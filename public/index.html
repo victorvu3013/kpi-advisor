@@ -91,16 +91,22 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
 .fgl textarea{resize:vertical;min-height:72px;}
 
 /* INDUSTRY GRID */
-.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:4px;}
-.ic{border:2px solid var(--gray-200);border-radius:var(--rl);padding:12px 10px;cursor:pointer;text-align:center;transition:all .2s;background:white;}
-.ic:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:var(--s2);}
-.ic.sel{border-color:var(--teal);background:rgba(0,88,112,.05);}
-.ic.sel .icd{background:var(--lime);}
-.ic-icon{font-size:22px;margin-bottom:5px;}
-.ic-name{font-size:11px;font-weight:600;}
-.icd{width:7px;height:7px;border-radius:50%;background:var(--gray-200);margin:5px auto 0;transition:background .2s;}
-.ig-lbl{grid-column:1/-1;font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;padding:6px 2px 3px;border-bottom:1px solid var(--gray-100);margin-top:8px;}
-.ig-lbl:first-child{margin-top:0;}
+.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:5px;margin-top:6px;}
+.ic{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1.5px solid var(--gray-200);border-radius:var(--r);cursor:pointer;background:white;transition:all .15s;}
+.ic:hover{border-color:var(--teal);background:rgba(0,88,112,.04);}
+.ic.sel{border-color:var(--teal);background:rgba(0,88,112,.07);box-shadow:0 0 0 1px rgba(0,88,112,.2);}
+.ic-icon{font-size:17px;flex-shrink:0;line-height:1;}
+.ic-name{font-size:11px;font-weight:600;text-align:left;line-height:1.3;color:var(--gray-900);}
+.ic.sel .ic-name{color:var(--teal);}
+.icd{display:none;}
+.ig-lbl{grid-column:1/-1;font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.6px;padding:8px 1px 3px;border-bottom:1px solid var(--gray-100);margin-top:6px;}
+.ig-lbl:first-child{margin-top:0;padding-top:0;}
+
+/* STEP 1 LAYOUT */
+.s1-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+.s1-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;}
+.s1-right{position:sticky;top:74px;display:flex;flex-direction:column;gap:14px;}
+.s1-right .abar{margin-top:4px;padding-top:14px;}
 
 /* PILL BUTTONS */
 .prow{display:flex;gap:6px;flex-wrap:wrap;}
@@ -400,7 +406,8 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
   </div>
   <div class="ph"><h1>Thông tin khách hàng</h1><div class="tbar"></div><p>Nhập thông tin cơ bản để AI đề xuất bộ KPI phù hợp nhất cho dự án</p></div>
   <div class="card">
-    <div class="fg">
+    <!-- Row 1: Basic info -->
+    <div class="s1-top">
       <div class="fgl"><label>Tên khách hàng / Dự án</label><input type="text" id="c-name" placeholder="VD: Công ty CP Thiên Long"/></div>
       <div class="fgl"><label>Quy mô doanh nghiệp</label>
         <select id="c-size">
@@ -410,7 +417,24 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
           <option value="enterprise">Enterprise (&gt;1000)</option>
         </select>
       </div>
-      <div class="fgl ff"><label>Ngành nghề</label>
+      <div class="fgl"><label>Hệ thống ERP</label>
+        <select id="c-erp">
+          <option value="">-- Chọn ERP --</option>
+          <option value="sap-s4">SAP S/4HANA</option>
+          <option value="sap-ecc">SAP ECC 6.0</option>
+          <option value="sap-b1">SAP Business One</option>
+          <option value="oracle">Oracle ERP</option>
+          <option value="dynamics">Microsoft Dynamics</option>
+          <option value="none">Chưa có ERP</option>
+          <option value="other">Khác</option>
+        </select>
+      </div>
+    </div>
+    <!-- Row 2: 2-column layout -->
+    <div class="s1-layout">
+      <!-- LEFT: Industry grid -->
+      <div class="fgl">
+        <label>Ngành nghề</label>
         <div class="ig" id="industry-grid">
           <div class="ig-lbl">⚙️ Sản xuất &amp; Công nghiệp</div>
           <div class="ic" onclick="selInd(this,'manufacturing')"><div class="ic-icon">🏭</div><div class="ic-name">Sản xuất</div><div class="icd"></div></div>
@@ -447,79 +471,70 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
           <div class="ic" onclick="selInd(this,'other')"><div class="ic-icon">🔧</div><div class="ic-name">Đa ngành / Khác</div><div class="icd"></div></div>
         </div>
       </div>
-      <div class="fgl"><label>Hệ thống ERP</label>
-        <select id="c-erp">
-          <option value="">-- Chọn ERP --</option>
-          <option value="sap-s4">SAP S/4HANA</option>
-          <option value="sap-ecc">SAP ECC 6.0</option>
-          <option value="sap-b1">SAP Business One</option>
-          <option value="oracle">Oracle ERP</option>
-          <option value="dynamics">Microsoft Dynamics</option>
-          <option value="none">Chưa có ERP</option>
-          <option value="other">Khác</option>
-        </select>
-      </div>
-      <div class="fgl"><label>SAP Module đang dùng</label>
-        <div id="sap-mods" class="mod-sections">
-          <div class="mod-sec">
-            <div class="mod-sec-lbl">Finance &amp; Controlling</div>
-            <div class="prow">
-              <button class="pb" onclick="togMod(this,'FI-GL')">FI-GL</button>
-              <button class="pb" onclick="togMod(this,'FI-AR')">FI-AR</button>
-              <button class="pb" onclick="togMod(this,'FI-AP')">FI-AP</button>
-              <button class="pb" onclick="togMod(this,'FI-AA')">FI-AA</button>
-              <button class="pb" onclick="togMod(this,'FI-CO')">FI-CO</button>
-              <button class="pb" onclick="togMod(this,'CO-PA')">CO-PA</button>
-              <button class="pb" onclick="togMod(this,'CO-PC')">CO-PC</button>
-              <button class="pb" onclick="togMod(this,'Treasury')">Treasury/TRM</button>
-              <button class="pb" onclick="togMod(this,'GRC')">GRC</button>
+      <!-- RIGHT: Modules + Objectives + Notes + CTA -->
+      <div class="s1-right">
+        <div class="fgl"><label>SAP Module đang dùng</label>
+          <div id="sap-mods" class="mod-sections">
+            <div class="mod-sec">
+              <div class="mod-sec-lbl">Finance &amp; Controlling</div>
+              <div class="prow">
+                <button class="pb" onclick="togMod(this,'FI-GL')">FI-GL</button>
+                <button class="pb" onclick="togMod(this,'FI-AR')">FI-AR</button>
+                <button class="pb" onclick="togMod(this,'FI-AP')">FI-AP</button>
+                <button class="pb" onclick="togMod(this,'FI-AA')">FI-AA</button>
+                <button class="pb" onclick="togMod(this,'FI-CO')">FI-CO</button>
+                <button class="pb" onclick="togMod(this,'CO-PA')">CO-PA</button>
+                <button class="pb" onclick="togMod(this,'CO-PC')">CO-PC</button>
+                <button class="pb" onclick="togMod(this,'Treasury')">Treasury/TRM</button>
+                <button class="pb" onclick="togMod(this,'GRC')">GRC</button>
+              </div>
             </div>
-          </div>
-          <div class="mod-sec">
-            <div class="mod-sec-lbl">Sales, Operations &amp; Supply Chain</div>
-            <div class="prow">
-              <button class="pb" onclick="togMod(this,'SD')">SD</button>
-              <button class="pb" onclick="togMod(this,'MM')">MM</button>
-              <button class="pb" onclick="togMod(this,'PP')">PP</button>
-              <button class="pb" onclick="togMod(this,'PP-PI')">PP-PI</button>
-              <button class="pb" onclick="togMod(this,'QM')">QM</button>
-              <button class="pb" onclick="togMod(this,'PM')">PM/EAM</button>
-              <button class="pb" onclick="togMod(this,'WM')">WM/EWM</button>
-              <button class="pb" onclick="togMod(this,'PS')">PS</button>
-              <button class="pb" onclick="togMod(this,'EHS')">EHS</button>
+            <div class="mod-sec">
+              <div class="mod-sec-lbl">Sales, Operations &amp; Supply Chain</div>
+              <div class="prow">
+                <button class="pb" onclick="togMod(this,'SD')">SD</button>
+                <button class="pb" onclick="togMod(this,'MM')">MM</button>
+                <button class="pb" onclick="togMod(this,'PP')">PP</button>
+                <button class="pb" onclick="togMod(this,'PP-PI')">PP-PI</button>
+                <button class="pb" onclick="togMod(this,'QM')">QM</button>
+                <button class="pb" onclick="togMod(this,'PM')">PM/EAM</button>
+                <button class="pb" onclick="togMod(this,'WM')">WM/EWM</button>
+                <button class="pb" onclick="togMod(this,'PS')">PS</button>
+                <button class="pb" onclick="togMod(this,'EHS')">EHS</button>
+              </div>
             </div>
-          </div>
-          <div class="mod-sec">
-            <div class="mod-sec-lbl">Procurement, HR &amp; Analytics</div>
-            <div class="prow">
-              <button class="pb" onclick="togMod(this,'Ariba')">Ariba</button>
-              <button class="pb" onclick="togMod(this,'SCM')">SCM/IBP</button>
-              <button class="pb" onclick="togMod(this,'CX')">CX/CRM</button>
-              <button class="pb" onclick="togMod(this,'HCM')">HCM/SF</button>
-              <button class="pb" onclick="togMod(this,'SAC')">SAC</button>
-              <button class="pb" onclick="togMod(this,'BTP')">BTP</button>
-              <button class="pb" onclick="togMod(this,'BW')">BW/4HANA</button>
+            <div class="mod-sec">
+              <div class="mod-sec-lbl">Procurement, HR &amp; Analytics</div>
+              <div class="prow">
+                <button class="pb" onclick="togMod(this,'Ariba')">Ariba</button>
+                <button class="pb" onclick="togMod(this,'SCM')">SCM/IBP</button>
+                <button class="pb" onclick="togMod(this,'CX')">CX/CRM</button>
+                <button class="pb" onclick="togMod(this,'HCM')">HCM/SF</button>
+                <button class="pb" onclick="togMod(this,'SAC')">SAC</button>
+                <button class="pb" onclick="togMod(this,'BTP')">BTP</button>
+                <button class="pb" onclick="togMod(this,'BW')">BW/4HANA</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="fgl ff"><label>Mục tiêu phân tích chính</label>
-        <div class="prow" id="objectives">
-          <button class="pb" onclick="togBtn(this)">Kiểm soát chi phí</button>
-          <button class="pb" onclick="togBtn(this)">Tối ưu dòng tiền</button>
-          <button class="pb" onclick="togBtn(this)">Nâng cao chất lượng</button>
-          <button class="pb" onclick="togBtn(this)">Tăng doanh thu</button>
-          <button class="pb" onclick="togBtn(this)">Tối ưu tồn kho</button>
-          <button class="pb" onclick="togBtn(this)">Cải thiện sản xuất</button>
-          <button class="pb" onclick="togBtn(this)">Quản lý công nợ</button>
-          <button class="pb" onclick="togBtn(this)">Bảo trì thiết bị</button>
+        <div class="fgl"><label>Mục tiêu phân tích chính</label>
+          <div class="prow" id="objectives">
+            <button class="pb" onclick="togBtn(this)">Kiểm soát chi phí</button>
+            <button class="pb" onclick="togBtn(this)">Tối ưu dòng tiền</button>
+            <button class="pb" onclick="togBtn(this)">Nâng cao chất lượng</button>
+            <button class="pb" onclick="togBtn(this)">Tăng doanh thu</button>
+            <button class="pb" onclick="togBtn(this)">Tối ưu tồn kho</button>
+            <button class="pb" onclick="togBtn(this)">Cải thiện sản xuất</button>
+            <button class="pb" onclick="togBtn(this)">Quản lý công nợ</button>
+            <button class="pb" onclick="togBtn(this)">Bảo trì thiết bị</button>
+          </div>
+        </div>
+        <div class="fgl"><label>Ghi chú thêm (tuỳ chọn)</label><textarea id="c-notes" placeholder="Mô tả thêm yêu cầu đặc thù, pain point, scope dự án..." style="min-height:60px"></textarea></div>
+        <div class="abar">
+          <div style="font-size:12px;color:var(--gray-500)">Bước 1 / 4</div>
+          <button class="btn btn-ai" onclick="startAI()"><div class="ai-dot"></div>Phân tích AI &amp; Đề xuất KPI →</button>
         </div>
       </div>
-      <div class="fgl ff"><label>Ghi chú thêm (tuỳ chọn)</label><textarea id="c-notes" placeholder="Mô tả thêm yêu cầu đặc thù, pain point, scope dự án..."></textarea></div>
-    </div>
-    <div class="abar">
-      <div style="font-size:12px;color:var(--gray-500)">Bước 1 / 4</div>
-      <button class="btn btn-ai" onclick="startAI()"><div class="ai-dot"></div>Phân tích AI &amp; Đề xuất KPI →</button>
     </div>
   </div>
 </div>
