@@ -1419,45 +1419,62 @@ async function genOutputs(){
   };
 
   const selected=[...selOuts];
-  prog.innerHTML=selected.map(k=>`<div class="ep-item" id="ep-${k}"><div class="ep-status pending">·</div><div class="ep-name">${formats[k].name}</div><span style="font-size:11px;color:var(--gray-500)">Đang chờ</span></div>`).join('');
+  prog.innerHTML=selected.map(k=>`<div class="ep-item" id="ep-${k}">
+    <div class="ep-status pending">·</div>
+    <div class="ep-name">${formats[k].name}</div>
+    <span class="ep-msg" style="font-size:11px;color:var(--gray-500)">Đang chờ</span>
+  </div>`).join('');
 
-  const name=document.getElementById('c-name').value||'Khách hàng';
+  const cname=document.getElementById('c-name').value||'Khách hàng';
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
   const kpiList=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no));
 
+  if(kpiList.length===0){
+    toast('Chưa có KPI nào được chọn — quay lại Bước 2 để chọn KPI');
+    btn.disabled=false;btn.textContent='Tạo tất cả tài liệu →';
+    prog.style.display='none';
+    return;
+  }
+
+  let successCount=0;
   for(const fmt of selected){
     const el=document.getElementById(`ep-${fmt}`);
+    const statusEl=el.querySelector('.ep-status');
+    const msgEl=el.querySelector('.ep-msg');
     el.className='ep-item active';
-    el.querySelector('.ep-status').className='ep-status spinning';
-    el.querySelector('.ep-status').textContent='';
-    el.lastElementChild.textContent='Đang tạo...';
+    statusEl.className='ep-status spinning';
+    statusEl.textContent='';
+    msgEl.textContent='Đang tạo...';
 
     try{
       let content='';
-      if(fmt==='doc') content=await genKPIDocument(name,mods,kpiList);
-      else if(fmt==='dash') content=await genDashboardSpec(name,kpiList);
-      else if(fmt==='xl') content=genExcelCSV(name,mods,kpiList);
-      else if(fmt==='pp') content=await genPresentation(name,mods,kpiList);
+      if(fmt==='doc') content=await genKPIDocument(cname,mods,kpiList);
+      else if(fmt==='dash') content=genDashboardSpec(cname,kpiList);
+      else if(fmt==='xl') content=genExcelCSV(cname,mods,kpiList);
+      else if(fmt==='pp') content=genPresentation(cname,mods,kpiList);
 
       el.className='ep-item done';
-      el.querySelector('.ep-status').className='ep-status ok';
-      el.querySelector('.ep-status').textContent='✓';
-      el.lastElementChild.remove();
+      statusEl.className='ep-status ok';
+      statusEl.textContent='✓';
+      msgEl.remove();
       const dlBtn=document.createElement('button');
       dlBtn.className='ep-dl';
       dlBtn.textContent='⬇ Tải xuống';
-      dlBtn.onclick=()=>downloadFile(content,`kpi-${fmt}-${name.replace(/\s+/g,'-')}`,formats[fmt].ext,formats[fmt].mime);
+      const closureName=cname,closureFmt=fmt,closureContent=content;
+      dlBtn.onclick=()=>downloadFile(closureContent,'kpi-'+closureFmt+'-'+closureName.replace(/\s+/g,'-'),formats[closureFmt].ext,formats[closureFmt].mime);
       el.appendChild(dlBtn);
+      successCount++;
     }catch(e){
+      console.error(`Export ${fmt} failed:`,e);
       el.className='ep-item error';
-      el.querySelector('.ep-status').className='ep-status err';
-      el.querySelector('.ep-status').textContent='✕';
-      el.lastElementChild.textContent='Lỗi: '+e.message;
+      statusEl.className='ep-status err';
+      statusEl.textContent='✕';
+      msgEl.textContent='Lỗi: '+(e.message||'Không xác định');
     }
   }
 
   btn.disabled=false;btn.textContent='Tạo tất cả tài liệu →';
-  // Auto-save draft after export
+  toast(successCount>0?`Đã tạo ${successCount}/${selected.length} tài liệu — bấm Tải xuống`:'Có lỗi khi tạo tài liệu');
   saveDraft();
 }
 
@@ -1471,8 +1488,13 @@ function downloadFile(content,name,ext,mime){
 }
 
 async function genKPIDocument(name,mods,kpis){
-  const kpiTable=kpis.map(k=>`| ${k.no} | ${k.nhom} | ${k.chi} | ${k.freq} | ${k.pri} | ${aiAddedNos.has(k.no)?'AI':'Library'} |`).join('\n');
-  const prompt=`Tạo tài liệu KPI Document chuyên nghiệp cho dự án SAP BI.
+  // Try AI-generated document first, fallback to local generation
+  const kpiByGroup={};
+  kpis.forEach(k=>{if(!kpiByGroup[k.nhom])kpiByGroup[k.nhom]=[];kpiByGroup[k.nhom].push(k);});
+  const objs=Array.from(document.querySelectorAll('#objectives .sel')).map(b=>b.textContent).join(', ')||'Chưa xác định';
+
+  try{
+    const prompt=`Tạo tài liệu KPI Document chuyên nghiệp cho dự án SAP BI.
 
 Thông tin:
 - Khách hàng: ${name}
@@ -1493,16 +1515,69 @@ Hãy tạo tài liệu Markdown đầy đủ gồm:
 
 Viết bằng tiếng Việt, chuyên nghiệp, format Markdown chuẩn.`;
 
-  const res=await fetch('/api/claude',{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:3000,messages:[{role:'user',content:prompt}]})
+    const res=await fetch('/api/claude',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:3000,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok)throw new Error('API '+res.status);
+    const data=await res.json();
+    if(data.content)return data.content.map(c=>c.text||'').join('');
+    throw new Error('No content');
+  }catch(e){
+    // Fallback: generate document locally
+    console.warn('AI document generation failed, using local fallback:',e.message);
+  }
+
+  // Local fallback document
+  let md=`# Tài liệu KPI — ${name}\n\n`;
+  md+=`> **Ngành:** ${curIndustry} | **SAP Modules:** ${mods} | **Ngày:** ${new Date().toLocaleDateString('vi-VN')}\n\n`;
+  md+=`> Tạo bởi KPI Advisor — Citek'\n\n---\n\n`;
+  md+=`## Mục lục\n\n`;
+  md+=`1. Tổng quan dự án\n2. Danh sách KPI đề xuất\n`;
+  Object.keys(kpiByGroup).forEach((g,i)=>{md+=`   ${i+1}. ${g}\n`;});
+  md+=`3. Dashboard theo cấp quản lý\n4. Khuyến nghị triển khai\n\n---\n\n`;
+
+  md+=`## 1. Tổng quan dự án\n\n`;
+  md+=`Dự án triển khai hệ thống KPI cho **${name}** trong ngành **${curIndustry}**, sử dụng nền tảng SAP (${mods}). `;
+  md+=`Mục tiêu phân tích chính: **${objs}**.\n\n`;
+  md+=`Tổng cộng **${kpis.length} KPI** được đề xuất, trong đó **${aiAddedNos.size} KPI** do AI bổ sung dựa trên đặc thù ngành. `;
+  md+=`Các KPI được phân bổ vào **${Object.keys(kpiByGroup).length} nhóm nghiệp vụ** và mapping đến **4 cấp dashboard** (C-Level, D-Level, M-Level, Department).\n\n---\n\n`;
+
+  md+=`## 2. Danh sách KPI đề xuất\n\n`;
+  md+=`| # | Nhóm | Chỉ tiêu | Tần suất | Ưu tiên | AI Score | Nguồn |\n`;
+  md+=`|---|---|---|---|---|---|---|\n`;
+  kpis.forEach(k=>{
+    const src=aiAddedNos.has(k.no)?'AI':'Library';
+    const sc=aiScores[k.no]||'—';
+    md+=`| ${k.no} | ${k.nhom} | ${k.chi} | ${k.freq} | ${k.pri} | ${sc} | ${src} |\n`;
   });
-  const data=await res.json();
-  return data.content.map(c=>c.text||'').join('');
+  md+=`\n`;
+
+  Object.entries(kpiByGroup).forEach(([g,list])=>{
+    md+=`### ${g} (${list.length} KPI)\n\n`;
+    list.forEach(k=>{md+=`- **${k.chi}** — ${k.freq}, Ưu tiên: ${k.pri}${k.mods?.length?' (SAP: '+k.mods.join(', ')+')':''}\n`;});
+    md+=`\n`;
+  });
+
+  md+=`---\n\n## 3. Dashboard theo cấp quản lý\n\n`;
+  Object.entries({c:'C-Level (CEO/CFO/COO)',d:'D-Level (Director/VP)',m:'M-Level (Manager)',dept:'Department (Chuyên viên)'}).forEach(([k,v])=>{
+    md+=`### ${v}\n\n`;
+    DASH_TMPL[k].forEach(d=>{md+=`- **${d.name}** _(${d.type})_ — ${d.desc}\n  - KPI: ${d.kpis.join(', ')}\n`;});
+    md+=`\n`;
+  });
+
+  md+=`---\n\n## 4. Khuyến nghị triển khai\n\n`;
+  md+=`1. **Ưu tiên KPI Cao trước** — Triển khai nhóm KPI ưu tiên Cao trong giai đoạn đầu để tạo giá trị nhanh\n`;
+  md+=`2. **Tận dụng SAP modules hiện có** — Khai thác dữ liệu từ ${mods} đã được triển khai\n`;
+  md+=`3. **Rollout theo cấp quản lý** — Bắt đầu từ C-Level dashboard, sau đó mở rộng xuống D/M/Dept\n`;
+  md+=`4. **Đào tạo người dùng** — Tổ chức training cho từng nhóm đối tượng sử dụng\n`;
+  md+=`5. **Review & điều chỉnh** — Đánh giá lại bộ KPI sau 3 tháng vận hành\n\n`;
+  md+=`---\n\n*Tài liệu được tạo bởi KPI Advisor — Citek' — ${new Date().toLocaleDateString('vi-VN')}*\n`;
+
+  return md;
 }
 
-async function genDashboardSpec(name,kpis){
-  const kpiNames=kpis.map(k=>k.chi).slice(0,20).join(', ');
+function genDashboardSpec(name,kpis){
   const html=`<!DOCTYPE html>
 <html lang="vi"><head><meta charset="UTF-8"><title>Dashboard Spec — ${name}</title>
 <style>
@@ -1550,7 +1625,7 @@ function genExcelCSV(name,mods,kpis){
   return csv;
 }
 
-async function genPresentation(name,mods,kpis){
+function genPresentation(name,mods,kpis){
   const kpiByGroup={};
   kpis.forEach(k=>{if(!kpiByGroup[k.nhom])kpiByGroup[k.nhom]=[];kpiByGroup[k.nhom].push(k);});
   const groupSummary=Object.entries(kpiByGroup).map(([g,list])=>`${g}: ${list.map(k=>k.chi).join(', ')}`).join('\n');
