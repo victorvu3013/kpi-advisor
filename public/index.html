@@ -2256,17 +2256,12 @@ function genDashboardSpec(name,kpis){
   const dt=new Date().toLocaleDateString('vi-VN');
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
 
-  /* ── deterministic hash for mock data ── */
-  function H(s,seed){
-    seed=seed||0;let h=seed+7;
-    for(let i=0;i<s.length;i++)h=(Math.imul(h,31)+s.charCodeAt(i))|0;
-    return Math.abs(h);
-  }
+  /* ── deterministic hash ── */
+  function H(s,seed){seed=seed||0;let h=seed+7;for(let i=0;i<s.length;i++)h=(Math.imul(h,31)+s.charCodeAt(i))|0;return Math.abs(h);}
 
-  /* ── mock metric values ── */
+  /* ── mock metric ── */
   function mock(n){
-    const h=H(n),nl=n.toLowerCase();
-    let v,u;
+    const h=H(n),nl=n.toLowerCase();let v,u;
     if(nl.includes('tỷ lệ')||nl.includes('oee')||nl.includes('rate')||nl.includes('%')){v=55+h%35;u='%';}
     else if(nl.includes('doanh thu')||nl.includes('doanh số')){v=120+h%280;u='tỷ đ';}
     else if(nl.includes('lợi nhuận')||nl.includes('ebit')){v=15+h%65;u='tỷ đ';}
@@ -2275,238 +2270,515 @@ function genDashboardSpec(name,kpis){
     else if(nl.includes('đơn')||nl.includes('order')){v=1200+h%3800;u='đơn';}
     else if(nl.includes('ngày')||nl.includes('dso')){v=18+h%42;u='ngày';}
     else{v=50+h%200;u='tỷ đ';}
-    const tp=((H(n,1)%30)-14)/10;
-    const ty=((H(n,2)%50)-20)/10;
-    return{val:v>=1000?Math.round(v).toLocaleString('vi-VN'):v.toFixed(1),unit:u,
-           tp:tp.toFixed(1),ty:ty.toFixed(1),up:tp>=0,uy:ty>=0};
+    const tp=((H(n,1)%30)-14)/10,ty=((H(n,2)%50)-20)/10;
+    return{val:v>=1000?Math.round(v).toLocaleString('vi-VN'):v.toFixed(1),unit:u,tp:tp.toFixed(1),ty:ty.toFixed(1),up:tp>=0,uy:ty>=0};
   }
 
-  /* ── chart data helpers ── */
-  function barVals(n,base){return [0,1,2,3,4,5].map(function(_,i){return Math.round((base||60)*(0.72+H(n,i+20)%30/100));});}
-  function lineVals(n,base){return [0,1,2,3,4,5,6,7,8,9,10,11].map(function(_,i){return Math.round((base||60)*(0.68+H(n,i+30)%36/100));});}
-  function sparkVals(n){let v=50;return [0,1,2,3,4,5,6,7].map(function(_,i){v+=((H(n,i+5)%18)-8);v=Math.max(10,Math.min(90,v));return Math.round(v);});}
+  /* ── chart data ── */
+  function barVals(n,base){return[0,1,2,3,4,5].map((_,i)=>Math.round((base||60)*(0.72+H(n,i+20)%30/100)));}
+  function lineVals(n,base){return[0,1,2,3,4,5,6,7,8,9,10,11].map((_,i)=>Math.round((base||60)*(0.68+H(n,i+30)%36/100)));}
+  function sparkVals(n){let v=50;return[0,1,2,3,4,5,6,7].map((_,i)=>{v+=((H(n,i+5)%18)-8);v=Math.max(10,Math.min(90,v));return Math.round(v);});}
 
   /* ── match KPIs ── */
   function matchKPIs(keywords){
-    return keywords.map(function(kw){
+    return keywords.map(kw=>{
       const lk=kw.toLowerCase();
-      const found=kpis.find(function(k){return k.chi.toLowerCase().includes(lk)||lk.includes(k.chi.toLowerCase().slice(0,8));});
+      const found=kpis.find(k=>k.chi.toLowerCase().includes(lk)||lk.includes(k.chi.toLowerCase().slice(0,8)));
       const item=found||{chi:kw,freq:'Tháng',mods:[],pri:'Trung bình'};
-      return{name:item.chi,freq:item.freq,mods:item.mods||[],mk:mock(item.chi),ct:assignChartType(item.chi,item.freq)};
+      return{name:item.chi,freq:item.freq,mods:item.mods||[],mk:mock(item.chi)};
     });
   }
 
+  /* ── data ── */
   const MONTHS6=['T7','T8','T9','T10','T11','T12'];
   const MONTHS12=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-  const BCOLS=['#005870','#C5D500','#00D4FF','#7fc4d6'];
-  const DCOLS=['#005870','#C5D500','#00D4FF','#7fc4d6','#a8c400'];
-  const allGroups=[...new Set(kpis.map(function(k){return k.nhom;}))].filter(Boolean).slice(0,5);
-  const groupCounts=allGroups.map(function(g){return kpis.filter(function(k){return k.nhom===g;}).length;});
+  const GCOLS=['#005870','#C5D500','#00D4FF','#7fc4d6','#a8c400','#3d8ea5'];
+  const allGroups=[...new Set(kpis.map(k=>k.nhom))].filter(Boolean);
+  const groupCounts=allGroups.map(g=>kpis.filter(k=>k.nhom===g).length);
+  const hiCount=kpis.filter(k=>k.pri==='Cao').length;
+  const aiCount=[...aiAddedNos].filter(no=>kpis.find(k=>k.no===no)).length;
 
-  const lvMeta={
-    c:{title:'C-Level Dashboard',sub:'CEO · CFO · COO',color:'#005870'},
-    d:{title:'D-Level Dashboard',sub:'Director · VP',color:'#007a9e'},
-    m:{title:'M-Level Dashboard',sub:'Manager',color:'#0097b2'},
-    dept:{title:'Department Dashboard',sub:'Chuyên viên',color:'#2e7d32'},
+  const LV_META={
+    c:{label:'C-Level',color:'#005870',sub:'CEO · CFO · COO'},
+    d:{label:'D-Level',color:'#007a9e',sub:'Director · VP'},
+    m:{label:'M-Level',color:'#0097b2',sub:'Manager'},
+    dept:{label:'Department',color:'#1a6b3a',sub:'Chuyên viên'},
   };
 
-  let dashHTML='';
-  let chartJS='Chart.defaults.font.family="Montserrat,sans-serif";\n';
+  const allDashes=[];
+  Object.entries(DASH_TMPL).forEach(([lv,dashes])=>dashes.forEach((d,di)=>allDashes.push({lv,d,di})));
 
-  Object.entries(DASH_TMPL).forEach(function(entry,lvIdx){
-    const lv=entry[0],dashes=entry[1],meta=lvMeta[lv];
+  let cidN=0;
+  const cid=()=>'ch'+(cidN++);
 
-    /* level divider */
-    dashHTML+='<div style="background:'+meta.color+';padding:64px 48px;text-align:center;color:#fff;font-family:Montserrat,sans-serif">'
-      +'<div style="font-size:18px;font-weight:700;opacity:.65;margin-bottom:14px">Citek<span style="color:#C5D500">\'</span></div>'
-      +'<div style="font-size:32px;font-weight:700;margin-bottom:8px">'+meta.title+'</div>'
-      +'<div style="font-size:15px;opacity:.7;margin-bottom:18px">'+meta.sub+'</div>'
-      +'<div style="display:inline-block;font-size:11px;background:rgba(255,255,255,.15);padding:5px 18px;border-radius:20px">'+dashes.length+' Dashboards</div>'
-      +'</div>';
+  const slides=[];
+  const chartInits=[];
 
-    dashes.forEach(function(d,dIdx){
-      const matched=matchKPIs(d.kpis);
-      const cards=matched.slice(0,Math.min(4,matched.length));
-      const m0=matched[0];
-      const mainId='c'+lvIdx+'_'+dIdx+'_m';
-      const secId='c'+lvIdx+'_'+dIdx+'_s';
-      const spIds=cards.map(function(_,k){return 'c'+lvIdx+'_'+dIdx+'_k'+k;});
+  /* ════ SLIDE 1: COVER ════ */
+  const lvBadges=Object.entries(LV_META).map(([,m])=>
+    `<span class="cover-badge" style="border-color:${m.color};color:${m.color}">${m.label}</span>`
+  ).join('');
+  slides.push(`<div class="slide slide-cover active" id="slide-0">
+  <div class="cover-bg">
+    <div class="cover-eyebrow">Citek<span style="color:#C5D500">'</span>&nbsp;·&nbsp;KPI Advisor</div>
+    <h1 class="cover-title">KPI Dashboard<br>Specification</h1>
+    <div class="cover-sub">${name}</div>
+    <div class="cover-meta">
+      <span>${dt}</span><span class="cover-sep">·</span>
+      <span>${kpis.length} KPI</span><span class="cover-sep">·</span>
+      <span>${allDashes.length} Dashboards</span><span class="cover-sep">·</span>
+      <span>${allGroups.length} Nhóm</span>
+    </div>
+    <div class="cover-badges">${lvBadges}</div>
+    <div class="cover-hint">Dùng ← → hoặc phím mũi tên để điều hướng</div>
+  </div>
+</div>`);
 
-      /* KPI cards */
-      let kpiHTML='';
-      cards.forEach(function(m,k){
-        const mk=m.mk;
-        kpiHTML+='<div class="kpi" style="border-top-color:'+BCOLS[k%4]+'">'
-          +'<div class="kpi-label">'+m.name+'</div>'
-          +'<div class="kpi-value" style="color:'+BCOLS[k%4]+'">'+mk.val+'</div>'
-          +'<div class="kpi-sub">'+mk.unit+'&nbsp;·&nbsp;'+m.freq+'</div>'
-          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:6px">'
-          +'<div><span class="kpi-badge '+(mk.up?'badge-up':'badge-dn')+'">'+(mk.up?'▲':'▼')+' '+Math.abs(mk.tp)+'%</span>'
-          +'<div style="font-size:9px;color:#aaa;margin-top:2px">vs kỳ trước</div></div>'
-          +'<canvas id="'+spIds[k]+'" height="32" style="flex:1;max-width:88px"></canvas>'
-          +'</div></div>';
+  /* ════ SLIDE 2: KPI OVERVIEW ════ */
+  const ovId=cid();
+  const metricHtml=[
+    {val:kpis.length,lbl:'Tổng KPI',accent:'#005870'},
+    {val:hiCount,lbl:'Ưu tiên Cao',accent:'#C5D500'},
+    {val:aiCount,lbl:'AI bổ sung',accent:'#00D4FF'},
+    {val:allGroups.length,lbl:'Nhóm nghiệp vụ',accent:'#005870'},
+  ].map(c=>`<div class="ov-card" style="border-top-color:${c.accent}">
+    <div class="ov-val" style="color:${c.accent}">${c.val}</div>
+    <div class="ov-lbl">${c.lbl}</div>
+  </div>`).join('');
+
+  slides.push(`<div class="slide" id="slide-1">
+  <div class="slide-header" style="background:#005870">
+    <div class="sh-logo">Citek<span>'</span></div>
+    <div class="sh-title">Tổng quan bộ KPI đề xuất<small>Phân bổ theo nhóm nghiệp vụ &amp; mức độ ưu tiên</small></div>
+    <div class="sh-right">${name}&nbsp;·&nbsp;${dt}</div>
+  </div>
+  <div class="ov-body">
+    <div class="ov-cards">${metricHtml}</div>
+    <div class="ov-chart-section">
+      <div class="ov-chart-title">Phân bổ KPI theo nhóm nghiệp vụ</div>
+      <div class="ov-chart-sub">Số KPI đã chọn trên tổng ${kpis.length} chỉ tiêu · Xếp theo số lượng giảm dần</div>
+      <div class="ov-chart-wrap"><canvas id="${ovId}"></canvas></div>
+    </div>
+  </div>
+</div>`);
+
+  const gcArr=GCOLS.slice(0,allGroups.length).concat(Array(Math.max(0,allGroups.length-GCOLS.length)).fill('#005870'));
+  chartInits.push(`(function(){var el=document.getElementById("${ovId}");if(!el)return;
+new Chart(el,{type:"bar",data:{labels:${JSON.stringify(allGroups)},datasets:[{data:${JSON.stringify(groupCounts)},backgroundColor:${JSON.stringify(gcArr)},borderRadius:6,borderSkipped:false}]},
+options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:11},bodyFont:{family:"Montserrat",size:11}}},
+scales:{x:{grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{family:"Montserrat",size:10},color:"#666"}},y:{grid:{display:false},ticks:{font:{family:"Montserrat",size:10},color:"#333"}}}}});})();`);
+
+  /* ════ DASHBOARD SLIDES — 3 PATTERNS ════ */
+  const PAT_DEFAULT={c:'A',d:'B',m:'B',dept:'C'};
+  let lastPat='',lastPatCnt=0;
+
+  allDashes.forEach(({lv,d},idx)=>{
+    let pat=PAT_DEFAULT[lv]||'B';
+    if(pat===lastPat&&lastPatCnt>=2){pat=['A','B','C'].find(p=>p!==lastPat)||'A';}
+    pat===lastPat?lastPatCnt++:(lastPat=pat,lastPatCnt=1);
+
+    const meta=LV_META[lv];
+    const matched=matchKPIs(d.kpis);
+    const m0=matched[0]||{name:d.kpis[0]||'KPI',mk:mock(d.kpis[0]||'KPI'),freq:'Tháng',mods:[]};
+    const sIdx=slides.length;
+
+    /* ── PATTERN A: COMMAND CENTER ── */
+    if(pat==='A'){
+      const mainId=cid();
+      const cards4=matched.slice(0,4);
+      const spIds=cards4.map(()=>cid());
+      const ACOLS=[meta.color,'#C5D500','#00D4FF','#7fc4d6'];
+
+      const cardHtml=cards4.map((m,k)=>`<div class="pa-card" style="border-top-color:${ACOLS[k]}">
+        <div class="pa-card-label">${m.name}</div>
+        <div class="pa-card-value" style="color:${k===0?meta.color:'#222'}">${m.mk.val} <span class="pa-unit">${m.mk.unit}</span></div>
+        <div class="pa-card-row">
+          <span class="kbadge ${m.mk.up?'badge-up':'badge-dn'}">${m.mk.up?'▲':'▼'} ${Math.abs(m.mk.tp)}%</span>
+          <canvas id="${spIds[k]}" class="spark-cv"></canvas>
+        </div>
+        <div class="pa-freq">${m.freq}</div>
+      </div>`).join('');
+
+      const lv12=lineVals(m0.name);
+      const lv12p=lv12.map((v,i)=>Math.round(v*(0.82+H(m0.name,i+99)%18/100)));
+
+      slides.push(`<div class="slide" id="slide-${sIdx}">
+  <div class="slide-header" style="background:${meta.color}">
+    <div class="sh-logo">Citek<span>'</span></div>
+    <div class="sh-title">${d.name}<small>${meta.label}&nbsp;·&nbsp;${d.type}</small></div>
+    <div class="sh-right"><span class="lv-pill" style="background:rgba(255,255,255,.2)">${meta.sub}</span></div>
+  </div>
+  <div class="pa-body">
+    <div class="pa-cards">${cardHtml}</div>
+    <div class="pa-bottom">
+      <div class="pa-chart-card">
+        <div class="pcc-title">${m0.name}&nbsp;—&nbsp;Xu hướng 12 tháng</div>
+        <div class="pcc-sub">Kỳ này vs Cùng kỳ năm trước&nbsp;·&nbsp;${m0.mk.unit}</div>
+        <div class="pcc-legend"><span class="lg-dot" style="background:${meta.color}"></span>Kỳ này&emsp;<span class="lg-dot" style="background:#C5D500"></span>Cùng kỳ&emsp;<span class="lg-line"></span>Trend</div>
+        <div class="pcc-wrap"><canvas id="${mainId}"></canvas></div>
+      </div>
+      <div class="pa-info-card">
+        <div class="pic-desc">${d.desc}</div>
+        <div class="pic-tags">${d.kpis.map(k=>`<span class="kpi-tag">${k}</span>`).join('')}</div>
+        <div class="pic-mods">SAP: ${(m0.mods||[]).join(', ')||mods.split(',').slice(0,2).join(', ')}</div>
+      </div>
+    </div>
+  </div>
+</div>`);
+
+      chartInits.push(`(function(){var el=document.getElementById("${mainId}");if(!el)return;
+new Chart(el,{type:"bar",data:{labels:${JSON.stringify(MONTHS12)},datasets:[
+{type:"bar",label:"Ky nay",data:${JSON.stringify(lv12)},backgroundColor:"${meta.color}",borderRadius:4,order:2},
+{type:"bar",label:"Cung ky",data:${JSON.stringify(lv12p)},backgroundColor:"rgba(197,213,0,0.75)",borderRadius:4,order:3},
+{type:"line",label:"Trend",data:${JSON.stringify(lv12)},borderColor:"#00D4FF",borderWidth:2,pointRadius:2,fill:false,tension:0.4,order:1}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:10},bodyFont:{family:"Montserrat",size:10}}},
+scales:{x:{grid:{display:false},ticks:{font:{family:"Montserrat",size:9},color:"#999"}},y:{grid:{color:"rgba(0,0,0,0.04)"},ticks:{font:{family:"Montserrat",size:9},color:"#999"}}}}});})();`);
+
+      spIds.forEach((sid,k)=>{
+        if(!cards4[k])return;
+        const sv=sparkVals(cards4[k].name);const up=cards4[k].mk.up;
+        chartInits.push(`(function(){var el=document.getElementById("${sid}");if(!el)return;
+new Chart(el,{type:"line",data:{labels:["","","","","","","",""],datasets:[{data:${JSON.stringify(sv)},borderColor:"${up?'#2e7d32':'#c62828'}",borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:"${up?'rgba(46,125,50,0.1)':'rgba(198,40,40,0.1)'}"}]},
+options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});})();`);
       });
 
-      /* detail table rows */
-      let trows='';
-      matched.forEach(function(m){
-        const mk=m.mk;
-        trows+='<tr>'
-          +'<td>'+m.name+'</td>'
-          +'<td><strong>'+mk.val+'</strong> <span style="font-size:10px;color:#999">'+mk.unit+'</span></td>'
-          +'<td style="color:'+(mk.up?'#2e7d32':'#c62828')+';font-weight:600">'+(mk.up?'▲':'▼')+' '+Math.abs(mk.tp)+'%</td>'
-          +'<td style="color:'+(mk.uy?'#2e7d32':'#c62828')+';font-weight:600">'+(mk.uy?'▲':'▼')+' '+Math.abs(mk.ty)+'%</td>'
-          +'<td>'+m.freq+'</td>'
-          +'<td style="color:#666;font-size:10px">'+m.ct.type+'</td>'
-          +'</tr>';
+    /* ── PATTERN B: ANALYSIS SPLIT ── */
+    }else if(pat==='B'){
+      const mainId=cid();
+      const bv=barVals(m0.name);
+      const bvp=bv.map((v,i)=>Math.round(v*(0.78+H(m0.name,i+50)%22/100)));
+
+      const kpiListHtml=matched.slice(0,6).map((m,k)=>{
+        const pct=30+H(m.name,k+7)%60;
+        const bc=k===0?meta.color:k===1?'#C5D500':'#00D4FF';
+        return `<div class="pb-row">
+          <div class="pb-name">${m.name}</div>
+          <div class="pb-bar-wrap"><div class="pb-bar" style="width:${pct}%;background:${bc}"></div></div>
+          <div class="pb-val">${m.mk.val}<span class="pb-unit">${m.mk.unit}</span></div>
+          <span class="kbadge ${m.mk.up?'badge-up':'badge-dn'}" style="font-size:9px">${m.mk.up?'▲':'▼'}${Math.abs(m.mk.tp)}%</span>
+        </div>`;
+      }).join('');
+
+      const footMods=[...new Set(matched.flatMap(m=>m.mods||[]))].slice(0,4).join(' · ')||mods.split(',').slice(0,3).join(' · ');
+
+      slides.push(`<div class="slide" id="slide-${sIdx}">
+  <div class="slide-header" style="background:${meta.color}">
+    <div class="sh-logo">Citek<span>'</span></div>
+    <div class="sh-title"><span class="lv-pill" style="background:rgba(255,255,255,.2);margin-right:8px">${meta.label}</span>${d.name}<small>${d.type}</small></div>
+    <div class="sh-right">${name}&nbsp;·&nbsp;${dt}</div>
+  </div>
+  <div class="pb-body">
+    <div class="pb-left">
+      <div class="pb-section-hd">Chỉ tiêu KPI chính</div>
+      <div class="pb-list">${kpiListHtml}</div>
+      <div class="pb-desc">${d.desc}</div>
+    </div>
+    <div class="pb-right">
+      <div class="pb-chart-title">${m0.name}&nbsp;—&nbsp;So sánh kỳ</div>
+      <div class="pb-chart-sub">Tần suất: ${m0.freq}&nbsp;·&nbsp;${m0.mk.unit}</div>
+      <div class="pb-legend"><span class="lg-dot" style="background:${meta.color}"></span>Kỳ này&emsp;<span class="lg-dot" style="background:#C5D500"></span>Kỳ trước</div>
+      <div class="pb-wrap"><canvas id="${mainId}"></canvas></div>
+      <div class="pb-foot-mods">SAP: ${footMods}</div>
+    </div>
+  </div>
+</div>`);
+
+      chartInits.push(`(function(){var el=document.getElementById("${mainId}");if(!el)return;
+new Chart(el,{type:"bar",data:{labels:${JSON.stringify(MONTHS6)},datasets:[
+{label:"Ky nay",data:${JSON.stringify(bv)},backgroundColor:"${meta.color}",borderRadius:5,order:1},
+{label:"Ky truoc",data:${JSON.stringify(bvp)},backgroundColor:"rgba(197,213,0,0.7)",borderRadius:5,order:2}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:10},bodyFont:{family:"Montserrat",size:10}}},
+scales:{x:{grid:{display:false},ticks:{font:{family:"Montserrat",size:10},color:"#999"}},y:{grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{family:"Montserrat",size:10},color:"#999"}}}}});})();`);
+
+    /* ── PATTERN C: DETAIL GRID ── */
+    }else{
+      const cols3=matched.slice(0,3);
+      const chIds=cols3.map(()=>cid());
+      const CCOLS=[meta.color,'#C5D500','#00D4FF'];
+
+      const colsHtml=cols3.map((m,k)=>`<div class="pc-col" style="border-top:4px solid ${CCOLS[k]}">
+        <div class="pc-label" style="color:${CCOLS[k]}">${m.name}</div>
+        <div class="pc-val" style="color:${k===0?meta.color:'#222'}">${m.mk.val}</div>
+        <div class="pc-unit">${m.mk.unit}&nbsp;·&nbsp;${m.freq}</div>
+        <div class="pc-spark"><canvas id="${chIds[k]}"></canvas></div>
+        <div class="pc-badges">
+          <span class="kbadge ${m.mk.up?'badge-up':'badge-dn'}">${m.mk.up?'▲':'▼'} ${Math.abs(m.mk.tp)}% vs kỳ trước</span>
+          <span style="font-size:10px;color:${m.mk.uy?'#2e7d32':'#c62828'};margin-left:6px">${m.mk.uy?'▲':'▼'} ${Math.abs(m.mk.ty)}% YoY</span>
+        </div>
+      </div>`).join('');
+
+      const remHtml=matched.slice(3).map(m=>`<div class="pc-rem-row">
+        <span class="pc-rem-name">${m.name}</span>
+        <strong class="pc-rem-val">${m.mk.val} ${m.mk.unit}</strong>
+      </div>`).join('')||'<div style="color:#bbb;font-size:11px;font-style:italic">Tất cả KPI chính đã hiển thị</div>';
+
+      slides.push(`<div class="slide" id="slide-${sIdx}">
+  <div class="slide-header" style="background:${meta.color}">
+    <div class="sh-logo">Citek<span>'</span></div>
+    <div class="sh-title">${d.name}<small>${meta.label}&nbsp;·&nbsp;${d.type}</small></div>
+    <div class="sh-right">${name}&nbsp;·&nbsp;${dt}</div>
+  </div>
+  <div class="pc-body">
+    <div class="pc-grid">${colsHtml}</div>
+    <div class="pc-bottom">
+      <div class="pc-insight">
+        <div class="pc-ins-label">💡 Insight chính</div>
+        <div class="pc-ins-text">${m0.name} đạt <strong>${m0.mk.val} ${m0.mk.unit}</strong> — ${m0.mk.up?'tăng trưởng tích cực':'cần chú ý cải thiện'} so với kỳ trước. ${d.desc}</div>
+      </div>
+      <div class="pc-remaining">
+        <div class="pc-rem-hd">KPI bổ sung</div>
+        ${remHtml}
+      </div>
+      <div class="pc-mods">
+        <div class="pc-rem-hd">SAP Modules</div>
+        ${mods.split(',').slice(0,5).map(m=>`<span class="mod-badge">${m.trim()}</span>`).join('')}
+      </div>
+    </div>
+  </div>
+</div>`);
+
+      chIds.forEach((chid,k)=>{
+        if(!cols3[k])return;
+        const bv2=barVals(cols3[k].name);const up=cols3[k].mk.up;
+        chartInits.push(`(function(){var el=document.getElementById("${chid}");if(!el)return;
+new Chart(el,{type:"bar",data:{labels:["T9","T10","T11","T12","T1","T2"],datasets:[{data:${JSON.stringify(bv2)},backgroundColor:"${up?meta.color:'#c62828'}",borderRadius:4}]},
+options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});})();`);
       });
-
-      /* custom legend (citek-skill: legend.display=false, dùng HTML ngoài) */
-      const lgnd='<div style="display:flex;gap:14px;margin-bottom:8px">'
-        +'<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:#666"><span style="width:10px;height:10px;border-radius:2px;background:'+meta.color+';display:inline-block"></span>Kỳ này</span>'
-        +'<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:#666"><span style="width:10px;height:10px;border-radius:2px;background:#C5D500;display:inline-block"></span>Cùng kỳ</span>'
-        +'<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:#666"><span style="width:22px;height:2px;background:#00D4FF;display:inline-block;border-radius:1px"></span>Trend</span>'
-        +'</div>';
-
-      const donutLgnd=allGroups.length?('<div style="margin-top:10px">'+allGroups.map(function(g,i){
-        return '<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#555;margin-bottom:4px;font-weight:400">'
-          +'<span style="width:8px;height:8px;border-radius:50%;background:'+DCOLS[i%5]+';display:inline-block;flex-shrink:0"></span>'+g+'</div>';
-      }).join('')+'</div>'):'';
-
-      /* dashboard screen (citek-skill layout) */
-      dashHTML+='<div class="dash">'
-        +'<div class="header" style="background:'+meta.color+'">'
-        +'<div class="logo">Citek<span>\'</span></div>'
-        +'<div class="header-title">'+d.name+'<small>'+meta.sub+'&nbsp;·&nbsp;'+d.type+'</small></div>'
-        +'<div style="text-align:right"><span style="color:rgba(255,255,255,.65);font-size:11px;font-weight:400">'+name+'</span><br>'
-        +'<span style="color:rgba(255,255,255,.45);font-size:10px;font-weight:400">'+dt+'</span></div>'
-        +'</div>'
-        +'<div class="filter-bar">'
-        +'<span style="font-size:11px;font-weight:600;color:#005870">Kỳ báo cáo:</span>'
-        +'<button style="background:#005870;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:10px;font-family:Montserrat,sans-serif;font-weight:500;cursor:pointer">Tháng</button>'
-        +'<button style="background:#fff;color:#666;border:1.5px solid #E0E0E0;border-radius:4px;padding:3px 11px;font-size:10px;font-family:Montserrat,sans-serif;font-weight:500;cursor:pointer">Quý</button>'
-        +'<button style="background:#fff;color:#666;border:1.5px solid #E0E0E0;border-radius:4px;padding:3px 11px;font-size:10px;font-family:Montserrat,sans-serif;font-weight:500;cursor:pointer">Năm</button>'
-        +'<span style="margin-left:auto;font-size:10px;color:#999;font-weight:400">SAP: '+mods+'</span>'
-        +'</div>'
-        +'<div class="kpi-row" style="grid-template-columns:repeat('+cards.length+',1fr)">'+kpiHTML+'</div>'
-        +'<div style="display:grid;grid-template-columns:1fr 300px;gap:12px;padding:0 20px 14px">'
-        +'<div class="chart-card">'
-        +'<div class="chart-title">'+m0.name+' &mdash; Xu hướng theo tháng</div>'
-        +'<div class="chart-unit">So sánh kỳ này vs cùng kỳ năm ngoái &nbsp;·&nbsp; Trend 12 tháng</div>'
-        +lgnd
-        +'<div style="height:170px"><canvas id="'+mainId+'"></canvas></div>'
-        +'</div>'
-        +'<div class="chart-card">'
-        +'<div class="chart-title">Phân bổ nhóm nghiệp vụ</div>'
-        +'<div class="chart-unit">Tỷ trọng KPI đã chọn</div>'
-        +'<div style="height:118px;margin-top:10px"><canvas id="'+secId+'"></canvas></div>'
-        +donutLgnd
-        +'</div>'
-        +'</div>'
-        +'<div style="padding:0 20px 20px">'
-        +'<div style="background:#005870;color:#fff;font-size:11px;font-weight:600;padding:8px 12px;letter-spacing:.5px;text-transform:uppercase;border-radius:4px 4px 0 0">Chi tiết KPI &mdash; '+d.name+'</div>'
-        +'<table class="tbl"><thead><tr><th>Chỉ tiêu KPI</th><th>Giá trị</th><th>vs Kỳ trước</th><th>vs Cùng kỳ</th><th>Tần suất</th><th>Chart type</th></tr></thead>'
-        +'<tbody>'+trows+'</tbody></table>'
-        +'</div>'
-        +'<div class="dash-footer">'
-        +'<span>\u00a9 2025 <strong>Citek\'</strong> \u2014 Data Analytics &amp; AI Center</span>'
-        +'<span>Powered by <strong>SAP &amp; AI</strong></span>'
-        +'</div>'
-        +'</div>';
-
-      /* Chart.js inits */
-      const base=m0.mk.raw;
-      const bv=barVals(m0.name,base);
-      const bvPrev=bv.map(function(v){return Math.round(v*(0.82+H(m0.name,99)%20/100));});
-      const lv12=lineVals(m0.name,base);
-
-      chartJS+='(function(){var el=document.getElementById("'+mainId+'");if(!el)return;'
-        +'new Chart(el,{type:"bar",data:{labels:'+JSON.stringify(MONTHS6)+','
-        +'datasets:['
-        +'{type:"bar",label:"Ky nay",data:'+JSON.stringify(bv)+',backgroundColor:"'+meta.color+'",borderRadius:3,order:2},'
-        +'{type:"bar",label:"Cung ky",data:'+JSON.stringify(bvPrev)+',backgroundColor:"#C5D500",borderRadius:3,order:3},'
-        +'{type:"line",label:"Trend",data:'+JSON.stringify(lv12.slice(6))+',borderColor:"#00D4FF",borderWidth:2,pointRadius:3,pointBackgroundColor:"#00D4FF",fill:false,tension:0.3,order:1}'
-        +']},options:{responsive:true,maintainAspectRatio:false,'
-        +'plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:10},bodyFont:{family:"Montserrat",size:10}}},'
-        +'scales:{x:{grid:{display:false},ticks:{font:{family:"Montserrat",size:9},color:"#999"}},'
-        +'y:{grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{family:"Montserrat",size:9},color:"#999"}}}'
-        +'}});})();\n';
-
-      if(allGroups.length){
-        chartJS+='(function(){var el=document.getElementById("'+secId+'");if(!el)return;'
-          +'new Chart(el,{type:"doughnut",data:{labels:'+JSON.stringify(allGroups)+','
-          +'datasets:[{data:'+JSON.stringify(groupCounts)+',backgroundColor:'+JSON.stringify(DCOLS.slice(0,allGroups.length))+',borderWidth:0,hoverOffset:4}]},'
-          +'options:{responsive:true,maintainAspectRatio:false,cutout:"60%",'
-          +'plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:10},bodyFont:{family:"Montserrat",size:10}}}'
-          +'}'
-          +'});})();\n';
-      }
-
-      cards.forEach(function(m,k){
-        const sv=sparkVals(m.name);
-        const up=m.mk.up;
-        const spColor=up?'#2e7d32':'#c62828';
-        const spBg=up?'rgba(46,125,50,0.08)':'rgba(198,40,40,0.08)';
-        chartJS+='(function(){var el=document.getElementById("'+spIds[k]+'");if(!el)return;'
-          +'new Chart(el,{type:"line",data:{labels:["","","","","","","",""],'
-          +'datasets:[{data:'+JSON.stringify(sv)+',borderColor:"'+spColor+'",borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:"'+spBg+'"}]},'
-          +'options:{responsive:true,maintainAspectRatio:false,'
-          +'plugins:{legend:{display:false},tooltip:{enabled:false}},'
-          +'scales:{x:{display:false},y:{display:false}}'
-          +'}'
-          +'});})();\n';
-      });
-    });
+    }
   });
 
-  /* ── CSS (citek-skill.ts exact classes) ── */
-  const css='*{box-sizing:border-box;margin:0;padding:0}'
-    +'body,html{font-family:\'Montserrat\',sans-serif;background:#F5F5F5}'
-    +'.dash{background:#F5F5F5;font-family:\'Montserrat\',sans-serif;border-bottom:12px solid #F5F5F5}'
-    +'.header{background:#005870;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}'
-    +'.logo{color:#fff;font-size:20px;font-weight:700}'
-    +'.logo span{color:#C5D500}'
-    +'.header-title{color:#fff;font-size:14px;font-weight:600;text-align:center}'
-    +'.header-title small{display:block;color:rgba(255,255,255,0.7);font-size:11px;font-weight:400;margin-top:2px}'
-    +'.filter-bar{background:#fff;border-bottom:2px solid #C5D500;padding:8px 20px;display:flex;gap:10px;align-items:center}'
-    +'.kpi-row{padding:14px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}'
-    +'.kpi{background:#fff;border-radius:8px;padding:14px 16px;border-top:3px solid #005870}'
-    +'.kpi-label{font-size:10px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;line-height:1.3;margin-bottom:6px}'
-    +'.kpi-value{font-size:28px;font-weight:700;color:#005870;margin:0 0 2px}'
-    +'.kpi-sub{font-size:11px;color:#888;font-weight:400}'
-    +'.kpi-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}'
-    +'.badge-up{background:#e8f5e9;color:#2e7d32}'
-    +'.badge-dn{background:#fde8e8;color:#c62828}'
-    +'.chart-card{background:#fff;border-radius:8px;padding:16px}'
-    +'.chart-title{font-size:12px;font-weight:600;color:#005870}'
-    +'.chart-unit{font-size:10px;color:#888;font-weight:400;margin-top:2px;margin-bottom:6px}'
-    +'.tbl{width:100%;border-collapse:collapse;font-size:11px}'
-    +'.tbl th{background:#005870;color:#fff;padding:7px 10px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.4px}'
-    +'.tbl td{padding:7px 10px;border-bottom:1px solid #f0f0f0;color:#333;font-weight:400}'
-    +'.tbl tr:hover td{background:#f9fafc}'
-    +'.dash-footer{background:#005870;padding:8px 20px;display:flex;justify-content:space-between;align-items:center}'
-    +'.dash-footer span{color:rgba(255,255,255,0.6);font-size:10px;font-weight:400}'
-    +'.dash-footer strong{color:#C5D500}'
-    +'@media print{body{background:#fff}.dash{page-break-before:always;page-break-inside:avoid}}';
+  /* ════ LAST SLIDE: RECOMMENDATION ════ */
+  const hiKpis=kpis.filter(k=>k.pri==='Cao').slice(0,4);
+  const quickWins=hiKpis.map(k=>`<li>${k.chi}</li>`).join('')||'<li>Xây dựng bộ KPI cơ bản cho C-Level dashboard</li><li>Cấu hình SAP module liên quan</li>';
+  const coreImpl=[
+    'Rollout từ C-Level → D-Level → M-Level → Department',
+    'Cấu hình dữ liệu SAP: '+mods.split(',').slice(0,2).join(', '),
+    'Training người dùng theo từng cấp quản lý',
+    'Thiết lập quy trình review KPI định kỳ',
+  ].map(t=>`<li>${t}</li>`).join('');
+  const advanced=[
+    'Tích hợp AI/ML forecast với SAC Analytics',
+    'Cross-system KPI: CX/CRM + ERP + HR',
+    'Real-time streaming dashboard với BTP',
+    'Predictive maintenance với PM/EAM + AI',
+  ].map(t=>`<li>${t}</li>`).join('');
 
-  return '<!DOCTYPE html><html lang="vi"><head>'
-    +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-    +'<title>Dashboard Specification \u2014 '+name+'</title>'
-    +'<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">'
-    +'<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>'
-    +'<style>'+css+'</style>'
-    +'</head><body>'
-    +'<div style="background:linear-gradient(135deg,#003d4f,#005870);padding:80px 60px;text-align:center;color:#fff;border-bottom:5px solid #C5D500;font-family:Montserrat,sans-serif">'
-    +'<div style="font-size:28px;font-weight:700;margin-bottom:14px">Citek<span style="color:#C5D500">\'</span></div>'
-    +'<div style="font-size:38px;font-weight:700;letter-spacing:-1px;margin-bottom:10px">Dashboard Specification</div>'
-    +'<div style="font-size:20px;opacity:.8;margin-bottom:28px">'+name+'</div>'
-    +'<div style="display:inline-flex;gap:20px;font-size:12px;font-weight:400;background:rgba(0,0,0,.22);padding:10px 24px;border-radius:30px">'
-    +'<span>Ng\u00e0nh: '+curIndustry+'</span><span>SAP: '+mods+'</span><span>'+dt+'</span>'
-    +'<span>'+Object.values(DASH_TMPL).flat().length+' Dashboards</span></div>'
-    +'</div>'
-    +dashHTML
-    +'<script>'+chartJS+'<\/script>'
-    +'</body></html>';
+  slides.push(`<div class="slide" id="slide-${slides.length}">
+  <div class="slide-header" style="background:#1a3a44">
+    <div class="sh-logo">Citek<span>'</span></div>
+    <div class="sh-title">Khuyến nghị triển khai<small>Lộ trình theo thứ tự ưu tiên</small></div>
+    <div class="sh-right">${name}&nbsp;·&nbsp;${dt}</div>
+  </div>
+  <div class="rec-body">
+    <div class="rec-col" style="border-top:4px solid #C5D500">
+      <div class="rec-hd" style="color:#7a8500">⚡ Quick Wins</div>
+      <div class="rec-sub">Tuần 1–4 · Ưu tiên cao nhất</div>
+      <ul class="rec-list" style="--accent:#C5D500">${quickWins}</ul>
+    </div>
+    <div class="rec-col rec-main" style="border-top:4px solid #005870">
+      <div class="rec-hd" style="color:#005870">🏗 Core Implementation</div>
+      <div class="rec-sub">Tháng 1–3 · Nền tảng vận hành</div>
+      <ul class="rec-list" style="--accent:#005870">${coreImpl}</ul>
+    </div>
+    <div class="rec-col" style="border-top:4px solid #00D4FF">
+      <div class="rec-hd" style="color:#0080a0">📊 Advanced Analytics</div>
+      <div class="rec-sub">Tháng 4–6 · Tối ưu hóa &amp; AI</div>
+      <ul class="rec-list" style="--accent:#00D4FF">${advanced}</ul>
+    </div>
+  </div>
+  <div class="rec-footer">
+    <span>⚠️ Số liệu trong tài liệu này là <strong>mock data minh họa</strong> — không phản ánh dữ liệu thực của khách hàng</span>
+    <span>Prepared by <strong>Citek'</strong> · KPI Advisor AI Platform · ${dt}</span>
+  </div>
+</div>`);
+
+  /* ════ CSS ════ */
+  const CSS=`
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#000}
+body{font-family:'Montserrat',sans-serif}
+.slide{height:100vh;height:100dvh;overflow:hidden;display:none;flex-direction:column;font-family:'Montserrat',sans-serif;background:#F2F4F5;padding-bottom:47px}
+.slide.active{display:flex}
+/* HEADER */
+.slide-header,.pb-header-x{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;flex-shrink:0;color:white}
+.sh-logo{font-size:18px;font-weight:700;color:white;flex-shrink:0;min-width:80px}
+.sh-logo span{color:#C5D500}
+.sh-title{font-size:13px;font-weight:700;color:white;text-align:center;flex:1;padding:0 16px}
+.sh-title small{display:block;font-size:10px;font-weight:400;opacity:.7;margin-top:2px}
+.sh-right{font-size:10px;color:rgba(255,255,255,.6);text-align:right;flex-shrink:0;min-width:80px}
+.lv-pill{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600}
+/* COVER */
+.slide-cover{background:none;padding-bottom:0}
+.cover-bg{flex:1;background:linear-gradient(135deg,#003E4F 0%,#005870 55%,#007a9e 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 80px 90px;text-align:center;position:relative;overflow:hidden}
+.cover-bg::before{content:'';position:absolute;top:-15%;right:-8%;width:480px;height:480px;border-radius:50%;background:rgba(197,213,0,0.06);pointer-events:none}
+.cover-bg::after{content:'';position:absolute;bottom:-10%;left:-8%;width:380px;height:380px;border-radius:50%;background:rgba(0,212,255,0.06);pointer-events:none}
+.cover-eyebrow{font-size:12px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:22px}
+.cover-title{font-size:58px;font-weight:700;color:white;line-height:1.08;letter-spacing:-2px;margin-bottom:18px}
+.cover-sub{font-size:22px;font-weight:500;color:rgba(255,255,255,.88);margin-bottom:26px}
+.cover-meta{display:flex;gap:10px;align-items:center;background:rgba(0,0,0,.22);padding:10px 24px;border-radius:30px;font-size:12px;color:rgba(255,255,255,.7);margin-bottom:30px}
+.cover-sep{opacity:.35}
+.cover-badges{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:28px}
+.cover-badge{padding:8px 22px;border-radius:22px;border:2px solid;font-size:12px;font-weight:700;background:white}
+.cover-hint{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.5px}
+/* OVERVIEW */
+.ov-body{flex:1;display:flex;flex-direction:column;padding:18px 26px 14px;gap:14px;overflow:hidden;min-height:0}
+.ov-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex-shrink:0}
+.ov-card{background:white;border-radius:10px;padding:16px 18px;border-top:4px solid;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.ov-val{font-size:36px;font-weight:700;line-height:1}
+.ov-lbl{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:5px}
+.ov-chart-section{flex:1;background:white;border-radius:10px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.ov-chart-title{font-size:13px;font-weight:700;color:#005870;flex-shrink:0}
+.ov-chart-sub{font-size:11px;color:#888;margin-top:2px;margin-bottom:10px;flex-shrink:0}
+.ov-chart-wrap{flex:1;min-height:0}
+/* BADGES */
+.kbadge{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.badge-up{background:#e8f5e9;color:#2e7d32}
+.badge-dn{background:#fde8e8;color:#c62828}
+.lg-dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:3px;vertical-align:middle}
+.lg-line{display:inline-block;width:18px;height:2px;background:#00D4FF;border-radius:1px;margin-right:3px;vertical-align:middle}
+.kpi-tag{display:inline-block;background:#eef2f4;color:#005870;font-size:9px;font-weight:600;padding:2px 8px;border-radius:8px;margin:2px}
+.mod-badge{display:inline-block;background:rgba(0,88,112,.1);color:#005870;font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;margin:3px}
+/* PATTERN A */
+.pa-body{flex:1;display:flex;flex-direction:column;padding:12px 20px 10px;gap:10px;overflow:hidden;min-height:0}
+.pa-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex-shrink:0}
+.pa-card{background:white;border-radius:8px;padding:13px 15px;border-top:3px solid;box-shadow:0 2px 5px rgba(0,0,0,.07)}
+.pa-card-label{font-size:9px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;line-height:1.35;margin-bottom:5px;height:2.7em;overflow:hidden}
+.pa-card-value{font-size:24px;font-weight:700;line-height:1;margin-bottom:1px}
+.pa-unit{font-size:11px;font-weight:400;color:#888}
+.pa-card-row{display:flex;align-items:center;justify-content:space-between;margin-top:7px;gap:5px}
+.pa-freq{font-size:9px;color:#ccc;margin-top:4px}
+.spark-cv{flex:1;max-width:80px;height:26px!important}
+.pa-bottom{display:grid;grid-template-columns:1fr 220px;gap:10px;flex:1;min-height:0}
+.pa-chart-card{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;min-height:0}
+.pcc-title{font-size:12px;font-weight:700;color:#005870;flex-shrink:0}
+.pcc-sub{font-size:10px;color:#888;margin-top:2px;flex-shrink:0}
+.pcc-legend{display:flex;align-items:center;font-size:10px;color:#666;margin:5px 0;flex-shrink:0}
+.pcc-wrap{flex:1;min-height:0}
+.pa-info-card{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:7px}
+.pic-desc{font-size:11px;color:#555;line-height:1.55}
+.pic-tags{display:flex;flex-wrap:wrap;gap:3px}
+.pic-mods{font-size:10px;color:#aaa;margin-top:auto}
+/* PATTERN B */
+.pb-body{flex:1;display:grid;grid-template-columns:40% 1fr;overflow:hidden;min-height:0}
+.pb-left{padding:18px 22px;display:flex;flex-direction:column;gap:7px;border-right:1px solid #e8e8e8;overflow:hidden}
+.pb-section-hd{font-size:10px;font-weight:700;color:#005870;text-transform:uppercase;letter-spacing:.6px;flex-shrink:0}
+.pb-list{display:flex;flex-direction:column;gap:9px;flex:1;overflow:hidden}
+.pb-row{display:flex;align-items:center;gap:8px}
+.pb-name{font-size:10px;color:#333;font-weight:500;width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb-bar-wrap{flex:1;height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden}
+.pb-bar{height:100%;border-radius:3px;transition:width .3s}
+.pb-val{font-size:11px;font-weight:700;color:#333;flex-shrink:0;width:56px;text-align:right}
+.pb-unit{font-size:9px;font-weight:400;color:#999;margin-left:2px}
+.pb-desc{font-size:11px;color:#888;line-height:1.5;margin-top:auto;padding-top:10px;border-top:1px solid #f0f0f0;flex-shrink:0}
+.pb-right{padding:18px 22px;display:flex;flex-direction:column;gap:5px;min-height:0}
+.pb-chart-title{font-size:13px;font-weight:700;color:#333;flex-shrink:0}
+.pb-chart-sub{font-size:10px;color:#888;flex-shrink:0}
+.pb-legend{display:flex;align-items:center;font-size:10px;color:#666;margin-top:3px;flex-shrink:0}
+.pb-wrap{flex:1;min-height:0}
+.pb-foot-mods{font-size:10px;color:#bbb;flex-shrink:0}
+/* PATTERN C */
+.pc-body{flex:1;display:flex;flex-direction:column;padding:12px 20px 10px;gap:10px;overflow:hidden;min-height:0}
+.pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex-shrink:0}
+.pc-col{background:white;border-radius:8px;padding:14px 16px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:3px}
+.pc-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;line-height:1.35;height:2.7em;overflow:hidden}
+.pc-val{font-size:28px;font-weight:700;line-height:1;margin-top:3px}
+.pc-unit{font-size:10px;color:#888}
+.pc-spark{height:48px;margin:6px 0}
+.pc-badges{display:flex;flex-wrap:wrap;gap:3px}
+.pc-bottom{display:grid;grid-template-columns:1fr 1fr 150px;gap:10px;flex:1;min-height:0;overflow:hidden}
+.pc-insight{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.pc-ins-label{font-size:10px;font-weight:700;color:#005870;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.pc-ins-text{font-size:11px;color:#333;line-height:1.6}
+.pc-remaining{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);overflow:hidden}
+.pc-mods{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:4px}
+.pc-rem-hd{font-size:10px;font-weight:700;color:#005870;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.pc-rem-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f0f0}
+.pc-rem-name{font-size:10px;color:#555;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:6px}
+.pc-rem-val{font-size:11px;color:#333;flex-shrink:0}
+/* RECOMMENDATION */
+.rec-body{flex:1;display:grid;grid-template-columns:1fr 1.15fr 1fr;overflow:hidden;min-height:0}
+.rec-col{padding:26px 28px;border-right:1px solid #eee;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.rec-col:last-child{border-right:none}
+.rec-main{background:#fafeff}
+.rec-hd{font-size:15px;font-weight:700;flex-shrink:0}
+.rec-sub{font-size:11px;color:#888;margin-bottom:6px;flex-shrink:0}
+.rec-list{list-style:none;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.rec-list li{font-size:11px;color:#333;line-height:1.5;padding:9px 12px;background:#f8f9fa;border-radius:6px;border-left:3px solid var(--accent,#005870)}
+.rec-footer{padding:10px 26px;background:#1a2b35;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.rec-footer span{font-size:10px;color:rgba(255,255,255,.55)}
+.rec-footer strong{color:#C5D500}
+/* NAV */
+.nav-prog-wrap{position:fixed;bottom:44px;left:0;right:0;height:3px;background:rgba(255,255,255,.1);z-index:999}
+.nav-prog{height:100%;background:linear-gradient(90deg,#C5D500,#00D4FF);transition:width .22s ease}
+.nav-bar{position:fixed;bottom:0;left:0;right:0;height:44px;background:rgba(0,40,55,.97);backdrop-filter:blur(6px);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:1000}
+.nav-btn{background:rgba(255,255,255,.12);border:none;color:white;padding:6px 18px;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;transition:background .15s;user-select:none}
+.nav-btn:hover:not(:disabled){background:rgba(255,255,255,.22)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+.nav-center{display:flex;flex-direction:column;align-items:center;gap:2px}
+.nav-status{font-size:12px;font-weight:700;color:white;letter-spacing:.3px}
+.nav-title{font-size:10px;color:rgba(255,255,255,.5);max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+`;
+
+  /* ════ NAV JS ════ */
+  const totalSlides=slides.length;
+  const navJS=`(function(){
+var cur=0,slides=document.querySelectorAll('.slide'),total=slides.length;
+var titles=Array.from(slides).map(function(s){
+  var el=s.querySelector('.cover-title,.sh-title,.pb-htitle');
+  return el?el.textContent.trim().replace(/\\s+/g,' ').slice(0,60):'';
+});
+function goTo(n){
+  slides[cur].classList.remove('active');
+  cur=Math.max(0,Math.min(n,total-1));
+  slides[cur].classList.add('active');
+  document.getElementById('nav-status').textContent='Slide '+(cur+1)+' / '+total;
+  document.getElementById('nav-title').textContent=titles[cur]||'';
+  document.getElementById('nav-prog').style.width=(total>1?(cur/(total-1)*100):100)+'%';
+  document.getElementById('nav-prev').disabled=(cur===0);
+  document.getElementById('nav-next').disabled=(cur===total-1);
+}
+document.getElementById('nav-prev').addEventListener('click',function(){goTo(cur-1);});
+document.getElementById('nav-next').addEventListener('click',function(){goTo(cur+1);});
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();goTo(cur+1);}
+  else if(e.key==='ArrowLeft'){e.preventDefault();goTo(cur-1);}
+  else if(e.key==='Home'){goTo(0);}
+  else if(e.key==='End'){goTo(total-1);}
+});
+var tx=0;
+document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?goTo(cur+1):goTo(cur-1);}});
+Chart.defaults.font.family="'Montserrat',sans-serif";
+${chartInits.join('\n')}
+goTo(0);
+})();`;
+
+  const navHTML=`<div class="nav-prog-wrap"><div class="nav-prog" id="nav-prog" style="width:0%"></div></div>
+<nav class="nav-bar">
+  <button class="nav-btn" id="nav-prev" disabled>← Trước</button>
+  <div class="nav-center">
+    <div class="nav-status" id="nav-status">Slide 1 / ${totalSlides}</div>
+    <div class="nav-title" id="nav-title">KPI Dashboard Specification</div>
+  </div>
+  <button class="nav-btn" id="nav-next">Tiếp →</button>
+</nav>`;
+
+  return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard Specification \u2014 ${name}</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>
+<style>${CSS}</style>
+</head>
+<body>
+${slides.join('\n')}
+${navHTML}
+<script>${navJS}<\/script>
+</body>
+</html>`;
 }
 
 /* ════════════════════════════════════
