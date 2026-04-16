@@ -1,0 +1,8 @@
+{
+  "name": "kpi-advisor",
+  "version": "1.0.0",
+  "description": "KPI Advisor App by Citek'",
+  "engines": {
+    "node": ">=18"
+  }
+}

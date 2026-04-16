@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPI Advisor — Citek'</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:#005870;--teal-light:#007a9e;--teal-dark:#003d4f;
+  --lime:#C5D500;--lime-dark:#a0ac00;--cyan:#00D4FF;
+  --white:#ffffff;--gray-50:#fafafa;--gray-100:#F5F5F5;
+  --gray-200:#E0E0E0;--gray-400:#BDBDBD;--gray-500:#9E9E9E;
+  --gray-600:#666666;--gray-900:#333333;
+  --font:'Montserrat',sans-serif;
+  --r:8px;--rl:12px;
+  --s1:0 1px 2px rgba(0,0,0,.05);--s2:0 2px 8px rgba(0,0,0,.10);--s3:0 4px 16px rgba(0,0,0,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--gray-100);color:var(--gray-900);min-height:100vh;}
+
+/* NAV */
+nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;display:flex;align-items:center;height:58px;position:sticky;top:0;z-index:200;box-shadow:var(--s1);}
+.nav-logo{display:flex;align-items:center;gap:9px;}
+.nav-mark{width:34px;height:34px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.nav-mark svg{width:20px;height:20px;fill:white;}
+.nav-brand{font-size:17px;font-weight:700;color:var(--teal);letter-spacing:-.5px;}
+.nav-brand span{color:var(--lime-dark);}
+.nav-steps{display:flex;align-items:center;gap:4px;margin:0 auto;}
+.s-item{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:500;}
+.s-dot{width:22px;height:22px;border-radius:50%;background:var(--gray-200);color:var(--gray-500);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:all .25s;}
+.s-dot.active{background:var(--teal);color:white;}
+.s-dot.done{background:var(--lime);color:var(--teal-dark);}
+.s-lbl{color:var(--gray-500);transition:color .25s;}
+.s-lbl.active{color:var(--teal);font-weight:600;}
+.s-sep{width:24px;height:1px;background:var(--gray-200);}
+.nav-tag{background:var(--teal);color:white;font-size:10px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:.5px;}
+
+/* LAYOUT */
+.wrap{max-width:1280px;margin:0 auto;padding:28px 20px;}
+.page{display:none;animation:fi .3s ease;}
+.page.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* STEP 2 SPLIT LAYOUT */
+.step2-layout{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start;}
+.step2-main{min-width:0;}
+.step2-sidebar{position:sticky;top:74px;display:flex;flex-direction:column;gap:16px;}
+
+/* PAGE HEADER */
+.ph{margin-bottom:22px;}
+.ph h1{font-size:24px;font-weight:700;color:var(--teal);line-height:1.2;}
+.ph p{font-size:13px;color:var(--gray-600);margin-top:5px;line-height:1.6;}
+.tbar{width:44px;height:4px;background:var(--lime);border-radius:2px;margin:8px 0;}
+
+/* FORM */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.ff{grid-column:1/-1;}
+.fgl{display:flex;flex-direction:column;gap:5px;}
+.fgl label{font-size:11px;font-weight:600;color:var(--teal);text-transform:uppercase;letter-spacing:.5px;}
+.fgl input,.fgl select,.fgl textarea{border:1.5px solid var(--gray-200);border-radius:var(--r);padding:9px 13px;font-family:var(--font);font-size:13px;color:var(--gray-900);background:white;transition:border-color .2s,box-shadow .2s;outline:none;}
+.fgl input:focus,.fgl select:focus,.fgl textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,88,112,.1);}
+.fgl textarea{resize:vertical;min-height:72px;}
+
+/* INDUSTRY GRID */
+.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:4px;}
+.ic{border:2px solid var(--gray-200);border-radius:var(--rl);padding:12px 10px;cursor:pointer;text-align:center;transition:all .2s;background:white;}
+.ic:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:var(--s2);}
+.ic.sel{border-color:var(--teal);background:rgba(0,88,112,.05);}
+.ic.sel .icd{background:var(--lime);}
+.ic-icon{font-size:22px;margin-bottom:5px;}
+.ic-name{font-size:11px;font-weight:600;}
+.icd{width:7px;height:7px;border-radius:50%;background:var(--gray-200);margin:5px auto 0;transition:background .2s;}
+
+/* PILL BUTTONS */
+.prow{display:flex;gap:6px;flex-wrap:wrap;}
+.pb{padding:7px 14px;border-radius:20px;border:1.5px solid var(--gray-200);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;background:white;color:var(--gray-600);}
+.pb:hover{border-color:var(--teal);color:var(--teal);}
+.pb.sel{background:var(--teal);border-color:var(--teal);color:white;}
+
+/* CARD */
+.card{background:white;border-radius:var(--rl);border-top:4px solid var(--teal);box-shadow:var(--s2);padding:22px;}
+.card+.card{margin-top:14px;}
+
+/* ACTION BAR */
+.abar{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:18px;border-top:1px solid var(--gray-100);}
+.btn{padding:10px 22px;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;border:none;}
+.btn-p{background:var(--lime);color:var(--teal-dark);font-weight:700;}
+.btn-p:hover{background:var(--lime-dark);transform:translateY(-1px);box-shadow:var(--s2);}
+.btn-p:disabled{background:var(--gray-200);color:var(--gray-500);transform:none;box-shadow:none;cursor:not-allowed;}
+.btn-s{background:var(--teal);color:white;}
+.btn-s:hover{background:var(--teal-light);}
+.btn-g{background:transparent;border:1.5px solid var(--gray-200);color:var(--gray-600);}
+.btn-g:hover{border-color:var(--teal);color:var(--teal);}
+.btn-ai{background:var(--teal);color:white;display:flex;align-items:center;gap:7px;}
+.btn-ai:hover{background:var(--teal-light);}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);animation:pulse 1.5s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.7}}
+
+/* ─── AI SUGGESTION PANEL ─── */
+.ai-suggest-panel{background:white;border-radius:var(--rl);border-top:4px solid var(--lime-dark);box-shadow:var(--s2);overflow:hidden;}
+.asp-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;border-bottom:1px solid var(--gray-100);}
+.asp-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--teal);}
+.asp-title .ai-dot{background:var(--lime);}
+.asp-subtitle{font-size:11px;color:var(--gray-500);font-weight:400;margin-top:1px;}
+.asp-body{padding:14px 16px;max-height:360px;overflow-y:auto;}
+.asp-group{margin-bottom:14px;}
+.asp-group-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--teal);margin-bottom:7px;padding-left:2px;}
+.asp-kpi-item{display:flex;align-items:flex-start;gap:9px;padding:8px 10px;border-radius:var(--r);border:1px solid var(--gray-100);margin-bottom:5px;cursor:pointer;transition:all .18s;background:var(--gray-50);}
+.asp-kpi-item:hover{border-color:var(--teal);background:rgba(0,88,112,.04);}
+.asp-kpi-item.added{border-color:var(--lime-dark);background:rgba(197,213,0,.08);}
+.aki-check{width:16px;height:16px;flex-shrink:0;margin-top:1px;accent-color:var(--teal);}
+.aki-info{flex:1;min-width:0;}
+.aki-name{font-size:12px;font-weight:600;color:var(--gray-900);line-height:1.3;}
+.aki-meta{font-size:10px;color:var(--gray-500);margin-top:2px;display:flex;gap:6px;}
+.aki-tag{background:var(--gray-100);padding:1px 7px;border-radius:8px;font-weight:500;}
+.aki-why{font-size:10px;color:var(--teal);font-style:italic;margin-top:3px;line-height:1.4;}
+.asp-loading{padding:20px;text-align:center;}
+.asp-spinner{width:28px;height:28px;border:2.5px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.asp-empty{padding:20px;text-align:center;color:var(--gray-500);font-size:12px;}
+.asp-add-all{width:100%;padding:9px;border:none;background:rgba(0,88,112,.07);color:var(--teal);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;border-radius:0 0 var(--rl) var(--rl);transition:background .2s;}
+.asp-add-all:hover{background:rgba(0,88,112,.12);}
+
+/* ─── AI CHAT BOX ─── */
+.chat-box{background:white;border-radius:var(--rl);border-top:4px solid var(--cyan);box-shadow:var(--s2);display:flex;flex-direction:column;height:440px;}
+.cb-header{display:flex;align-items:center;gap:8px;padding:13px 16px 11px;border-bottom:1px solid var(--gray-100);flex-shrink:0;}
+.cb-avatar{width:28px;height:28px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cb-avatar svg{width:15px;height:15px;fill:white;}
+.cb-hinfo{flex:1;}
+.cb-name{font-size:12px;font-weight:700;color:var(--teal);}
+.cb-status{font-size:10px;color:var(--gray-500);display:flex;align-items:center;gap:4px;}
+.cb-online{width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0;}
+.cb-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.msg{max-width:88%;animation:msgIn .2s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.msg-ai{align-self:flex-start;}
+.msg-user{align-self:flex-end;}
+.msg-bubble{padding:9px 12px;border-radius:12px;font-size:12px;line-height:1.55;}
+.msg-ai .msg-bubble{background:var(--gray-50);border:1px solid var(--gray-100);color:var(--gray-900);border-radius:4px 12px 12px 12px;}
+.msg-user .msg-bubble{background:var(--teal);color:white;border-radius:12px 4px 12px 12px;}
+.msg-time{font-size:10px;color:var(--gray-400);margin-top:3px;padding:0 4px;}
+.msg-ai .msg-time{text-align:left;}
+.msg-user .msg-time{text-align:right;}
+.msg-typing .msg-bubble{display:flex;align-items:center;gap:4px;padding:10px 14px;}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--gray-400);animation:td .9s infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.cb-actions{padding:10px 12px 8px;border-top:1px solid var(--gray-100);flex-shrink:0;}
+.cb-quick{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.cq-btn{padding:4px 10px;border-radius:10px;border:1px solid var(--gray-200);background:white;font-family:var(--font);font-size:10px;font-weight:500;color:var(--teal);cursor:pointer;transition:all .18s;white-space:nowrap;}
+.cq-btn:hover{background:rgba(0,88,112,.06);border-color:var(--teal);}
+.cb-input-row{display:flex;gap:6px;align-items:flex-end;}
+.cb-input{flex:1;border:1.5px solid var(--gray-200);border-radius:var(--r);padding:8px 11px;font-family:var(--font);font-size:12px;resize:none;outline:none;min-height:36px;max-height:80px;transition:border-color .2s;line-height:1.4;overflow-y:auto;}
+.cb-input:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(0,88,112,.08);}
+.cb-send{width:34px;height:34px;border:none;border-radius:var(--r);background:var(--teal);color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
+.cb-send:hover{background:var(--teal-light);}
+.cb-send:disabled{background:var(--gray-200);cursor:not-allowed;}
+.cb-send svg{width:15px;height:15px;fill:white;}
+
+/* KPI TABLE */
+.kpi-table{width:100%;border-collapse:collapse;font-size:12px;}
+.kpi-table th{background:var(--teal);color:white;padding:9px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.kpi-table th:first-child{border-radius:6px 0 0 0;}
+.kpi-table th:last-child{border-radius:0 6px 0 0;}
+.kpi-table td{padding:9px 12px;border-bottom:1px solid var(--gray-100);vertical-align:middle;}
+.kpi-table tr:hover td{background:rgba(0,88,112,.025);}
+.kpi-table tr.ksel td{background:rgba(197,213,0,.06);}
+.kpi-table tr.kai-added td{background:rgba(0,212,255,.04);}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:600;}
+.b-cao{background:rgba(0,88,112,.1);color:var(--teal);}
+.b-tb{background:rgba(197,213,0,.2);color:#7a8500;}
+.b-thap{background:var(--gray-100);color:var(--gray-600);}
+.b-ngay{background:rgba(0,212,255,.1);color:#0080a0;}
+.b-tuan{background:rgba(0,88,112,.07);color:var(--teal);}
+.b-thang{background:rgba(197,213,0,.15);color:#7a8500;}
+.b-ai{background:rgba(0,212,255,.15);color:#005870;font-style:italic;}
+.kpi-check{width:15px;height:15px;accent-color:var(--teal);cursor:pointer;}
+.group-row td{background:rgba(0,88,112,.05);font-weight:700;color:var(--teal);font-size:11px;letter-spacing:.3px;}
+.ai-new-row td{border-left:3px solid var(--cyan);}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.sc{background:white;border-radius:var(--r);padding:14px;border-top:3px solid var(--teal);box-shadow:var(--s1);}
+.sc-num{font-size:26px;font-weight:700;color:var(--teal);line-height:1;}
+.sc-lbl{font-size:10px;color:var(--gray-500);font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
+.sc.lime-top{border-top-color:var(--lime-dark);}
+.sc.cyan-top{border-top-color:var(--cyan);}
+
+/* FILTER */
+.fbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.fs{padding:7px 11px;border:1.5px solid var(--gray-200);border-radius:18px;font-family:var(--font);font-size:11px;font-weight:500;color:var(--gray-900);background:white;cursor:pointer;outline:none;transition:border-color .2s;}
+.fs:focus{border-color:var(--teal);}
+.fcnt{margin-left:auto;font-size:12px;color:var(--gray-600);font-weight:500;}
+.fcnt span{color:var(--teal);font-weight:700;}
+
+/* DASHBOARD LEVEL */
+.ltabs{display:flex;gap:0;border-bottom:2px solid var(--gray-200);}
+.ltab{padding:11px 18px;font-size:12px;font-weight:600;color:var(--gray-500);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;}
+.ltab:hover{color:var(--teal);}
+.ltab.active{color:var(--teal);border-bottom-color:var(--teal);}
+.lc{display:none;padding:20px 0;}
+.lc.active{display:block;}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+.dc{background:white;border:1.5px solid var(--gray-200);border-radius:var(--rl);padding:14px;transition:all .2s;cursor:pointer;}
+.dc:hover{border-color:var(--teal);box-shadow:var(--s2);transform:translateY(-2px);}
+.dc.sel{border-color:var(--lime-dark);background:rgba(197,213,0,.04);}
+.dc-type{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gray-500);margin-bottom:5px;}
+.dc-name{font-size:13px;font-weight:700;color:var(--gray-900);margin-bottom:3px;}
+.dc-desc{font-size:11px;color:var(--gray-600);line-height:1.5;}
+.dc-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px;}
+.dc-tag{background:var(--gray-100);color:var(--gray-600);font-size:9px;padding:2px 7px;border-radius:7px;font-weight:500;}
+.dc-preview{width:100%;height:48px;background:var(--gray-50);border-radius:5px;margin-top:9px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+
+/* OUTPUT */
+.og{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.oc{background:white;border:1.5px solid var(--gray-200);border-radius:var(--rl);padding:18px;transition:all .2s;cursor:pointer;}
+.oc:hover{border-color:var(--teal);box-shadow:var(--s2);}
+.oc.sel{border-color:var(--teal);background:rgba(0,88,112,.04);}
+.oc-icon{width:40px;height:40px;background:rgba(0,88,112,.08);border-radius:var(--r);display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.oc-icon svg{width:22px;height:22px;stroke:var(--teal);fill:none;stroke-width:1.5;}
+.oc-name{font-size:14px;font-weight:700;color:var(--gray-900);margin-bottom:3px;}
+.oc-desc{font-size:11px;color:var(--gray-600);line-height:1.5;}
+.oc-badge{display:inline-block;margin-top:9px;padding:2px 9px;border-radius:8px;font-size:10px;font-weight:700;background:rgba(197,213,0,.2);color:#6b7400;}
+
+/* AI LOADING */
+.ai-load{text-align:center;padding:40px 20px;}
+.ai-spin{width:52px;height:52px;border:3px solid var(--gray-200);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px;}
+.ai-load h3{font-size:17px;color:var(--teal);margin-bottom:5px;}
+.ai-load p{font-size:12px;color:var(--gray-500);}
+.ai-slist{list-style:none;margin-top:16px;text-align:left;display:inline-block;}
+.ai-slist li{font-size:12px;color:var(--gray-500);padding:3px 0;display:flex;align-items:center;gap:7px;}
+.ai-slist li.done{color:var(--teal);}
+.ai-slist li.done::before{content:'✓';font-weight:700;color:var(--lime-dark);}
+.ai-slist li.act::before{content:'›';font-weight:700;color:var(--teal);animation:blink .8s infinite;}
+.ai-slist li.pend::before{content:'·';font-weight:700;color:var(--gray-200);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.prog-wrap{height:4px;background:var(--gray-200);border-radius:2px;margin-top:16px;width:280px;margin-left:auto;margin-right:auto;}
+.prog-bar{height:4px;background:var(--lime);border-radius:2px;transition:width .4s ease;}
+
+/* LEVEL BADGES */
+.lb{padding:5px 14px;border-radius:18px;font-size:11px;font-weight:700;}
+.lb-c{background:var(--teal);color:white;}
+.lb-d{background:var(--teal-light);color:white;}
+.lb-m{background:rgba(0,88,112,.15);color:var(--teal);}
+.lb-dept{background:rgba(197,213,0,.25);color:#6b7400;}
+
+/* SUMMARY TABLE */
+.sum-table{width:100%;font-size:12px;}
+.sum-table td{padding:5px 0;vertical-align:top;}
+.sum-table td:first-child{color:var(--gray-500);width:38%;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--teal);color:white;padding:11px 18px;border-radius:var(--r);font-size:12px;font-weight:500;box-shadow:var(--s3);transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999;display:flex;align-items:center;gap:7px;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-mark"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+    <span class="nav-brand">Citek<span>'</span></span>
+  </div>
+  <div class="nav-steps">
+    <div class="s-item"><div class="s-dot active" id="dot-1">1</div><span class="s-lbl active" id="lbl-1">Thông tin KH</span></div>
+    <div class="s-sep"></div>
+    <div class="s-item"><div class="s-dot" id="dot-2">2</div><span class="s-lbl" id="lbl-2">Chọn KPI</span></div>
+    <div class="s-sep"></div>
+    <div class="s-item"><div class="s-dot" id="dot-3">3</div><span class="s-lbl" id="lbl-3">Dashboard</span></div>
+    <div class="s-sep"></div>
+    <div class="s-item"><div class="s-dot" id="dot-4">4</div><span class="s-lbl" id="lbl-4">Xuất file</span></div>
+  </div>
+  <span class="nav-tag">KPI Advisor v2</span>
+</nav>
+
+<div class="wrap">
+
+<!-- ═══════════════════════════════════════════
+     STEP 1 — CUSTOMER INFO
+═══════════════════════════════════════════ -->
+<div class="page active" id="page-1">
+  <div class="ph"><h1>Thông tin khách hàng</h1><div class="tbar"></div><p>Nhập thông tin cơ bản để AI đề xuất bộ KPI phù hợp nhất cho dự án</p></div>
+  <div class="card">
+    <div class="fg">
+      <div class="fgl"><label>Tên khách hàng / Dự án</label><input type="text" id="c-name" placeholder="VD: Công ty CP Thiên Long"/></div>
+      <div class="fgl"><label>Quy mô doanh nghiệp</label>
+        <select id="c-size">
+          <option value="">-- Chọn quy mô --</option>
+          <option value="sme">SME (&lt;200 nhân viên)</option>
+          <option value="mid">Mid-market (200–1000)</option>
+          <option value="enterprise">Enterprise (&gt;1000)</option>
+        </select>
+      </div>
+      <div class="fgl ff"><label>Ngành nghề</label>
+        <div class="ig" id="industry-grid">
+          <div class="ic" onclick="selInd(this,'manufacturing')"><div class="ic-icon">🏭</div><div class="ic-name">Sản xuất</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'trading')"><div class="ic-icon">🛒</div><div class="ic-name">Thương mại</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'fmcg')"><div class="ic-icon">📦</div><div class="ic-name">FMCG</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'pharma')"><div class="ic-icon">💊</div><div class="ic-name">Dược phẩm</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'finance')"><div class="ic-icon">🏦</div><div class="ic-name">Tài chính</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'logistics')"><div class="ic-icon">🚛</div><div class="ic-name">Logistics</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'retail')"><div class="ic-icon">🏪</div><div class="ic-name">Bán lẻ</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'other')"><div class="ic-icon">🔧</div><div class="ic-name">Khác</div><div class="icd"></div></div>
+        </div>
+      </div>
+      <div class="fgl"><label>Hệ thống ERP</label>
+        <select id="c-erp">
+          <option value="">-- Chọn ERP --</option>
+          <option value="sap-s4">SAP S/4HANA</option>
+          <option value="sap-ecc">SAP ECC 6.0</option>
+          <option value="sap-b1">SAP Business One</option>
+          <option value="oracle">Oracle ERP</option>
+          <option value="dynamics">Microsoft Dynamics</option>
+          <option value="none">Chưa có ERP</option>
+          <option value="other">Khác</option>
+        </select>
+      </div>
+      <div class="fgl"><label>SAP Module đang dùng</label>
+        <div class="prow" id="sap-mods">
+          <button class="pb" onclick="togBtn(this)">FI-GL</button>
+          <button class="pb" onclick="togBtn(this)">FI-AR</button>
+          <button class="pb" onclick="togBtn(this)">FI-CO</button>
+          <button class="pb" onclick="togBtn(this)">SD</button>
+          <button class="pb" onclick="togBtn(this)">MM</button>
+          <button class="pb" onclick="togBtn(this)">PP</button>
+          <button class="pb" onclick="togBtn(this)">QM</button>
+          <button class="pb" onclick="togBtn(this)">PM</button>
+          <button class="pb" onclick="togBtn(this)">Treasury</button>
+        </div>
+      </div>
+      <div class="fgl ff"><label>Mục tiêu phân tích chính</label>
+        <div class="prow" id="objectives">
+          <button class="pb" onclick="togBtn(this)">Kiểm soát chi phí</button>
+          <button class="pb" onclick="togBtn(this)">Tối ưu dòng tiền</button>
+          <button class="pb" onclick="togBtn(this)">Nâng cao chất lượng</button>
+          <button class="pb" onclick="togBtn(this)">Tăng doanh thu</button>
+          <button class="pb" onclick="togBtn(this)">Tối ưu tồn kho</button>
+          <button class="pb" onclick="togBtn(this)">Cải thiện sản xuất</button>
+          <button class="pb" onclick="togBtn(this)">Quản lý công nợ</button>
+          <button class="pb" onclick="togBtn(this)">Bảo trì thiết bị</button>
+        </div>
+      </div>
+      <div class="fgl ff"><label>Ghi chú thêm (tuỳ chọn)</label><textarea id="c-notes" placeholder="Mô tả thêm yêu cầu đặc thù, pain point, scope dự án..."></textarea></div>
+    </div>
+    <div class="abar">
+      <div style="font-size:12px;color:var(--gray-500)">Bước 1 / 4</div>
+      <button class="btn btn-ai" onclick="startAI()"><div class="ai-dot"></div>Phân tích AI &amp; Đề xuất KPI →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 2 — KPI SELECTION + AI SIDEBAR
+═══════════════════════════════════════════ -->
+<div class="page" id="page-2">
+
+  <!-- AI LOADING OVERLAY -->
+  <div id="ai-load-view" class="card">
+    <div class="ai-load">
+      <div class="ai-spin"></div>
+      <h3>AI đang phân tích yêu cầu...</h3>
+      <p>Kết hợp thư viện KPI + nghiên cứu ngành để đề xuất tối ưu</p>
+      <ul class="ai-slist" id="aisteps">
+        <li class="act" id="as1">Phân tích ngành và mục tiêu kinh doanh</li>
+        <li class="pend" id="as2">Tìm KPI phù hợp từ thư viện 91 chỉ tiêu</li>
+        <li class="pend" id="as3">Nghiên cứu best practices ngành</li>
+        <li class="pend" id="as4">Tính AI Score và mức độ ưu tiên</li>
+        <li class="pend" id="as5">Tổng hợp và chuẩn bị đề xuất</li>
+      </ul>
+      <div class="prog-wrap"><div class="prog-bar" id="prog" style="width:0"></div></div>
+    </div>
+  </div>
+
+  <!-- MAIN KPI CONTENT -->
+  <div id="kpi-main" style="display:none">
+    <div class="ph"><h1>Đề xuất KPI &amp; AI Assistant</h1><div class="tbar"></div><p>AI đã phân tích và đề xuất bộ KPI. Dùng panel bên phải để bổ sung hoặc điều chỉnh.</p></div>
+
+    <div class="step2-layout">
+      <!-- LEFT: KPI TABLE -->
+      <div class="step2-main">
+        <div class="stats">
+          <div class="sc"><div class="sc-num" id="s-total">0</div><div class="sc-lbl">KPI thư viện</div></div>
+          <div class="sc lime-top"><div class="sc-num" id="s-sel">0</div><div class="sc-lbl">Đã chọn</div></div>
+          <div class="sc cyan-top"><div class="sc-num" id="s-ai">0</div><div class="sc-lbl">AI bổ sung</div></div>
+          <div class="sc"><div class="sc-num" id="s-grp">0</div><div class="sc-lbl">Nhóm nghiệp vụ</div></div>
+        </div>
+
+        <div class="card" style="padding:18px;">
+          <div class="fbar">
+            <select class="fs" id="fg" onchange="filterT()">
+              <option value="">Tất cả nhóm</option>
+              <option>Tài chính - Quản trị</option><option>Dòng tiền</option>
+              <option>Công nợ</option><option>Giá thành</option>
+              <option>Kinh doanh</option><option>Chất lượng</option>
+              <option>Bảo trì</option><option>Tồn kho</option>
+              <option>Mua hàng</option><option>Sản xuất</option>
+              <option>AI Đề xuất</option>
+            </select>
+            <select class="fs" id="fp" onchange="filterT()">
+              <option value="">Mọi ưu tiên</option>
+              <option>Cao</option><option>Trung bình</option><option>Thấp</option>
+            </select>
+            <select class="fs" id="ff2" onchange="filterT()">
+              <option value="">Mọi tần suất</option>
+              <option>Ngày</option><option>Tuần</option><option>Tháng</option>
+            </select>
+            <button class="pb sel" style="font-size:11px" onclick="selAllVis()">Chọn tất cả</button>
+            <button class="pb" style="font-size:11px" onclick="clearAll()">Bỏ chọn</button>
+            <span class="fcnt">Hiển thị: <span id="vis-cnt">0</span></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="kpi-table" id="ktable">
+              <thead>
+                <tr>
+                  <th style="width:32px"><input type="checkbox" id="chk-all" onchange="togAll(this)" style="accent-color:var(--lime);width:14px;height:14px"></th>
+                  <th>#</th><th>Nhóm</th><th style="min-width:190px">Chỉ tiêu</th>
+                  <th>Tần suất</th><th>Ưu tiên</th><th>AI Score</th><th>Nguồn</th>
+                </tr>
+              </thead>
+              <tbody id="ktbody"></tbody>
+            </table>
+          </div>
+          <div class="abar">
+            <button class="btn btn-g" onclick="goStep(1)">← Quay lại</button>
+            <button class="btn btn-p" onclick="goStep(3)">Thiết kế Dashboard →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: SIDEBAR -->
+      <div class="step2-sidebar">
+
+        <!-- AI SUGGESTION PANEL -->
+        <div class="ai-suggest-panel">
+          <div class="asp-header">
+            <div>
+              <div class="asp-title"><div class="ai-dot"></div>AI Đề xuất thêm</div>
+              <div class="asp-subtitle">Dựa trên ngành &amp; mục tiêu của khách hàng</div>
+            </div>
+            <button class="pb" style="font-size:10px;padding:5px 10px" onclick="refreshSuggest()">↻ Làm mới</button>
+          </div>
+          <div class="asp-body" id="asp-body">
+            <div class="asp-loading"><div class="asp-spinner"></div><div style="font-size:11px;color:var(--gray-500)">Đang phân tích...</div></div>
+          </div>
+          <button class="asp-add-all" onclick="addAllSuggested()">+ Thêm tất cả đề xuất vào danh sách</button>
+        </div>
+
+        <!-- AI CHAT BOX -->
+        <div class="chat-box">
+          <div class="cb-header">
+            <div class="cb-avatar"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 3a3 3 0 1 1-3 3 3 3 0 0 1 3-3zm0 14.2a7.2 7.2 0 0 1-6-3.22c.03-2 4-3.1 6-3.1s5.97 1.1 6 3.1a7.2 7.2 0 0 1-6 3.22z"/></svg></div>
+            <div class="cb-hinfo">
+              <div class="cb-name">KPI Assistant</div>
+              <div class="cb-status"><div class="cb-online"></div>Claude AI · Sẵn sàng hỗ trợ</div>
+            </div>
+          </div>
+          <div class="cb-messages" id="chat-msgs"></div>
+          <div class="cb-actions">
+            <div class="cb-quick" id="quick-btns">
+              <button class="cq-btn" onclick="quickMsg(this)">Thêm KPI chất lượng</button>
+              <button class="cq-btn" onclick="quickMsg(this)">Bỏ KPI ít quan trọng</button>
+              <button class="cq-btn" onclick="quickMsg(this)">Đề xuất cho C-Level</button>
+              <button class="cq-btn" onclick="quickMsg(this)">KPI theo tuần</button>
+            </div>
+            <div class="cb-input-row">
+              <textarea class="cb-input" id="chat-inp" placeholder="Hỏi AI về KPI, dashboard layout..." rows="1" onkeydown="chatKey(event)"></textarea>
+              <button class="cb-send" id="chat-send" onclick="sendChat()">
+                <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end sidebar -->
+    </div><!-- end step2-layout -->
+  </div><!-- end kpi-main -->
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 3 — DASHBOARD
+═══════════════════════════════════════════ -->
+<div class="page" id="page-3">
+  <div class="ph"><h1>Thiết kế Dashboard theo cấp độ</h1><div class="tbar"></div><p>Chọn dashboard phù hợp cho từng cấp quản lý — mỗi level có góc nhìn và KPI riêng</p></div>
+  <div class="card">
+    <div class="ltabs">
+      <div class="ltab active" onclick="swLv('c',this)">C-Level</div>
+      <div class="ltab" onclick="swLv('d',this)">D-Level</div>
+      <div class="ltab" onclick="swLv('m',this)">M-Level</div>
+      <div class="ltab" onclick="swLv('dept',this)">Department</div>
+    </div>
+    <div class="lc active" id="lc-c"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span class="lb lb-c">C-Level — CEO / CFO / COO</span><span style="font-size:12px;color:var(--gray-500)">Góc nhìn chiến lược, KPI tổng hợp</span></div><div class="dash-grid" id="dc-c"></div></div>
+    <div class="lc" id="lc-d"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span class="lb lb-d">D-Level — Director / VP</span><span style="font-size:12px;color:var(--gray-500)">Vận hành theo phòng ban, drill-down</span></div><div class="dash-grid" id="dc-d"></div></div>
+    <div class="lc" id="lc-m"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span class="lb lb-m">M-Level — Manager</span><span style="font-size:12px;color:var(--gray-500)">Quản lý theo quy trình, tiến độ</span></div><div class="dash-grid" id="dc-m"></div></div>
+    <div class="lc" id="lc-dept"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span class="lb lb-dept">Department — Chuyên viên</span><span style="font-size:12px;color:var(--gray-500)">Công việc hàng ngày, chi tiết giao dịch</span></div><div class="dash-grid" id="dc-dept"></div></div>
+    <div class="abar">
+      <button class="btn btn-g" onclick="goStep(2)">← Quay lại</button>
+      <button class="btn btn-p" onclick="goStep(4)">Chọn định dạng xuất →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     STEP 4 — OUTPUT
+═══════════════════════════════════════════ -->
+<div class="page" id="page-4">
+  <div class="ph"><h1>Xuất tài liệu</h1><div class="tbar"></div><p>Chọn định dạng — app tạo tài liệu theo chuẩn CITEK branding</p></div>
+  <div class="og">
+    <div class="oc sel" id="oc-doc" onclick="togOut(this,'doc')"><div class="oc-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div class="oc-name">KPI Document</div><div class="oc-desc">Word/PDF đầy đủ — danh sách KPI, công thức, chiều phân tích, nguồn dữ liệu SAP</div><span class="oc-badge">Word / PDF</span></div>
+    <div class="oc sel" id="oc-dash" onclick="togOut(this,'dash')"><div class="oc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div><div class="oc-name">Dashboard Specification</div><div class="oc-desc">Đặc tả dashboard từng level C/D/M/Dept — layout, chart type, KPI mapping</div><span class="oc-badge">HTML Wireframe</span></div>
+    <div class="oc sel" id="oc-xl" onclick="togOut(this,'xl')"><div class="oc-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="oc-name">Excel Export</div><div class="oc-desc">KPI matrix — công thức, tần suất, ưu tiên, SAP module, dashboard mapping</div><span class="oc-badge">XLSX</span></div>
+    <div class="oc sel" id="oc-pp" onclick="togOut(this,'pp')"><div class="oc-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="oc-name">Presentation</div><div class="oc-desc">Slide deck CITEK-branded — tóm tắt KPI đề xuất, dashboard overview mỗi level</div><span class="oc-badge">PPTX</span></div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Tóm tắt phiên làm việc</div>
+    <table class="sum-table" id="sum-tbl"></table>
+    <div class="abar">
+      <button class="btn btn-g" onclick="goStep(3)">← Quay lại</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-s" onclick="toast('Đã lưu draft phiên làm việc')">Lưu Draft</button>
+        <button class="btn btn-p" onclick="genOutputs()">Tạo tất cả tài liệu →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- .wrap -->
+<div class="toast" id="toastEl"><div class="toast-dot"></div><span id="toast-txt"></span></div>
+
+<script>
+/* ─── KPI LIBRARY ─── */
+const KPI_LIB = [
+  {no:1,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Các khoản mục CĐKT so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:2,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Cơ cấu CĐKT theo thời gian, vs kỳ trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:3,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kế hoạch / ước thực hiện",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:4,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kỳ trước / cùng kỳ năm trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:5,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Doanh thu theo kênh / ngành hàng / vùng miền",freq:"Tháng",pri:"Cao",mods:["FI","SD"]},
+  {no:6,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Giá vốn theo kênh bán hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"]},
+  {no:7,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Lãi gộp theo kênh / ngành hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"]},
+  {no:19,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Gross Margin / Tỷ lệ lợi nhuận gộp",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:20,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Tỷ lệ EBIT / Doanh thu",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:21,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROS — Tỷ suất sinh lời trên doanh thu",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"]},
+  {no:22,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROE — Sinh lời trên vốn chủ sở hữu",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:23,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROA — Sinh lời trên tổng tài sản",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"]},
+  {no:24,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Current Ratio — Khả năng thanh toán hiện thời",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:25,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Quick Ratio — Khả năng thanh toán nhanh",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
+  {no:27,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Số dư tiền vay ngân hàng",freq:"Tuần",pri:"Cao",mods:["Treasury"]},
+  {no:28,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Hạn mức vay ngân hàng còn lại",freq:"Tuần",pri:"Cao",mods:["Treasury"]},
+  {no:32,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Số dư tiền đầu / cuối ngày",freq:"Ngày",pri:"Cao",mods:["FI-GL"]},
+  {no:33,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Dự báo dự thu / dự chi",freq:"Ngày",pri:"Cao",mods:["FI-GL"]},
+  {no:36,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Cơ cấu công nợ phải thu (trong hạn / quá hạn)",freq:"Tuần",pri:"Cao",mods:["FI-AR"]},
+  {no:37,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Tuổi nợ phải thu theo khoảng thời gian",freq:"Tuần",pri:"Cao",mods:["FI-AR"]},
+  {no:39,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"DSO — Kỳ thu tiền bình quân",freq:"Tháng",pri:"Cao",mods:["FI-AR","SD"]},
+  {no:40,nhom:"Giá thành",sub:"Chi phí sản xuất",chi:"Chi phí sản xuất so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"]},
+  {no:41,nhom:"Giá thành",sub:"Cấu trúc giá thành",chi:"Cấu trúc giá thành vs kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"]},
+  {no:43,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kế hoạch / ước thực hiện",freq:"Ngày",pri:"Cao",mods:["SD","FI"]},
+  {no:44,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kỳ trước / cùng kỳ / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"]},
+  {no:45,nhom:"Kinh doanh",sub:"Sản lượng",chi:"Sản lượng bán vs kế hoạch / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"]},
+  {no:48,nhom:"Kinh doanh",sub:"Lợi nhuận gộp",chi:"Lợi nhuận gộp theo kênh / sản phẩm",freq:"Tháng",pri:"Cao",mods:["SD","FI"]},
+  {no:49,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô đạt chất lượng đầu vào (Accepted)",freq:"Ngày",pri:"Cao",mods:["QM"]},
+  {no:50,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô bị từ chối (Rejected)",freq:"Ngày",pri:"Cao",mods:["QM"]},
+  {no:53,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ hàng đạt CL trong sản xuất (Passed)",freq:"Ngày",pri:"Cao",mods:["QM","PP"]},
+  {no:56,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ chi phí thiệt hại do chất lượng",freq:"Ngày",pri:"Cao",mods:["QM","FI-CO"]},
+  {no:61,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Tỷ lệ hàng trả lại theo nguyên nhân",freq:"Tuần",pri:"Trung bình",mods:["QM","SD"]},
+  {no:63,nhom:"Bảo trì",sub:"Downtime",chi:"MTBF — Thời gian trung bình giữa 2 lần hỏng",freq:"Tháng",pri:"Cao",mods:["PM"]},
+  {no:64,nhom:"Bảo trì",sub:"Downtime",chi:"MTTR — Thời gian trung bình để sửa chữa",freq:"Tháng",pri:"Cao",mods:["PM"]},
+  {no:65,nhom:"Bảo trì",sub:"Downtime",chi:"Thời gian & số lần dừng máy đột xuất",freq:"Tháng",pri:"Cao",mods:["PM"]},
+  {no:69,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí bảo trì vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["PM","FI"]},
+  {no:73,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng tồn kho đầu / cuối kỳ",freq:"Tuần",pri:"Cao",mods:["MM"]},
+  {no:74,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng nhập kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"]},
+  {no:75,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng xuất kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"]},
+  {no:80,nhom:"Tồn kho",sub:"Tuổi HTK theo HSD",chi:"Tuổi hàng tồn kho theo hạn sử dụng",freq:"Tuần",pri:"Cao",mods:["MM"]},
+  {no:82,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị mua hàng theo vendor / nhóm hàng",freq:"Tuần",pri:"Cao",mods:["MM"]},
+  {no:83,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị đặt hàng chưa giao",freq:"Ngày",pri:"Cao",mods:["MM"]},
+  {no:85,nhom:"Mua hàng",sub:"Leadtime",chi:"Lead time mua hàng theo vendor / sản phẩm",freq:"Tháng",pri:"Cao",mods:["MM"]},
+  {no:86,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm vs kế hoạch",freq:"Ngày",pri:"Cao",mods:["PP"]},
+  {no:87,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm theo thời gian / loại",freq:"Ngày",pri:"Cao",mods:["PP"]},
+  {no:88,nhom:"Sản xuất",sub:"Tiêu hao SX",chi:"Tỷ lệ tiêu hao hoạt chất vs định mức",freq:"Tháng",pri:"Cao",mods:["PP"]},
+  {no:90,nhom:"Sản xuất",sub:"Năng suất SX",chi:"Công suất máy thực tế vs tối đa",freq:"Tuần",pri:"Cao",mods:["PP"]},
+  {no:91,nhom:"Sản xuất",sub:"Năng suất SX",chi:"OEE — Hiệu quả thiết bị tổng thể",freq:"Tháng",pri:"Cao",mods:["PP","PM"]},
+];
+
+const DASH_TMPL = {
+  c:[
+    {name:"Executive Overview",type:"Strategic",desc:"Tổng hợp KD, tài chính, dòng tiền toàn công ty",kpis:["Doanh thu","Lãi gộp","EBIT","Cash Flow"]},
+    {name:"Financial Health",type:"Financial",desc:"Chỉ số tài chính tổng hợp — ROE, ROA, Current Ratio",kpis:["ROE","ROA","Current Ratio","EBIT Margin"]},
+    {name:"Revenue Performance",type:"Sales",desc:"Doanh thu theo kênh, vùng miền, so sánh kế hoạch",kpis:["Doanh thu","SL bán","Tăng trưởng %"]},
+    {name:"Cash Flow Monitor",type:"Treasury",desc:"Dòng tiền, dư nợ vay, dự báo thu chi tuần/tháng",kpis:["Dư nợ vay","Dự thu","Dự chi","Số dư tiền"]},
+  ],
+  d:[
+    {name:"P&L Analysis",type:"Finance",desc:"Kết quả KD chi tiết theo quản trị, so kế hoạch",kpis:["Doanh thu","Giá vốn","Lãi gộp","CP gián tiếp"]},
+    {name:"Sales Dashboard",type:"Commercial",desc:"DT, sản lượng, LNG theo kênh / khách hàng",kpis:["DT kênh","SL bán","Giá vốn"]},
+    {name:"Accounts Receivable",type:"Finance",desc:"Công nợ PT — cơ cấu, tuổi nợ, DSO",kpis:["AR Balance","DSO","Tuổi nợ"]},
+    {name:"Production Overview",type:"Operations",desc:"Tình hình SX, hiệu suất, chi phí nhà máy",kpis:["SL SX","OEE","CP SX","Tiêu hao"]},
+    {name:"Inventory Control",type:"Logistics",desc:"Xuất nhập tồn, tuổi HTK theo HSD",kpis:["Tồn kho","Tuổi HTK","Nhập/Xuất"]},
+    {name:"Quality Dashboard",type:"Quality",desc:"Chất lượng đầu vào, SX và đầu ra theo ngày/tuần",kpis:["Accept Rate","Pass Rate","Return %"]},
+  ],
+  m:[
+    {name:"Daily Sales Tracker",type:"Sales",desc:"Doanh thu và SL bán hàng theo ngày, nhân viên",kpis:["DT ngày","SL ngày","Target%"]},
+    {name:"Procurement Monitor",type:"Procurement",desc:"Mua hàng, đơn hàng chờ, lead time",kpis:["PO Value","Open PO","Lead time"]},
+    {name:"Production Daily",type:"Manufacturing",desc:"SL SX ngày, tỷ lệ đạt so kế hoạch",kpis:["SL SX","Plan vs Act","Scrap Rate"]},
+    {name:"Maintenance KPI",type:"Maintenance",desc:"MTBF, MTTR, downtime đột xuất theo máy",kpis:["MTBF","MTTR","Downtime"]},
+    {name:"Cost Control",type:"Finance",desc:"Chi phí SX và giá thành so định mức",kpis:["CP SX","Giá thành","Tiêu hao"]},
+  ],
+  dept:[
+    {name:"AR Aging Detail",type:"Finance Dept",desc:"Chi tiết công nợ từng KH, hoá đơn quá hạn",kpis:["Công nợ chi tiết","Hoá đơn quá hạn"]},
+    {name:"Inventory Ledger",type:"Warehouse",desc:"XNT chi tiết từng mã hàng, lô hàng, kho",kpis:["XNT chi tiết","Batch aging"]},
+    {name:"Quality Inspection",type:"QC",desc:"Kết quả kiểm tra từng lô, nguyên nhân không đạt",kpis:["Inspection result","Rejection cause"]},
+    {name:"Production Order",type:"Manufacturing",desc:"Lệnh SX, tiến độ, vật tư tiêu hao theo công đoạn",kpis:["Production Order","BOM vs Actual"]},
+    {name:"Purchase Order",type:"Procurement",desc:"Theo dõi PO từng NCC, tiến độ giao hàng",kpis:["PO Status","GR vs PO","Vendor perf"]},
+  ]
+};
+
+/* ─── STATE ─── */
+let selKPIs = new Set();
+let aiAddedNos = new Set();
+let aiKPIs = [];         // AI-suggested extra KPIs
+let selOuts = new Set(['doc','dash','xl','pp']);
+let curIndustry = '', chatHistory = [];
+let aiScores = {};
+let suggestItems = [];   // items shown in suggest panel
+
+/* ─── HELPERS ─── */
+function selInd(el,v){document.querySelectorAll('.ic').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');curIndustry=v;}
+function togBtn(btn){btn.classList.toggle('sel');}
+function toast(msg){const t=document.getElementById('toastEl');document.getElementById('toast-txt').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+function getTime(){const d=new Date();return d.getHours()+':'+(d.getMinutes()+'').padStart(2,'0');}
+
+/* ─── STEP NAV ─── */
+function goStep(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`page-${n}`).classList.add('active');
+  for(let i=1;i<=4;i++){
+    const d=document.getElementById(`dot-${i}`),l=document.getElementById(`lbl-${i}`);
+    if(i<n){d.className='s-dot done';d.textContent='✓';l.className='s-lbl';}
+    else if(i===n){d.className='s-dot active';d.textContent=i;l.className='s-lbl active';}
+    else{d.className='s-dot';d.textContent=i;l.className='s-lbl';}
+  }
+  if(n===3)buildDashes();
+  if(n===4)buildSummary();
+  window.scrollTo(0,0);
+}
+
+/* ─── START AI ANALYSIS ─── */
+function startAI(){
+  if(!curIndustry){toast('Vui lòng chọn ngành nghề');return;}
+  goStep(2);
+  const steps=['as1','as2','as3','as4','as5'];
+  let i=0;
+  const iv=setInterval(()=>{
+    if(i>0)document.getElementById(steps[i-1]).className='done';
+    if(i<steps.length){
+      document.getElementById(steps[i]).className='act';
+      document.getElementById('prog').style.width=((i+1)/steps.length*100)+'%';
+      i++;
+    }else{
+      clearInterval(iv);
+      setTimeout(()=>{
+        document.getElementById('ai-load-view').style.display='none';
+        document.getElementById('kpi-main').style.display='block';
+        buildScores();
+        renderTable(KPI_LIB);
+        selHighPri();
+        updStats();
+        loadSuggestPanel();
+        initChat();
+      },400);
+    }
+  },550);
+}
+
+/* ─── AI SCORES ─── */
+function buildScores(){
+  const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent);
+  KPI_LIB.forEach(k=>{
+    let s=k.pri==='Cao'?82:k.pri==='Trung bình'?62:42;
+    s+=k.mods.filter(m=>mods.includes(m)).length*5;
+    aiScores[k.no]=Math.min(98,s+Math.floor(Math.random()*10));
+  });
+}
+
+/* ─── RENDER TABLE ─── */
+function renderTable(data){
+  const tb=document.getElementById('ktbody');
+  tb.innerHTML='';
+  let lastG='';
+  data.forEach(k=>{
+    if(k.nhom!==lastG){
+      lastG=k.nhom;
+      const gr=document.createElement('tr');
+      gr.className='group-row';
+      gr.innerHTML=`<td></td><td colspan="7" style="font-size:11px">${k.nhom}</td>`;
+      tb.appendChild(gr);
+    }
+    const tr=document.createElement('tr');
+    tr.dataset.no=k.no;tr.dataset.grp=k.nhom;tr.dataset.pri=k.pri;tr.dataset.freq=k.freq;
+    if(selKPIs.has(k.no))tr.classList.add('ksel');
+    if(aiAddedNos.has(k.no))tr.classList.add('kai-added','ai-new-row');
+    const sc=aiScores[k.no]||75;
+    const scCol=sc>=85?'var(--teal)':sc>=65?'#7a8500':'var(--gray-600)';
+    const src=aiAddedNos.has(k.no)?'<span class="badge b-ai">AI</span>':'<span style="font-size:10px;color:var(--gray-400)">Library</span>';
+    tr.innerHTML=`
+      <td><input type="checkbox" class="kpi-check" ${selKPIs.has(k.no)?'checked':''} onchange="togKPI(this,${k.no},this.closest('tr'))"></td>
+      <td style="color:var(--gray-400);font-size:10px">${k.no}</td>
+      <td style="font-size:11px;color:var(--teal);font-weight:600">${k.sub}</td>
+      <td style="font-weight:500;font-size:12px">${k.chi}</td>
+      <td><span class="badge b-${k.freq==='Ngày'?'ngay':k.freq==='Tuần'?'tuan':'thang'}">${k.freq}</span></td>
+      <td><span class="badge b-${k.pri==='Cao'?'cao':k.pri==='Trung bình'?'tb':'thap'}">${k.pri}</span></td>
+      <td><span style="font-weight:700;color:${scCol};font-size:12px">${sc}</span></td>
+      <td>${src}</td>`;
+    tb.appendChild(tr);
+  });
+  document.getElementById('vis-cnt').textContent=data.length;
+}
+
+function togKPI(cb,no,tr){
+  if(cb.checked){selKPIs.add(no);tr.classList.add('ksel');}
+  else{selKPIs.delete(no);tr.classList.remove('ksel');}
+  updStats();
+}
+function togAll(m){
+  document.querySelectorAll('.kpi-check').forEach(cb=>{
+    const tr=cb.closest('tr');const no=parseInt(tr?.dataset?.no);
+    if(!no)return;
+    cb.checked=m.checked;
+    if(m.checked){selKPIs.add(no);tr.classList.add('ksel');}
+    else{selKPIs.delete(no);tr.classList.remove('ksel');}
+  });
+  updStats();
+}
+function selAllVis(){
+  document.querySelectorAll('#ktbody tr:not(.group-row)').forEach(tr=>{
+    if(tr.style.display==='none')return;
+    const no=parseInt(tr.dataset.no);const cb=tr.querySelector('.kpi-check');
+    if(no&&cb){selKPIs.add(no);cb.checked=true;tr.classList.add('ksel');}
+  });
+  updStats();
+}
+function clearAll(){
+  document.querySelectorAll('.kpi-check').forEach(cb=>{cb.checked=false;cb.closest('tr')?.classList.remove('ksel');});
+  selKPIs.clear();updStats();
+}
+function selHighPri(){KPI_LIB.forEach(k=>{if(k.pri==='Cao')selKPIs.add(k.no);});}
+
+function filterT(){
+  const g=document.getElementById('fg').value;
+  const p=document.getElementById('fp').value;
+  const f=document.getElementById('ff2').value;
+  const isAI=g==='AI Đề xuất';
+  let vis=0;
+  document.querySelectorAll('#ktbody tr').forEach(tr=>{
+    if(tr.classList.contains('group-row')){tr.style.display='';return;}
+    const isAIRow=tr.classList.contains('kai-added');
+    const ok=(!g||tr.dataset.grp===g||(isAI&&isAIRow))&&(!p||tr.dataset.pri===p)&&(!f||tr.dataset.freq===f);
+    tr.style.display=ok?'':'none';
+    if(ok)vis++;
+  });
+  document.getElementById('vis-cnt').textContent=vis;
+}
+
+function updStats(){
+  const sel=selKPIs.size,hi=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)&&k.pri==='Cao').length;
+  const grps=new Set(KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)).map(k=>k.nhom)).size;
+  document.getElementById('s-total').textContent=KPI_LIB.length;
+  document.getElementById('s-sel').textContent=sel;
+  document.getElementById('s-ai').textContent=aiAddedNos.size;
+  document.getElementById('s-grp').textContent=grps;
+  document.querySelectorAll('.kpi-check').forEach(cb=>{
+    const tr=cb.closest('tr');const no=parseInt(tr?.dataset?.no);
+    if(no){cb.checked=selKPIs.has(no);tr.classList.toggle('ksel',selKPIs.has(no));}
+  });
+}
+
+/* ════════════════════════════════════
+   AI SUGGEST PANEL — real Claude API
+════════════════════════════════════ */
+async function loadSuggestPanel(){
+  const ind=curIndustry||'Sản xuất';
+  const objs=Array.from(document.querySelectorAll('#objectives .sel')).map(b=>b.textContent).join(', ')||'Chưa xác định';
+  const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
+  const prompt=`Bạn là chuyên gia SAP Analytics & Business Intelligence với 15 năm kinh nghiệm tư vấn cho doanh nghiệp Việt Nam.
+
+Khách hàng có thông tin:
+- Ngành: ${ind}
+- Mục tiêu phân tích: ${objs}
+- SAP Modules đang dùng: ${mods}
+
+Thư viện KPI hiện có bao gồm các nhóm: Tài chính - Quản trị, Dòng tiền, Công nợ, Giá thành, Kinh doanh, Chất lượng, Bảo trì, Tồn kho, Mua hàng, Sản xuất.
+
+Hãy đề xuất thêm 6–8 KPI quan trọng NGOÀI thư viện hiện có, phù hợp đặc thù ngành ${ind} và mục tiêu "${objs}". Mỗi KPI cần ngắn gọn và thực tế.
+
+Trả lời ĐÚNG theo định dạng JSON sau (KHÔNG có text bên ngoài JSON):
+[
+  {"nhom":"Tên nhóm KPI","chi":"Tên chỉ tiêu ngắn gọn","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình","why":"Lý do ngắn 1 dòng tại sao quan trọng với ngành này"}
+]`;
+
+  try{
+    const res=await fetch('/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const txt=data.content.map(c=>c.text||'').join('');
+    let items=[];
+    try{
+      const clean=txt.replace(/```json|```/g,'').trim();
+      items=JSON.parse(clean);
+    }catch{items=fallbackSuggest(ind);}
+    suggestItems=items;
+    renderSuggestPanel(items);
+  }catch(e){
+    suggestItems=fallbackSuggest(ind);
+    renderSuggestPanel(suggestItems);
+  }
+}
+
+function fallbackSuggest(ind){
+  const base=[
+    {nhom:"Hiệu suất nhân sự",chi:"Doanh thu / nhân viên",freq:"Tháng",pri:"Trung bình",why:"Đo lường năng suất lao động tổng thể"},
+    {nhom:"Hiệu suất nhân sự",chi:"Chi phí lương / Doanh thu (%)",freq:"Tháng",pri:"Cao",why:"Kiểm soát tỷ trọng chi phí nhân sự"},
+    {nhom:"Khách hàng",chi:"Customer Satisfaction Score (CSAT)",freq:"Tháng",pri:"Trung bình",why:"Đo lường mức độ hài lòng sau giao hàng"},
+    {nhom:"Tăng trưởng",chi:"Tốc độ tăng trưởng doanh thu YoY",freq:"Tháng",pri:"Cao",why:"Chỉ số chiến lược quan trọng cho C-Level"},
+    {nhom:"Hiệu quả vốn",chi:"Cash Conversion Cycle (CCC)",freq:"Tháng",pri:"Cao",why:"Đo lường hiệu quả chuyển đổi tiền trong chuỗi cung ứng"},
+    {nhom:"Chuỗi cung ứng",chi:"On-Time Delivery Rate (%)",freq:"Tuần",pri:"Cao",why:"Đo lường tỷ lệ giao hàng đúng hạn cho khách hàng"},
+  ];
+  if(ind==='manufacturing'||ind==='pharma'){
+    base.push({nhom:"Sản xuất nâng cao",chi:"First Pass Yield (FPY) — Tỷ lệ đạt ngay lần đầu",freq:"Ngày",pri:"Cao",why:"Chỉ số chất lượng quan trọng trong sản xuất"});
+  }
+  return base;
+}
+
+function renderSuggestPanel(items){
+  const body=document.getElementById('asp-body');
+  if(!items||!items.length){body.innerHTML='<div class="asp-empty">Không có đề xuất thêm</div>';return;}
+  let lastG='',html='';
+  items.forEach((it,i)=>{
+    if(it.nhom!==lastG){
+      if(lastG)html+='</div>';
+      lastG=it.nhom;
+      html+=`<div class="asp-group"><div class="asp-group-name">${it.nhom}</div>`;
+    }
+    const sid=`sug-${i}`;
+    html+=`<div class="asp-kpi-item" id="${sid}" onclick="toggleSuggest(${i})">
+      <input type="checkbox" class="aki-check" id="chk-s${i}">
+      <div class="aki-info">
+        <div class="aki-name">${it.chi}</div>
+        <div class="aki-meta">
+          <span class="aki-tag">${it.freq}</span>
+          <span class="aki-tag" style="background:${it.pri==='Cao'?'rgba(0,88,112,.1)':'rgba(197,213,0,.15)'};color:${it.pri==='Cao'?'var(--teal)':'#7a8500'}">${it.pri}</span>
+        </div>
+        <div class="aki-why">${it.why}</div>
+      </div>
+    </div>`;
+  });
+  html+='</div>';
+  body.innerHTML=html;
+}
+
+function toggleSuggest(idx){
+  const it=suggestItems[idx];
+  const el=document.getElementById(`sug-${idx}`);
+  const cb=document.getElementById(`chk-s${idx}`);
+  if(!el)return;
+  if(el.classList.contains('added')){
+    el.classList.remove('added');cb.checked=false;
+    const no=1000+idx;selKPIs.delete(no);aiAddedNos.delete(no);
+    aiKPIs=aiKPIs.filter(k=>k.no!==no);
+    document.querySelector(`tr[data-no="${no}"]`)?.remove();
+    toast(`Đã bỏ KPI: ${it.chi}`);
+  }else{
+    el.classList.add('added');cb.checked=true;
+    addKPIFromSuggest(idx,it);
+    toast(`Đã thêm KPI: ${it.chi}`);
+  }
+  updStats();
+}
+
+function addKPIFromSuggest(idx,it){
+  const no=1000+idx;
+  if(aiAddedNos.has(no))return;
+  aiAddedNos.add(no);selKPIs.add(no);
+  aiScores[no]=it.pri==='Cao'?88:68;
+  const kobj={no,nhom:"AI Đề xuất",sub:it.nhom,chi:it.chi,freq:it.freq,pri:it.pri,mods:[]};
+  aiKPIs.push(kobj);
+  const tb=document.getElementById('ktbody');
+  let grRow=null;
+  tb.querySelectorAll('.group-row').forEach(r=>{if(r.cells[1]?.textContent==='AI Đề xuất')grRow=r;});
+  if(!grRow){
+    const gr=document.createElement('tr');gr.className='group-row';
+    gr.innerHTML=`<td></td><td colspan="7" style="font-size:11px">AI Đề xuất</td>`;
+    tb.appendChild(gr);grRow=gr;
+  }
+  const tr=document.createElement('tr');
+  tr.dataset.no=no;tr.dataset.grp='AI Đề xuất';tr.dataset.pri=it.pri;tr.dataset.freq=it.freq;
+  tr.classList.add('ksel','kai-added','ai-new-row');
+  tr.innerHTML=`
+    <td><input type="checkbox" class="kpi-check" checked onchange="togKPI(this,${no},this.closest('tr'))"></td>
+    <td style="color:var(--gray-400);font-size:10px">AI</td>
+    <td style="font-size:11px;color:var(--teal);font-weight:600">${it.nhom}</td>
+    <td style="font-weight:500;font-size:12px">${it.chi}</td>
+    <td><span class="badge b-${it.freq==='Ngày'?'ngay':it.freq==='Tuần'?'tuan':'thang'}">${it.freq}</span></td>
+    <td><span class="badge b-${it.pri==='Cao'?'cao':'tb'}">${it.pri}</span></td>
+    <td><span style="font-weight:700;color:var(--teal);font-size:12px">${aiScores[no]}</span></td>
+    <td><span class="badge b-ai">AI</span></td>`;
+  tb.appendChild(tr);
+}
+
+function addAllSuggested(){
+  suggestItems.forEach((_,i)=>{
+    const el=document.getElementById(`sug-${i}`);
+    if(!el?.classList.contains('added'))toggleSuggest(i);
+  });
+  toast('Đã thêm tất cả KPI đề xuất');
+}
+
+async function refreshSuggest(){
+  document.getElementById('asp-body').innerHTML='<div class="asp-loading"><div class="asp-spinner"></div><div style="font-size:11px;color:var(--gray-500)">Đang làm mới...</div></div>';
+  await loadSuggestPanel();
+  toast('Đã làm mới đề xuất AI');
+}
+
+/* ════════════════════════════════════
+   AI CHAT BOX — real Claude API
+════════════════════════════════════ */
+function initChat(){
+  chatHistory=[];
+  const msgs=document.getElementById('chat-msgs');
+  msgs.innerHTML='';
+  addMsg('ai','Xin chào! Tôi là KPI Assistant. Tôi có thể giúp bạn:\n• Bổ sung KPI theo yêu cầu đặc thù\n• Điều chỉnh dashboard layout\n• Giải thích công thức và chiều phân tích\n\nBạn muốn bắt đầu từ đâu?');
+}
+
+function addMsg(role,text){
+  const msgs=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className=`msg msg-${role}`;
+  const txt=text.replace(/\n/g,'<br>');
+  div.innerHTML=`<div class="msg-bubble">${txt}</div><div class="msg-time">${getTime()}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+function addTyping(){
+  const msgs=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className='msg msg-ai msg-typing';div.id='typing-ind';
+  div.innerHTML='<div class="msg-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function removeTyping(){document.getElementById('typing-ind')?.remove();}
+
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+
+function quickMsg(btn){
+  document.getElementById('chat-inp').value=btn.textContent;
+  sendChat();
+}
+
+async function sendChat(){
+  const inp=document.getElementById('chat-inp');
+  const txt=inp.value.trim();
+  if(!txt)return;
+  inp.value='';
+  addMsg('user',txt);
+  document.getElementById('chat-send').disabled=true;
+  addTyping();
+
+  const selKPIList=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)).map(k=>k.chi).slice(0,20).join(', ');
+  const ind=curIndustry||'không xác định';
+  const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ');
+
+  const sysPrompt=`Bạn là KPI Assistant của Citek' — chuyên gia SAP Analytics & Business Intelligence.
+
+Bối cảnh dự án hiện tại:
+- Ngành khách hàng: ${ind}
+- SAP Modules: ${mods}
+- KPI đã chọn (${selKPIs.size}): ${selKPIList}
+- KPI AI đã đề xuất thêm: ${aiAddedNos.size} chỉ tiêu
+
+Nhiệm vụ của bạn:
+1. Trả lời ngắn gọn, thực tế bằng tiếng Việt (tối đa 200 từ)
+2. Nếu được hỏi thêm KPI → đề xuất cụ thể kèm lý do và tần suất
+3. Nếu được hỏi về dashboard layout → gợi ý cụ thể chart type và KPI nên dùng cho mỗi level (C/D/M/Dept)
+4. Nếu được hỏi về công thức → giải thích rõ ràng, kèm SAP t-code nếu có
+5. Tone: chuyên nghiệp nhưng thân thiện`;
+
+  chatHistory.push({role:'user',content:txt});
+
+  try{
+    const res=await fetch('/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:600,
+        system:sysPrompt,
+        messages:chatHistory
+      })
+    });
+    const data=await res.json();
+    const reply=data.content.map(c=>c.text||'').join('').trim();
+    chatHistory.push({role:'assistant',content:reply});
+    removeTyping();
+    addMsg('ai',reply);
+    // auto-extract KPI if AI mentions adding one
+    tryExtractKPIFromReply(reply);
+  }catch(e){
+    removeTyping();
+    addMsg('ai','Xin lỗi, có lỗi kết nối đến AI. Vui lòng thử lại sau giây lát.');
+  }
+  document.getElementById('chat-send').disabled=false;
+}
+
+function tryExtractKPIFromReply(reply){
+  // If reply contains "đề xuất thêm" and a recognizable KPI pattern, offer to add
+  if(reply.length<50)return;
+  const lines=reply.split('\n').filter(l=>l.match(/[-•]\s*.{10,50}(tháng|tuần|ngày)/i));
+  if(lines.length>0&&lines.length<=4){
+    setTimeout(()=>{
+      const offer=document.createElement('div');
+      offer.className='msg msg-ai';
+      offer.style.animation='msgIn .2s ease';
+      offer.innerHTML=`<div class="msg-bubble" style="background:rgba(197,213,0,.1);border-color:rgba(197,213,0,.4)">
+        <span style="font-size:11px;color:var(--teal)">Bạn có muốn thêm các KPI trên vào danh sách không?</span><br>
+        <button onclick="this.parentElement.parentElement.remove();toast('Vui lòng dùng panel AI Đề xuất để thêm KPI')" style="margin-top:6px;padding:5px 12px;border:none;border-radius:6px;background:var(--teal);color:white;font-size:11px;font-weight:600;cursor:pointer">Mở AI Đề xuất →</button>
+      </div><div class="msg-time">${getTime()}</div>`;
+      const msgs=document.getElementById('chat-msgs');
+      msgs.appendChild(offer);msgs.scrollTop=msgs.scrollHeight;
+    },600);
+  }
+}
+
+/* ─── DASHBOARDS ─── */
+function buildDashes(){
+  Object.keys(DASH_TMPL).forEach(lv=>{
+    const cont=document.getElementById(`dc-${lv}`);
+    cont.innerHTML='';
+    DASH_TMPL[lv].forEach(d=>{
+      const div=document.createElement('div');
+      div.className='dc sel';
+      div.innerHTML=`<div class="dc-type">${d.type}</div><div class="dc-name">${d.name}</div><div class="dc-desc">${d.desc}</div><div class="dc-tags">${d.kpis.map(k=>`<span class="dc-tag">${k}</span>`).join('')}</div><div class="dc-preview">${previewSVG(d.type)}</div>`;
+      div.onclick=()=>div.classList.toggle('sel');
+      cont.appendChild(div);
+    });
+  });
+}
+
+function previewSVG(t){
+  const m={
+    Strategic:`<svg width="170" height="44"><rect x="3" y="9" width="34" height="27" rx="2" fill="#005870" opacity=".2"/><rect x="44" y="16" width="34" height="20" rx="2" fill="#C5D500" opacity=".35"/><rect x="85" y="12" width="34" height="24" rx="2" fill="#005870" opacity=".28"/><rect x="126" y="5" width="34" height="31" rx="2" fill="#C5D500" opacity=".45"/></svg>`,
+    Financial:`<svg width="170" height="44"><circle cx="30" cy="22" r="16" fill="none" stroke="#005870" stroke-width="5" opacity=".25"/><circle cx="30" cy="22" r="16" fill="none" stroke="#C5D500" stroke-dasharray="45 56" stroke-width="5" opacity=".65"/><rect x="60" y="8" width="104" height="7" rx="2" fill="#005870" opacity=".2"/><rect x="60" y="20" width="76" height="7" rx="2" fill="#C5D500" opacity=".3"/><rect x="60" y="32" width="92" height="7" rx="2" fill="#005870" opacity=".15"/></svg>`,
+    default:`<svg width="170" height="44"><polyline points="6,38 38,26 70,30 102,16 134,20 166,10" fill="none" stroke="#005870" stroke-width="2" opacity=".55"/><polyline points="6,38 38,26 70,30 102,16 134,20 166,10 166,44 6,44" fill="#005870" opacity=".08"/></svg>`
+  };
+  return m[t]||m.default;
+}
+
+function swLv(lv,el){
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.lc').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`lc-${lv}`).classList.add('active');
+}
+
+/* ─── OUTPUT ─── */
+function togOut(card,key){
+  card.classList.toggle('sel');
+  if(selOuts.has(key))selOuts.delete(key);else selOuts.add(key);
+}
+
+function buildSummary(){
+  const name=document.getElementById('c-name').value||'Khách hàng';
+  const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
+  const outs=[...selOuts].map(s=>({doc:'KPI Document',dash:'Dashboard Spec',xl:'Excel',pp:'Presentation'}[s])).join(', ');
+  document.getElementById('sum-tbl').innerHTML=`
+    <tr><td>Khách hàng</td><td style="font-weight:600;color:var(--teal)">${name}</td></tr>
+    <tr><td>Ngành</td><td>${curIndustry||'Chưa xác định'}</td></tr>
+    <tr><td>SAP Modules</td><td>${mods}</td></tr>
+    <tr><td>KPI đã chọn</td><td><strong style="color:var(--teal)">${selKPIs.size}</strong> KPI (thư viện + AI)</td></tr>
+    <tr><td>KPI AI bổ sung</td><td>${aiAddedNos.size} chỉ tiêu</td></tr>
+    <tr><td>Dashboard levels</td><td>C-Level · D-Level · M-Level · Department</td></tr>
+    <tr><td>Định dạng xuất</td><td>${outs||'Chưa chọn'}</td></tr>`;
+}
+
+function genOutputs(){
+  if(selOuts.size===0){toast('Vui lòng chọn ít nhất 1 định dạng');return;}
+  toast('Đang tạo tài liệu... (tính năng này sẽ gọi đầy đủ API trong production)');
+}
+</script>
+</body>
+</html>
