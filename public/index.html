@@ -881,42 +881,122 @@ function updStats(){
 /* ════════════════════════════════════
    AI SUGGEST PANEL — real Claude API
 ════════════════════════════════════ */
+/* ── citek-skills.ts: INDUSTRY_RESEARCH_PROMPT ── */
+const SKILL_INDUSTRY_RESEARCH = `Skill nghiên cứu ngành phục vụ đánh giá đầu tư SAP S/4HANA
+
+VAI TRÒ
+Bạn đóng vai chuyên gia nghiên cứu ngành và phân tích mô hình vận hành. Nhiệm vụ là làm rõ ngành hoạt động, mô hình kinh doanh, cấu trúc vận hành, chuỗi giá trị, bức tranh cạnh tranh, các yếu tố tạo ra giá trị, điểm yếu vận hành điển hình, áp lực từ bên ngoài và bộ tài liệu tham chiếu đáng tin của doanh nghiệp mục tiêu — trước khi bắt đầu bất kỳ phân tích KPI hay ROI nào.
+
+NGUYÊN TẮC CỐT LÕI
+- Ưu tiên độ chính xác hơn độ đầy đủ
+- Khi thiếu bằng chứng, để trống có kiểm soát thay vì tự điền
+- Không biến đặc điểm chung của ngành thành sự thật của doanh nghiệp
+- Mọi kết luận quan trọng phải truy ngược được về nguồn, nhãn bằng chứng và mức tin cậy
+
+NHÃN BẰNG CHỨNG: [F] Fact | [B] Benchmark | [I] Inference | [P] Proxy | [A] Assumption | [U] Unknown
+
+10 CÂU HỎI BẮT BUỘC PHẢI TRẢ LỜI
+1. Doanh nghiệp thuộc ngành và phân ngành nào
+2. Mô hình vận hành thực tế là gì — không chỉ là tên ngành
+3. Bức tranh cạnh tranh ngành như thế nào — áp lực từ đâu, rào cản ra sao
+4. Chuỗi giá trị của mô hình này vận hành ra sao
+5. Các yếu tố tạo ra giá trị chính về vận hành và tài chính là gì
+6. Điểm yếu vận hành phổ biến của mô hình này là gì
+7. Áp lực bên ngoài nào đang thúc đẩy nhu cầu đầu tư ERP
+8. SAP module nào phù hợp nhất với mô hình này
+9. Nguồn tham chiếu nào đáng tin cho bối cảnh này
+10. Giới hạn, lưu ý hoặc rủi ro diễn giải nào cần giữ lại cho bước sau
+
+ĐẦU RA: Hồ sơ ngành | Phân loại mô hình kinh doanh | Bản đồ chuỗi giá trị | Bản đồ yếu tố tạo giá trị | Bản đồ điểm yếu vận hành | Lý do đầu tư ERP
+
+Khi đủ điều kiện, ghi rõ: "Triggering KPI & Value Driver Skill because industry foundation is now sufficient for KPI architecture."`;
+
+/* ── citek-skills.ts: KPI_VALUE_DRIVER_PROMPT ── */
+const SKILL_KPI_VALUE_DRIVER = `Skill KPI & Value Driver cho Business Case SAP S/4HANA
+
+VAI TRÒ
+Bạn là kiến trúc sư KPI và chuyên gia phân tích yếu tố tạo giá trị. Nhiệm vụ là biến hiểu biết về ngành và mô hình kinh doanh thành bộ KPI cấp lãnh đạo, xác định đúng KPI mà ban lãnh đạo thực sự quan tâm, chuẩn hóa định nghĩa KPI, xây chuỗi nhân quả từ hiệu suất quy trình đến kết quả kinh doanh, và xác định phần giá trị nào SAP S/4HANA có thể tác động một cách thực tế.
+
+Bạn không được bịa đặt benchmark. Bạn phải làm việc như một value advisory architect — tư vấn giá trị trung lập.
+
+FRAMEWORK: Balanced Scorecard (4 perspectives) | Value Driver Tree | APQC Process Classification Framework | KPI Tree / ROKS Methodology | SAP Value Lifecycle Manager
+
+NHÃN BẰNG CHỨNG: [F] Fact | [B] Benchmark | [P] Proxy | [A] Assumption | [I] Inference
+
+NGUYÊN TẮC BẤT KHẢ THƯƠNG LƯỢNG
+- Không chọn KPI chỉ vì nghe có vẻ ấn tượng
+- Không trộn lẫn outcome KPI với diagnostic metric
+- Không đưa KPI vào shortlist nếu không đo được hoặc không giải thích được cho lãnh đạo
+- Tránh vanity metrics
+- Chỉ đề xuất KPI BỔ SUNG so với template đã có — không lặp lại
+
+ĐẦU RA: Danh sách KPI bổ sung theo định dạng JSON được yêu cầu, mỗi KPI kèm nhóm nghiệp vụ, tên ngắn gọn, tần suất đo, ưu tiên và lý do business rõ ràng.`;
+
 async function loadSuggestPanel(){
   const ind=curIndustry||'Sản xuất';
   const objs=Array.from(document.querySelectorAll('#objectives .sel')).map(b=>b.textContent).join(', ')||'Chưa xác định';
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
-  const prompt=`Bạn là chuyên gia SAP Analytics & Business Intelligence với 15 năm kinh nghiệm tư vấn cho doanh nghiệp Việt Nam.
+  const existingKPIs=KPI_LIB.map(k=>k.chi).join(' | ');
+  const body=document.getElementById('asp-body');
 
-Khách hàng có thông tin:
-- Ngành: ${ind}
-- Mục tiêu phân tích: ${objs}
-- SAP Modules đang dùng: ${mods}
+  function setLoading(step,msg){
+    body.innerHTML='<div class="asp-loading"><div class="asp-spinner"></div>'
+      +'<div style="font-size:11px;color:var(--gray-500);margin-top:6px">'
+      +'<strong style="color:var(--teal)">Bước '+step+'/2</strong> — '+msg+'</div></div>';
+  }
 
-Thư viện KPI hiện có bao gồm các nhóm: Tài chính - Quản trị, Dòng tiền, Công nợ, Giá thành, Kinh doanh, Chất lượng, Bảo trì, Tồn kho, Mua hàng, Sản xuất.
-
-Hãy đề xuất thêm 6–8 KPI quan trọng NGOÀI thư viện hiện có, phù hợp đặc thù ngành ${ind} và mục tiêu "${objs}". Mỗi KPI cần ngắn gọn và thực tế.
-
-Trả lời ĐÚNG theo định dạng JSON sau (KHÔNG có text bên ngoài JSON):
-[
-  {"nhom":"Tên nhóm KPI","chi":"Tên chỉ tiêu ngắn gọn","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình","why":"Lý do ngắn 1 dòng tại sao quan trọng với ngành này"}
-]`;
-
+  /* ── Bước 1: industry_research skill ── */
+  setLoading(1,'Đang nghiên cứu đặc thù ngành <em>'+ind+'</em>...');
+  let industryContext='';
   try{
-    const res=await fetch('/api/claude',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+    const r1=await fetch('/api/claude',{
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
+        max_tokens:1200,
+        system:SKILL_INDUSTRY_RESEARCH,
+        messages:[{role:'user',content:
+          'Phân tích nhanh đặc thù ngành phục vụ thiết kế KPI SAP:\n'
+          +'- Ngành: '+ind+'\n'
+          +'- Mục tiêu phân tích: '+objs+'\n'
+          +'- SAP Modules: '+mods+'\n\n'
+          +'Tập trung trả lời 10 câu hỏi bắt buộc. Súc tích, dùng nhãn bằng chứng. '
+          +'Kết thúc bằng "Triggering KPI & Value Driver Skill because industry foundation is now sufficient for KPI architecture."'
+        }]
       })
     });
-    const data=await res.json();
-    const txt=data.content.map(c=>c.text||'').join('');
+    const d1=await r1.json();
+    industryContext=d1.content.map(c=>c.text||'').join('').slice(0,1200);
+  }catch(e){
+    industryContext='[A] Ngành '+ind+': value drivers chính là hiệu quả quy trình, tối ưu chi phí vận hành và khả năng truy xuất dữ liệu theo thời gian thực.';
+  }
+
+  /* ── Bước 2: kpi_value_driver skill ── */
+  setLoading(2,'Đang xây dựng đề xuất KPI bổ sung...');
+  try{
+    const r2=await fetch('/api/claude',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1100,
+        system:SKILL_KPI_VALUE_DRIVER,
+        messages:[{role:'user',content:
+          '## Kết quả Industry Research (Bước 1)\n'+industryContext
+          +'\n\n## KPI Template hiện có (KHÔNG lặp lại)\n'+existingKPIs
+          +'\n\n## Yêu cầu\n'
+          +'Đề xuất 6–8 KPI BỔ SUNG ngoài template, phù hợp đặc thù ngành '+ind
+          +' và mục tiêu "'+objs+'". Chỉ KPI chưa có trong template.\n\n'
+          +'Trả lời CHỈ JSON, không có text bên ngoài:\n'
+          +'[{"nhom":"Tên nhóm nghiệp vụ","chi":"Tên KPI ngắn gọn","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình","why":"Lý do business 1 dòng"}]'
+        }]
+      })
+    });
+    const d2=await r2.json();
+    const txt=d2.content.map(c=>c.text||'').join('');
     let items=[];
     try{
-      const clean=txt.replace(/```json|```/g,'').trim();
-      items=JSON.parse(clean);
+      const m=txt.replace(/```json|```/g,'').match(/\[[\s\S]*\]/);
+      items=JSON.parse(m?m[0]:txt.trim());
     }catch{items=fallbackSuggest(ind);}
     suggestItems=items;
     renderSuggestPanel(items);
