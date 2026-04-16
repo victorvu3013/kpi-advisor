@@ -48,6 +48,33 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
 .step2-main{min-width:0;}
 .step2-sidebar{position:sticky;top:74px;display:flex;flex-direction:column;gap:16px;}
 
+/* ─── SAP MODULE GROUPS ─── */
+.mod-sections{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.mod-sec{background:var(--gray-50);border-radius:8px;padding:8px 10px;}
+.mod-sec-lbl{font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.mod-sec .prow{margin-top:0;}
+button.pb.ai-mod{position:relative;}
+button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;background:var(--cyan);color:#fff;font-size:7px;font-weight:700;border-radius:4px;padding:1px 3px;line-height:1.2;}
+
+/* ─── KPI TOOLTIP ─── */
+.chi-wrap{position:relative;display:inline-block;width:100%;}
+.chi-wrap:hover .kpi-tip{opacity:1;pointer-events:auto;transform:translateY(0);}
+.kpi-tip{
+  position:absolute;left:0;top:calc(100% + 4px);z-index:999;
+  background:#1a2b35;color:#fff;border-radius:8px;
+  padding:10px 13px;min-width:260px;max-width:340px;
+  font-size:11px;line-height:1.6;
+  opacity:0;pointer-events:none;
+  transform:translateY(-4px);transition:opacity .18s,transform .18s;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);
+}
+.kpi-tip::before{content:'';position:absolute;top:-5px;left:14px;
+  border:5px solid transparent;border-bottom-color:#1a2b35;border-top:none;}
+.tip-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:4px;}
+.tip-row:last-child{margin-bottom:0;}
+.tip-label{color:#C5D500;font-weight:700;font-size:10px;flex-shrink:0;min-width:70px;}
+.tip-val{color:rgba(255,255,255,0.88);}
+
 /* PAGE HEADER */
 .ph{margin-bottom:22px;}
 .ph h1{font-size:24px;font-weight:700;color:var(--teal);line-height:1.2;}
@@ -122,6 +149,22 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
 .asp-empty{padding:20px;text-align:center;color:var(--gray-500);font-size:12px;}
 .asp-add-all{width:100%;padding:9px;border:none;background:rgba(0,88,112,.07);color:var(--teal);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;border-radius:0 0 var(--rl) var(--rl);transition:background .2s;}
 .asp-add-all:hover{background:rgba(0,88,112,.12);}
+
+/* ─── TOKEN METER ─── */
+.token-meter{background:white;border-radius:var(--rl);box-shadow:var(--s1);padding:10px 14px;border-left:3px solid var(--teal);font-size:11px;}
+.tm-title{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--teal);margin-bottom:8px;font-size:11px;}
+.tm-title svg{width:13px;height:13px;stroke:var(--teal);fill:none;stroke-width:2;}
+.tm-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.tm-cell{background:var(--gray-50);border-radius:6px;padding:6px 8px;text-align:center;}
+.tm-val{font-size:13px;font-weight:700;color:var(--teal);line-height:1;}
+.tm-val.cost{color:#2e7d32;}
+.tm-lbl{font-size:9px;color:var(--gray-500);margin-top:2px;font-weight:500;text-transform:uppercase;letter-spacing:.3px;}
+.tm-bar-wrap{margin-top:8px;background:var(--gray-100);border-radius:4px;height:4px;overflow:hidden;}
+.tm-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--cyan));transition:width .4s ease;}
+.tm-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+.tm-calls{font-size:10px;color:var(--gray-500);}
+.tm-reset{font-size:10px;color:var(--gray-400);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;}
+.tm-reset:hover{color:var(--teal);}
 
 /* ─── AI CHAT BOX ─── */
 .chat-box{background:white;border-radius:var(--rl);border-top:4px solid var(--cyan);box-shadow:var(--s2);display:flex;flex-direction:column;height:440px;}
@@ -374,16 +417,47 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
         </select>
       </div>
       <div class="fgl"><label>SAP Module đang dùng</label>
-        <div class="prow" id="sap-mods">
-          <button class="pb" onclick="togBtn(this)">FI-GL</button>
-          <button class="pb" onclick="togBtn(this)">FI-AR</button>
-          <button class="pb" onclick="togBtn(this)">FI-CO</button>
-          <button class="pb" onclick="togBtn(this)">SD</button>
-          <button class="pb" onclick="togBtn(this)">MM</button>
-          <button class="pb" onclick="togBtn(this)">PP</button>
-          <button class="pb" onclick="togBtn(this)">QM</button>
-          <button class="pb" onclick="togBtn(this)">PM</button>
-          <button class="pb" onclick="togBtn(this)">Treasury</button>
+        <div id="sap-mods" class="mod-sections">
+          <div class="mod-sec">
+            <div class="mod-sec-lbl">Finance &amp; Controlling</div>
+            <div class="prow">
+              <button class="pb" onclick="togMod(this,'FI-GL')">FI-GL</button>
+              <button class="pb" onclick="togMod(this,'FI-AR')">FI-AR</button>
+              <button class="pb" onclick="togMod(this,'FI-AP')">FI-AP</button>
+              <button class="pb" onclick="togMod(this,'FI-AA')">FI-AA</button>
+              <button class="pb" onclick="togMod(this,'FI-CO')">FI-CO</button>
+              <button class="pb" onclick="togMod(this,'CO-PA')">CO-PA</button>
+              <button class="pb" onclick="togMod(this,'CO-PC')">CO-PC</button>
+              <button class="pb" onclick="togMod(this,'Treasury')">Treasury/TRM</button>
+              <button class="pb" onclick="togMod(this,'GRC')">GRC</button>
+            </div>
+          </div>
+          <div class="mod-sec">
+            <div class="mod-sec-lbl">Sales, Operations &amp; Supply Chain</div>
+            <div class="prow">
+              <button class="pb" onclick="togMod(this,'SD')">SD</button>
+              <button class="pb" onclick="togMod(this,'MM')">MM</button>
+              <button class="pb" onclick="togMod(this,'PP')">PP</button>
+              <button class="pb" onclick="togMod(this,'PP-PI')">PP-PI</button>
+              <button class="pb" onclick="togMod(this,'QM')">QM</button>
+              <button class="pb" onclick="togMod(this,'PM')">PM/EAM</button>
+              <button class="pb" onclick="togMod(this,'WM')">WM/EWM</button>
+              <button class="pb" onclick="togMod(this,'PS')">PS</button>
+              <button class="pb" onclick="togMod(this,'EHS')">EHS</button>
+            </div>
+          </div>
+          <div class="mod-sec">
+            <div class="mod-sec-lbl">Procurement, HR &amp; Analytics</div>
+            <div class="prow">
+              <button class="pb" onclick="togMod(this,'Ariba')">Ariba</button>
+              <button class="pb" onclick="togMod(this,'SCM')">SCM/IBP</button>
+              <button class="pb" onclick="togMod(this,'CX')">CX/CRM</button>
+              <button class="pb" onclick="togMod(this,'HCM')">HCM/SF</button>
+              <button class="pb" onclick="togMod(this,'SAC')">SAC</button>
+              <button class="pb" onclick="togMod(this,'BTP')">BTP</button>
+              <button class="pb" onclick="togMod(this,'BW')">BW/4HANA</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="fgl ff"><label>Mục tiêu phân tích chính</label>
@@ -544,6 +618,24 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
           </div>
         </div>
 
+        <!-- TOKEN METER -->
+        <div class="token-meter" id="token-meter">
+          <div class="tm-title">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Token Usage — claude-sonnet-4-5
+          </div>
+          <div class="tm-grid">
+            <div class="tm-cell"><div class="tm-val" id="tm-in">0</div><div class="tm-lbl">Input</div></div>
+            <div class="tm-cell"><div class="tm-val" id="tm-out">0</div><div class="tm-lbl">Output</div></div>
+            <div class="tm-cell"><div class="tm-val cost" id="tm-cost">$0.00</div><div class="tm-lbl">Est. Cost</div></div>
+          </div>
+          <div class="tm-bar-wrap"><div class="tm-bar" id="tm-bar" style="width:0%"></div></div>
+          <div class="tm-footer">
+            <span class="tm-calls" id="tm-calls">0 API calls · 0 tokens tổng</span>
+            <button class="tm-reset" onclick="resetTokens()">Reset</button>
+          </div>
+        </div>
+
       </div><!-- end sidebar -->
     </div><!-- end step2-layout -->
   </div><!-- end kpi-main -->
@@ -607,54 +699,107 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
 <script>
 /* ─── KPI LIBRARY ─── */
 const KPI_LIB = [
-  {no:1,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Các khoản mục CĐKT so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:2,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Cơ cấu CĐKT theo thời gian, vs kỳ trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:3,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kế hoạch / ước thực hiện",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:4,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kỳ trước / cùng kỳ năm trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:5,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Doanh thu theo kênh / ngành hàng / vùng miền",freq:"Tháng",pri:"Cao",mods:["FI","SD"]},
-  {no:6,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Giá vốn theo kênh bán hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"]},
-  {no:7,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Lãi gộp theo kênh / ngành hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"]},
-  {no:19,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Gross Margin / Tỷ lệ lợi nhuận gộp",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:20,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Tỷ lệ EBIT / Doanh thu",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:21,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROS — Tỷ suất sinh lời trên doanh thu",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"]},
-  {no:22,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROE — Sinh lời trên vốn chủ sở hữu",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:23,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROA — Sinh lời trên tổng tài sản",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"]},
-  {no:24,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Current Ratio — Khả năng thanh toán hiện thời",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:25,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Quick Ratio — Khả năng thanh toán nhanh",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:27,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Số dư tiền vay ngân hàng",freq:"Tuần",pri:"Cao",mods:["Treasury"]},
-  {no:28,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Hạn mức vay ngân hàng còn lại",freq:"Tuần",pri:"Cao",mods:["Treasury"]},
-  {no:32,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Số dư tiền đầu / cuối ngày",freq:"Ngày",pri:"Cao",mods:["FI-GL"]},
-  {no:33,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Dự báo dự thu / dự chi",freq:"Ngày",pri:"Cao",mods:["FI-GL"]},
-  {no:36,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Cơ cấu công nợ phải thu (trong hạn / quá hạn)",freq:"Tuần",pri:"Cao",mods:["FI-AR"]},
-  {no:37,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Tuổi nợ phải thu theo khoảng thời gian",freq:"Tuần",pri:"Cao",mods:["FI-AR"]},
-  {no:39,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"DSO — Kỳ thu tiền bình quân",freq:"Tháng",pri:"Cao",mods:["FI-AR","SD"]},
-  {no:40,nhom:"Giá thành",sub:"Chi phí sản xuất",chi:"Chi phí sản xuất so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"]},
-  {no:41,nhom:"Giá thành",sub:"Cấu trúc giá thành",chi:"Cấu trúc giá thành vs kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"]},
-  {no:43,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kế hoạch / ước thực hiện",freq:"Ngày",pri:"Cao",mods:["SD","FI"]},
-  {no:44,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kỳ trước / cùng kỳ / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"]},
-  {no:45,nhom:"Kinh doanh",sub:"Sản lượng",chi:"Sản lượng bán vs kế hoạch / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"]},
-  {no:48,nhom:"Kinh doanh",sub:"Lợi nhuận gộp",chi:"Lợi nhuận gộp theo kênh / sản phẩm",freq:"Tháng",pri:"Cao",mods:["SD","FI"]},
-  {no:49,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô đạt chất lượng đầu vào (Accepted)",freq:"Ngày",pri:"Cao",mods:["QM"]},
-  {no:50,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô bị từ chối (Rejected)",freq:"Ngày",pri:"Cao",mods:["QM"]},
-  {no:53,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ hàng đạt CL trong sản xuất (Passed)",freq:"Ngày",pri:"Cao",mods:["QM","PP"]},
-  {no:56,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ chi phí thiệt hại do chất lượng",freq:"Ngày",pri:"Cao",mods:["QM","FI-CO"]},
-  {no:61,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Tỷ lệ hàng trả lại theo nguyên nhân",freq:"Tuần",pri:"Trung bình",mods:["QM","SD"]},
-  {no:63,nhom:"Bảo trì",sub:"Downtime",chi:"MTBF — Thời gian trung bình giữa 2 lần hỏng",freq:"Tháng",pri:"Cao",mods:["PM"]},
-  {no:64,nhom:"Bảo trì",sub:"Downtime",chi:"MTTR — Thời gian trung bình để sửa chữa",freq:"Tháng",pri:"Cao",mods:["PM"]},
-  {no:65,nhom:"Bảo trì",sub:"Downtime",chi:"Thời gian & số lần dừng máy đột xuất",freq:"Tháng",pri:"Cao",mods:["PM"]},
-  {no:69,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí bảo trì vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["PM","FI"]},
-  {no:73,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng tồn kho đầu / cuối kỳ",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:74,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng nhập kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:75,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng xuất kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:80,nhom:"Tồn kho",sub:"Tuổi HTK theo HSD",chi:"Tuổi hàng tồn kho theo hạn sử dụng",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:82,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị mua hàng theo vendor / nhóm hàng",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:83,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị đặt hàng chưa giao",freq:"Ngày",pri:"Cao",mods:["MM"]},
-  {no:85,nhom:"Mua hàng",sub:"Leadtime",chi:"Lead time mua hàng theo vendor / sản phẩm",freq:"Tháng",pri:"Cao",mods:["MM"]},
-  {no:86,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm vs kế hoạch",freq:"Ngày",pri:"Cao",mods:["PP"]},
-  {no:87,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm theo thời gian / loại",freq:"Ngày",pri:"Cao",mods:["PP"]},
-  {no:88,nhom:"Sản xuất",sub:"Tiêu hao SX",chi:"Tỷ lệ tiêu hao hoạt chất vs định mức",freq:"Tháng",pri:"Cao",mods:["PP"]},
-  {no:90,nhom:"Sản xuất",sub:"Năng suất SX",chi:"Công suất máy thực tế vs tối đa",freq:"Tuần",pri:"Cao",mods:["PP"]},
-  {no:91,nhom:"Sản xuất",sub:"Năng suất SX",chi:"OEE — Hiệu quả thiết bị tổng thể",freq:"Tháng",pri:"Cao",mods:["PP","PM"]},
+  /* ── TÀI CHÍNH - QUẢN TRỊ ── */
+  {no:1,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Các khoản mục CĐKT so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Giá trị TK thực tế / Giá trị TK kế hoạch × 100%",dimension:"Loại tài sản, Thời gian, Đơn vị",tcode:"FS10N, F.01, S_ALR_87012284"},
+  {no:2,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Cơ cấu CĐKT theo thời gian, vs kỳ trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Giá trị từng mục / Tổng tài sản × 100%",dimension:"Kỳ báo cáo, Nhóm tài khoản",tcode:"F.01, S_ALR_87012284"},
+  {no:3,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kế hoạch / ước thực hiện",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"LNST thực tế / LNST kế hoạch × 100%",dimension:"Công ty, Kỳ báo cáo, Kịch bản",tcode:"S_ALR_87012293, KE30"},
+  {no:4,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kỳ trước / cùng kỳ năm trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"(LNST kỳ này − LNST kỳ trước) / LNST kỳ trước × 100%",dimension:"Năm, Quý, Tháng",tcode:"S_ALR_87012293, GR55"},
+  {no:5,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Doanh thu theo kênh / ngành hàng / vùng miền",freq:"Tháng",pri:"Cao",mods:["FI","SD"],formula:"Σ Doanh thu thuần theo phân khúc",dimension:"Kênh bán hàng, Vùng miền, Nhóm hàng",tcode:"VF45, KE30, S_ALR_87012186"},
+  {no:6,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Giá vốn theo kênh bán hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"],formula:"Σ Giá vốn hàng bán theo kênh",dimension:"Kênh bán hàng, Nhóm sản phẩm",tcode:"KE30, KKBC, S_ALR_87012293"},
+  {no:7,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Lãi gộp theo kênh / ngành hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"],formula:"Doanh thu thuần − Giá vốn hàng bán",dimension:"Kênh bán hàng, Ngành hàng, Khách hàng",tcode:"KE30, KEAB, S_ALR_87012293"},
+  {no:8,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Chi phí bán hàng & Marketing vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["FI-CO","SD"],formula:"Chi phí BH thực tế / Chi phí BH kế hoạch × 100%",dimension:"Kênh, Khu vực, Nhóm chi phí",tcode:"KSB1, S_ALR_87013611, KOB1"},
+  {no:9,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Chi phí QLDN vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["FI-CO"],formula:"Chi phí QLDN thực tế / Kế hoạch × 100%",dimension:"Phòng ban, Nhóm chi phí, Kỳ",tcode:"KSB1, S_ALR_87013611, KSBL"},
+  {no:10,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"EBITDA / Biên EBITDA (%)",freq:"Tháng",pri:"Cao",mods:["FI-GL","FI-CO"],formula:"EBIT + Khấu hao + Phân bổ; Biên = EBITDA / DT thuần",dimension:"Công ty, Segment, Kỳ",tcode:"S_ALR_87012293, FAGLL03, KE30"},
+  {no:11,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"LNST / Net Profit After Tax",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Lợi nhuận trước thuế − Thuế TNDN",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012293, F.01"},
+  {no:12,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Tổng tài sản ngắn hạn vs dài hạn",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"TSNH / Tổng TS; TSDH / Tổng TS (cơ cấu %)",dimension:"Loại tài sản, Công ty, Kỳ",tcode:"F.01, FS10N, S_ALR_87012284"},
+  {no:13,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Tỷ lệ nợ / Tổng tài sản (Debt Ratio)",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Tổng nợ phải trả / Tổng tài sản × 100%",dimension:"Công ty, Kỳ báo cáo",tcode:"F.01, S_ALR_87012284"},
+  {no:14,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Debt/Equity Ratio — Tỷ số nợ / VCSH",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Tổng nợ phải trả / Vốn chủ sở hữu",dimension:"Công ty, Kỳ báo cáo",tcode:"F.01, S_ALR_87012284"},
+  {no:15,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROCE — Return on Capital Employed",freq:"Tháng",pri:"Trung bình",mods:["FI-GL","FI-CO"],formula:"EBIT / (Tổng TS − Nợ ngắn hạn) × 100%",dimension:"Công ty, Segment, Năm",tcode:"S_ALR_87012293, KE30"},
+  {no:16,nhom:"Tài chính - Quản trị",sub:"Chỉ số hiệu quả",chi:"Asset Turnover Ratio",freq:"Tháng",pri:"Thấp",mods:["FI-GL"],formula:"Doanh thu thuần / Tổng tài sản bình quân",dimension:"Công ty, Năm",tcode:"F.01, S_ALR_87012284"},
+  {no:17,nhom:"Tài chính - Quản trị",sub:"Chỉ số hiệu quả",chi:"Inventory Turnover Ratio",freq:"Tháng",pri:"Trung bình",mods:["FI-GL","MM"],formula:"Giá vốn hàng bán / Tồn kho bình quân",dimension:"Nhóm vật tư, Kho, Kỳ",tcode:"MB52, S_ALR_87012293"},
+  {no:18,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Cash Ratio — Tỷ lệ tiền mặt",freq:"Tháng",pri:"Trung bình",mods:["FI-GL","Treasury"],formula:"Tiền & Tương đương tiền / Nợ ngắn hạn",dimension:"Công ty, Kỳ báo cáo",tcode:"FF7B, F.01"},
+  {no:19,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Gross Margin / Tỷ lệ lợi nhuận gộp",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"(Doanh thu thuần − Giá vốn) / Doanh thu thuần × 100%",dimension:"Sản phẩm, Kênh, Kỳ",tcode:"S_ALR_87012293, KE30"},
+  {no:20,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Tỷ lệ EBIT / Doanh thu",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"EBIT / Doanh thu thuần × 100%",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012293, KE30"},
+  {no:21,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROS — Tỷ suất sinh lời trên doanh thu",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"LNST / Doanh thu thuần × 100%",dimension:"Công ty, Segment, Năm",tcode:"S_ALR_87012293"},
+  {no:22,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROE — Sinh lời trên vốn chủ sở hữu",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"LNST / VCSH bình quân × 100%",dimension:"Công ty, Năm",tcode:"F.01, S_ALR_87012293"},
+  {no:23,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROA — Sinh lời trên tổng tài sản",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"LNST / Tổng tài sản bình quân × 100%",dimension:"Công ty, Năm",tcode:"F.01, S_ALR_87012293"},
+  {no:24,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Current Ratio — Khả năng thanh toán hiện thời",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Tài sản ngắn hạn / Nợ ngắn hạn",dimension:"Công ty, Kỳ báo cáo",tcode:"F.01, S_ALR_87012284"},
+  {no:25,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Quick Ratio — Khả năng thanh toán nhanh",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"(TSNH − Tồn kho − Trả trước) / Nợ ngắn hạn",dimension:"Công ty, Kỳ báo cáo",tcode:"F.01, S_ALR_87012284"},
+  /* ── DÒNG TIỀN ── */
+  {no:26,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Chi phí lãi vay kỳ này vs kế hoạch",freq:"Tháng",pri:"Cao",mods:["Treasury","FI-GL"],formula:"Σ Lãi vay thực tế / Kế hoạch lãi vay × 100%",dimension:"Ngân hàng, Loại vay, Kỳ",tcode:"F.51, FAGLL03, TR11"},
+  {no:27,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Số dư tiền vay ngân hàng",freq:"Tuần",pri:"Cao",mods:["Treasury"],formula:"Σ Dư nợ vay theo từng hợp đồng tín dụng",dimension:"Ngân hàng, Loại tiền, Kỳ hạn",tcode:"F.51, FBL3N, TR11"},
+  {no:28,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Hạn mức vay ngân hàng còn lại",freq:"Tuần",pri:"Cao",mods:["Treasury"],formula:"Hạn mức tín dụng − Dư nợ đã sử dụng",dimension:"Ngân hàng, Loại tín dụng",tcode:"TR11, FBL3N"},
+  {no:29,nhom:"Dòng tiền",sub:"Dòng tiền hoạt động",chi:"OCF — Operating Cash Flow",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"LNST + Khấu hao ± Thay đổi vốn lưu động",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012271, FAGLB03"},
+  {no:30,nhom:"Dòng tiền",sub:"Dòng tiền đầu tư",chi:"Investing Cash Flow — Dòng tiền đầu tư",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"Thu đầu tư − Chi đầu tư TSCĐ & góp vốn",dimension:"Dự án, Loại đầu tư, Kỳ",tcode:"S_ALR_87012271, AS03"},
+  {no:31,nhom:"Dòng tiền",sub:"Dòng tiền tài chính",chi:"Financing Cash Flow — Dòng tiền tài chính",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"Thu tài chính (vay) − Chi tài chính (trả nợ, cổ tức)",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012271, FBL3N"},
+  {no:32,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Số dư tiền đầu / cuối ngày",freq:"Ngày",pri:"Cao",mods:["FI-GL"],formula:"Số dư đầu ngày ± Phát sinh thu chi trong ngày",dimension:"Tài khoản ngân hàng, Loại tiền",tcode:"FF7B, FF7A, FAGLB03"},
+  {no:33,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Dự báo dự thu / dự chi",freq:"Ngày",pri:"Cao",mods:["FI-GL"],formula:"Σ Dự thu (AR đến hạn) + Σ Dự chi (AP đến hạn)",dimension:"Ngày, Tài khoản ngân hàng, Khách hàng",tcode:"FF7B, FBL5N, FBL1N"},
+  {no:34,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Sai lệch dự báo vs thực tế dòng tiền",freq:"Tháng",pri:"Trung bình",mods:["FI-GL","Treasury"],formula:"(Dự báo − Thực tế) / Thực tế × 100%",dimension:"Kỳ, Loại dòng tiền",tcode:"FF7B, FAGLB03"},
+  {no:35,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Free Cash Flow (FCF)",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"OCF − CAPEX (Chi đầu tư TSCĐ)",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012271, AS03"},
+  /* ── CÔNG NỢ ── */
+  {no:36,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Cơ cấu công nợ phải thu (trong hạn / quá hạn)",freq:"Tuần",pri:"Cao",mods:["FI-AR"],formula:"Số dư AR quá hạn / Tổng AR × 100%",dimension:"Khách hàng, Nhóm tuổi nợ, Khu vực",tcode:"FBL5N, S_ALR_87012178"},
+  {no:37,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Tuổi nợ phải thu theo khoảng thời gian",freq:"Tuần",pri:"Cao",mods:["FI-AR"],formula:"Phân loại AR theo bucket: <30d, 30-60d, 60-90d, >90d",dimension:"Khách hàng, Khu vực, Kỳ",tcode:"S_ALR_87012178, FBL5N"},
+  {no:38,nhom:"Công nợ",sub:"Công nợ phải trả",chi:"Cơ cấu công nợ phải trả (trong hạn / quá hạn)",freq:"Tuần",pri:"Cao",mods:["FI-AP"],formula:"Số dư AP quá hạn / Tổng AP × 100%",dimension:"Nhà cung cấp, Nhóm tuổi nợ, Kỳ",tcode:"FBL1N, S_ALR_87012083"},
+  {no:39,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"DSO — Kỳ thu tiền bình quân",freq:"Tháng",pri:"Cao",mods:["FI-AR","SD"],formula:"(Số dư AR bình quân / Doanh thu) × Số ngày kỳ",dimension:"Khách hàng, Kênh bán, Kỳ",tcode:"FBL5N, VF45, S_ALR_87012178"},
+  /* ── GIÁ THÀNH ── */
+  {no:40,nhom:"Giá thành",sub:"Chi phí sản xuất",chi:"Chi phí sản xuất so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"],formula:"Chi phí SX thực tế / Kế hoạch × 100%",dimension:"Nhà máy, Dây chuyền, Nhóm chi phí",tcode:"KOB1, KKBC, S_ALR_87013611"},
+  {no:41,nhom:"Giá thành",sub:"Cấu trúc giá thành",chi:"Cấu trúc giá thành vs kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"],formula:"% từng thành phần (NVL, NC, SXC) / Tổng giá thành",dimension:"Sản phẩm, Nhà máy, Kỳ",tcode:"CKM3, KKBC, KOB1"},
+  {no:42,nhom:"Giá thành",sub:"Biến động giá thành",chi:"Biến động giá thành thực tế vs standard cost",freq:"Tháng",pri:"Cao",mods:["FI-CO"],formula:"Giá thành thực tế − Standard cost; Variance %",dimension:"Sản phẩm, Nguyên nhân biến động, Kỳ",tcode:"CKM3, KE30, KKBC"},
+  /* ── KINH DOANH ── */
+  {no:43,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kế hoạch / ước thực hiện",freq:"Ngày",pri:"Cao",mods:["SD","FI"],formula:"Doanh thu thực tế / Kế hoạch × 100%",dimension:"Kênh, Vùng miền, Nhóm hàng, Ngày",tcode:"VF45, S_ALR_87012186, KE30"},
+  {no:44,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kỳ trước / cùng kỳ / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"],formula:"(DT kỳ này − DT kỳ trước) / DT kỳ trước × 100%",dimension:"Kênh, Sản phẩm, Kỳ",tcode:"VF45, S_ALR_87012186"},
+  {no:45,nhom:"Kinh doanh",sub:"Sản lượng",chi:"Sản lượng bán vs kế hoạch / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"],formula:"SL thực tế / KH × 100%; SL lũy kế YTD",dimension:"Sản phẩm, Kênh, Vùng miền",tcode:"VA05, VF45, MB52"},
+  {no:46,nhom:"Kinh doanh",sub:"Đơn hàng",chi:"Đơn hàng mới vs kế hoạch",freq:"Ngày",pri:"Cao",mods:["SD"],formula:"Số lượng / Giá trị SO mới / Kế hoạch × 100%",dimension:"Kênh, Khách hàng, Nhóm hàng",tcode:"VA05, VA45, S_ALR_87014388"},
+  {no:47,nhom:"Kinh doanh",sub:"Đơn hàng",chi:"Số lượng khách hàng mới / tái mua",freq:"Tháng",pri:"Trung bình",mods:["SD","CX"],formula:"Đếm KH có SO đầu tiên / KH có SO lặp lại trong kỳ",dimension:"Kênh, Vùng miền, Nhóm hàng",tcode:"VA05, XD03"},
+  {no:48,nhom:"Kinh doanh",sub:"Lợi nhuận gộp",chi:"Lợi nhuận gộp theo kênh / sản phẩm",freq:"Tháng",pri:"Cao",mods:["SD","FI"],formula:"Doanh thu − Giá vốn hàng bán theo phân khúc",dimension:"Kênh, Sản phẩm, Khách hàng",tcode:"KE30, VF45, S_ALR_87012186"},
+  /* ── CHẤT LƯỢNG ── */
+  {no:49,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô đạt chất lượng đầu vào (Accepted)",freq:"Ngày",pri:"Cao",mods:["QM"],formula:"Số lô Accepted / Tổng lô kiểm tra × 100%",dimension:"Nhà cung cấp, Nhóm vật liệu, Nhà máy",tcode:"QA32, QA33, MCXD"},
+  {no:50,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô bị từ chối (Rejected)",freq:"Ngày",pri:"Cao",mods:["QM"],formula:"Số lô Rejected / Tổng lô kiểm tra × 100%",dimension:"Nhà cung cấp, Vật liệu, Nguyên nhân",tcode:"QA32, QA33, QM01"},
+  {no:51,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Số lô cần kiểm tra lại / tái kiểm định",freq:"Tuần",pri:"Trung bình",mods:["QM","MM"],formula:"Đếm Inspection Lot có usage decision = Retest",dimension:"Nhà cung cấp, Vật liệu, Nhà máy",tcode:"QA32, QM53, QE01"},
+  {no:52,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Supplier Quality Performance Rate (%)",freq:"Tháng",pri:"Trung bình",mods:["QM","MM"],formula:"Số lô đạt / Tổng lô cung cấp theo vendor × 100%",dimension:"Nhà cung cấp, Nhóm hàng, Kỳ",tcode:"QA33, MCXD, ME2M"},
+  {no:53,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ hàng đạt CL trong sản xuất (Passed)",freq:"Ngày",pri:"Cao",mods:["QM","PP"],formula:"SL đạt chất lượng / Tổng SL kiểm tra × 100%",dimension:"Dây chuyền, Ca SX, Nhóm sản phẩm",tcode:"QA32, CO03, QE51N"},
+  {no:54,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ NG / Scrap trong sản xuất (%)",freq:"Ngày",pri:"Cao",mods:["QM","PP"],formula:"SL NG (Scrap) / Tổng SL sản xuất × 100%",dimension:"Dây chuyền, Ca, Sản phẩm, Nguyên nhân",tcode:"QM01, CO03, COOIS"},
+  {no:55,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ hàng cần rework / tái chế (%)",freq:"Ngày",pri:"Cao",mods:["QM","PP"],formula:"SL Rework / Tổng SL × 100%",dimension:"Dây chuyền, Công đoạn, Nguyên nhân",tcode:"QM01, CO03, QE51N"},
+  {no:56,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ chi phí thiệt hại do chất lượng",freq:"Ngày",pri:"Cao",mods:["QM","FI-CO"],formula:"Chi phí chất lượng (scrap+rework+warranty) / Doanh thu",dimension:"Nhà máy, Dây chuyền, Nguyên nhân",tcode:"QM01, KOB1, CO03"},
+  {no:57,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Số khiếu nại khách hàng trong kỳ",freq:"Tuần",pri:"Cao",mods:["QM","SD"],formula:"Đếm Complaint / Quality Notification type Q3",dimension:"Khách hàng, Sản phẩm, Vùng miền",tcode:"QM01, QM02, VA05"},
+  {no:58,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Thời gian xử lý khiếu nại trung bình (ngày)",freq:"Tháng",pri:"Trung bình",mods:["QM"],formula:"Σ (Ngày đóng − Ngày mở) / Số khiếu nại",dimension:"Loại khiếu nại, Khách hàng, Kỳ",tcode:"QM01, QM02, QM09"},
+  {no:59,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Customer Complaint Resolution Rate (%)",freq:"Tháng",pri:"Trung bình",mods:["QM"],formula:"Số khiếu nại đã đóng / Tổng khiếu nại phát sinh × 100%",dimension:"Loại khiếu nại, Khách hàng",tcode:"QM01, QM09"},
+  {no:60,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Tổng chi phí chất lượng / Cost of Quality (COQ)",freq:"Tháng",pri:"Cao",mods:["QM","FI-CO"],formula:"Phòng ngừa + Thẩm định + Lỗi nội bộ + Lỗi ngoại",dimension:"Nhà máy, Nhóm chi phí CL, Kỳ",tcode:"QM01, KOB1, S_ALR_87013611"},
+  {no:61,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Tỷ lệ hàng trả lại theo nguyên nhân",freq:"Tuần",pri:"Trung bình",mods:["QM","SD"],formula:"SL hàng trả lại / SL giao hàng × 100%",dimension:"Khách hàng, Sản phẩm, Nguyên nhân",tcode:"VL09, QM01, S_ALR_87012186"},
+  {no:62,nhom:"Chất lượng",sub:"Audit & Tuân thủ",chi:"Tỷ lệ audit nội bộ đạt / không đạt (%)",freq:"Tháng",pri:"Trung bình",mods:["QM"],formula:"Số điểm đánh giá đạt / Tổng điểm audit × 100%",dimension:"Bộ phận, Tiêu chí audit, Kỳ",tcode:"QM01, QM03"},
+  /* ── BẢO TRÌ ── */
+  {no:63,nhom:"Bảo trì",sub:"Downtime",chi:"MTBF — Thời gian trung bình giữa 2 lần hỏng",freq:"Tháng",pri:"Cao",mods:["PM"],formula:"Tổng thời gian hoạt động / Số lần hỏng hóc",dimension:"Thiết bị, Nhóm máy, Nhà máy",tcode:"IW39, IW33, S_ALR_87012993"},
+  {no:64,nhom:"Bảo trì",sub:"Downtime",chi:"MTTR — Thời gian trung bình để sửa chữa",freq:"Tháng",pri:"Cao",mods:["PM"],formula:"Tổng thời gian sửa chữa / Số lần hỏng hóc",dimension:"Thiết bị, Loại sự cố, Kỹ thuật viên",tcode:"IW39, IW33, S_ALR_87012993"},
+  {no:65,nhom:"Bảo trì",sub:"Downtime",chi:"Thời gian & số lần dừng máy đột xuất",freq:"Tháng",pri:"Cao",mods:["PM"],formula:"Σ Thời gian downtime không lập kế hoạch / Tổng TG",dimension:"Thiết bị, Ca SX, Nguyên nhân",tcode:"IW39, PM01, COOIS"},
+  {no:66,nhom:"Bảo trì",sub:"Kế hoạch bảo trì",chi:"Tỷ lệ bảo trì phòng ngừa / tổng công việc BT (%)",freq:"Tháng",pri:"Cao",mods:["PM"],formula:"Số WO Preventive / Tổng WO × 100%",dimension:"Nhà máy, Nhóm thiết bị, Kỳ",tcode:"IW39, IW38, IP24"},
+  {no:67,nhom:"Bảo trì",sub:"Kế hoạch bảo trì",chi:"Số lệnh công tác BT hoàn thành vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["PM"],formula:"WO completed / WO planned × 100%",dimension:"Nhà máy, Loại BT, Nhóm thiết bị",tcode:"IW39, IW38, IP24"},
+  {no:68,nhom:"Bảo trì",sub:"Kế hoạch bảo trì",chi:"Tỷ lệ sẵn sàng thiết bị / Availability Rate (%)",freq:"Tuần",pri:"Cao",mods:["PM","PP"],formula:"(TG lên lịch − TG downtime) / TG lên lịch × 100%",dimension:"Thiết bị, Nhà máy, Ca SX",tcode:"IW39, COOIS, S_ALR_87012993"},
+  {no:69,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí bảo trì vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["PM","FI"],formula:"CP BT thực tế / Kế hoạch × 100%",dimension:"Nhà máy, Nhóm chi phí, Loại BT",tcode:"IW39, KOB1, S_ALR_87013611"},
+  {no:70,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí phụ tùng / Spare Parts Cost",freq:"Tháng",pri:"Trung bình",mods:["PM","MM"],formula:"Σ Giá trị phụ tùng xuất kho cho BT trong kỳ",dimension:"Nhóm thiết bị, Loại phụ tùng, Nhà máy",tcode:"IW39, MB52, MIGO"},
+  {no:71,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí thuê ngoài bảo trì (Subcontract)",freq:"Tháng",pri:"Thấp",mods:["PM","FI-CO"],formula:"Σ CP dịch vụ BT thuê ngoài trong kỳ",dimension:"Nhà thầu, Loại dịch vụ, Nhà máy",tcode:"IW39, KOB1, ME2M"},
+  {no:72,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Maintenance Cost per Production Output",freq:"Tháng",pri:"Trung bình",mods:["PM","FI-CO"],formula:"Tổng CP bảo trì / Sản lượng thực tế",dimension:"Nhà máy, Dây chuyền, Kỳ",tcode:"IW39, CO03, KOB1"},
+  /* ── TỒN KHO ── */
+  {no:73,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng tồn kho đầu / cuối kỳ",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Tồn đầu kỳ ± Nhập − Xuất = Tồn cuối kỳ",dimension:"Kho, Vật liệu, Nhóm hàng",tcode:"MB52, MB5L, MMBE"},
+  {no:74,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng nhập kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Σ SL nhập kho theo Movement Type (101, 201, 311...)",dimension:"Kho, Loại nhập, Vật liệu",tcode:"MB51, MIGO, MB52"},
+  {no:75,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng xuất kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Σ SL xuất kho theo Movement Type (201, 261, 411...)",dimension:"Kho, Loại xuất, Vật liệu",tcode:"MB51, MIGO, COOIS"},
+  {no:76,nhom:"Tồn kho",sub:"Giá trị tồn kho",chi:"Giá trị tồn kho theo nhóm vật liệu",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Σ SL tồn × Giá trị đơn vị theo nhóm vật liệu",dimension:"Kho, Nhóm vật liệu, Nhà máy",tcode:"MB52, MMBE, MB5L"},
+  {no:77,nhom:"Tồn kho",sub:"Vòng quay tồn kho",chi:"Vòng quay hàng tồn kho / Inventory Turnover",freq:"Tháng",pri:"Cao",mods:["MM"],formula:"Giá vốn hàng bán / Giá trị tồn kho bình quân",dimension:"Nhóm vật liệu, Kho, Kỳ",tcode:"MB52, S_ALR_87012293"},
+  {no:78,nhom:"Tồn kho",sub:"Phân tích tồn kho",chi:"Tỷ lệ hàng chậm luân chuyển / Slow-Moving (%)",freq:"Tháng",pri:"Trung bình",mods:["MM"],formula:"Giá trị HTK không xuất kho >90d / Tổng HTK × 100%",dimension:"Nhóm vật liệu, Kho, Ngưỡng ngày",tcode:"MB52, MB5L, S_ALR_87012172"},
+  {no:79,nhom:"Tồn kho",sub:"Phân tích tồn kho",chi:"Độ chính xác kiểm kê kho / Inventory Accuracy (%)",freq:"Tháng",pri:"Trung bình",mods:["MM","WM"],formula:"(1 − |Sai lệch| / Tổng SL kiểm kê) × 100%",dimension:"Kho, Nhóm vật liệu, Đợt kiểm kê",tcode:"MI07, MI20, MI04"},
+  {no:80,nhom:"Tồn kho",sub:"Tuổi HTK theo HSD",chi:"Tuổi hàng tồn kho theo hạn sử dụng",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Phân loại HTK theo: còn >6th, 3-6th, 1-3th, <1th HSD",dimension:"Nhóm hàng, Kho, Nhà sản xuất",tcode:"MB52, MMBE, MCHB"},
+  /* ── MUA HÀNG ── */
+  {no:81,nhom:"Mua hàng",sub:"Hiệu suất mua hàng",chi:"Tỷ lệ đơn hàng mua đúng hạn / On-Time PO (%)",freq:"Tuần",pri:"Cao",mods:["MM","Ariba"],formula:"Số PO giao đúng hạn / Tổng PO cần giao × 100%",dimension:"Nhà cung cấp, Nhóm hàng, Kỳ",tcode:"ME2M, ME80FN, ML81N"},
+  {no:82,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị mua hàng theo vendor / nhóm hàng",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Σ Giá trị GR / Invoice theo nhà cung cấp",dimension:"Nhà cung cấp, Nhóm hàng, Kỳ",tcode:"ME2M, ME80FN, MIR6"},
+  {no:83,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị đặt hàng chưa giao",freq:"Ngày",pri:"Cao",mods:["MM"],formula:"Σ Giá trị PO open (đã đặt chưa nhận hàng)",dimension:"Nhà cung cấp, Nhóm hàng, Kho",tcode:"ME2M, ME80FN, MB51"},
+  {no:84,nhom:"Mua hàng",sub:"Đánh giá vendor",chi:"Vendor Performance Score / Điểm đánh giá NCC",freq:"Tháng",pri:"Trung bình",mods:["MM","Ariba"],formula:"Tổng điểm theo tiêu chí: chất lượng, đúng hạn, giá",dimension:"Nhà cung cấp, Tiêu chí, Kỳ",tcode:"ME61, ME62, LX01"},
+  {no:85,nhom:"Mua hàng",sub:"Leadtime",chi:"Lead time mua hàng theo vendor / sản phẩm",freq:"Tháng",pri:"Cao",mods:["MM"],formula:"Ngày nhận hàng − Ngày đặt hàng (bình quân)",dimension:"Nhà cung cấp, Nhóm hàng, Kỳ",tcode:"ME2M, ME80FN, ME11"},
+  /* ── SẢN XUẤT ── */
+  {no:86,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm vs kế hoạch",freq:"Ngày",pri:"Cao",mods:["PP"],formula:"SL thực tế / Kế hoạch MPS × 100%",dimension:"Sản phẩm, Dây chuyền, Ca SX",tcode:"COOIS, MCP3, CO03"},
+  {no:87,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm theo thời gian / loại",freq:"Ngày",pri:"Cao",mods:["PP"],formula:"Σ SL GI/GR confirmed theo Production Order",dimension:"Sản phẩm, Ca, Ngày, Dây chuyền",tcode:"COOIS, CO03, MCP3"},
+  {no:88,nhom:"Sản xuất",sub:"Tiêu hao SX",chi:"Tỷ lệ tiêu hao hoạt chất vs định mức",freq:"Tháng",pri:"Cao",mods:["PP"],formula:"Tiêu hao thực tế / Định mức BOM × 100%",dimension:"Nguyên liệu, Sản phẩm, Dây chuyền",tcode:"COOIS, CO03, CKM3"},
+  {no:89,nhom:"Sản xuất",sub:"WIP & Dở dang",chi:"WIP — Giá trị sản phẩm dở dang",freq:"Tuần",pri:"Trung bình",mods:["PP","FI-CO"],formula:"Σ Giá trị WIP theo Production Order đang chạy",dimension:"Dây chuyền, Sản phẩm, Nhà máy",tcode:"COOIS, CO88, CKM3"},
+  {no:90,nhom:"Sản xuất",sub:"Năng suất SX",chi:"Công suất máy thực tế vs tối đa",freq:"Tuần",pri:"Cao",mods:["PP"],formula:"TG SX thực tế / TG có thể SX tối đa × 100%",dimension:"Máy, Dây chuyền, Ca SX",tcode:"COOIS, CM01, CM05"},
+  {no:91,nhom:"Sản xuất",sub:"Năng suất SX",chi:"OEE — Hiệu quả thiết bị tổng thể",freq:"Tháng",pri:"Cao",mods:["PP","PM"],formula:"Availability × Performance × Quality Rate",dimension:"Thiết bị, Dây chuyền, Nhà máy, Ca",tcode:"COOIS, IW39, QA32"},
 ];
 
 const DASH_TMPL = {
@@ -696,12 +841,55 @@ let selOuts = new Set(['doc','dash','xl','pp']);
 let curIndustry = '', chatHistory = [];
 let aiScores = {};
 let suggestItems = [];   // items shown in suggest panel
+
+/* ─── TOKEN COUNTER ─── */
+// Pricing: claude-sonnet-4-6 → $3/1M input, $15/1M output
+const TOKEN_PRICE={in:3/1e6, out:15/1e6};
+let tokenUsage={input:0,output:0,calls:0};
+
+function trackTokens(usage){
+  if(!usage)return;
+  tokenUsage.input +=(usage.input_tokens||0);
+  tokenUsage.output+=(usage.output_tokens||0);
+  tokenUsage.calls++;
+  updateTokenMeter();
+}
+
+function updateTokenMeter(){
+  const total=tokenUsage.input+tokenUsage.output;
+  const cost=tokenUsage.input*TOKEN_PRICE.in + tokenUsage.output*TOKEN_PRICE.out;
+  // bar: scale to 100k tokens max
+  const pct=Math.min(100,Math.round(total/1e5*100));
+  const fmt=n=>n>=1000?(n/1000).toFixed(1)+'k':n.toString();
+  document.getElementById('tm-in').textContent=fmt(tokenUsage.input);
+  document.getElementById('tm-out').textContent=fmt(tokenUsage.output);
+  document.getElementById('tm-cost').textContent='$'+cost.toFixed(4);
+  document.getElementById('tm-bar').style.width=pct+'%';
+  document.getElementById('tm-calls').textContent=tokenUsage.calls+' API call'+(tokenUsage.calls!==1?'s':'')+' · '+fmt(total)+' tokens tổng';
+}
+
+function resetTokens(){
+  tokenUsage={input:0,output:0,calls:0};
+  updateTokenMeter();
+  toast('Đã reset token counter');
+}
 let curStep = 1;         // track current wizard step
 let maxStep = 1;         // highest step reached
 
 /* ─── HELPERS ─── */
 function selInd(el,v){document.querySelectorAll('.ic').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');curIndustry=v;}
 function togBtn(btn){btn.classList.toggle('sel');}
+
+/* Modules with KPIs in KPI_LIB */
+const MODS_WITH_KPI=new Set(['FI-GL','FI-AR','FI-CO','FI','SD','MM','PP','QM','PM','Treasury']);
+
+function togMod(btn,mod){
+  btn.classList.toggle('sel');
+  /* Visual hint: modules without template KPIs get AI badge */
+  if(!MODS_WITH_KPI.has(mod)){
+    btn.classList.toggle('ai-mod',btn.classList.contains('sel'));
+  }
+}
 function toast(msg){const t=document.getElementById('toastEl');document.getElementById('toast-txt').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function getTime(){const d=new Date();return d.getHours()+':'+(d.getMinutes()+'').padStart(2,'0');}
 
@@ -810,7 +998,10 @@ function renderTable(data){
       <td><input type="checkbox" class="kpi-check" ${selKPIs.has(k.no)?'checked':''} onchange="togKPI(this,${k.no},this.closest('tr'))"></td>
       <td style="color:var(--gray-400);font-size:10px">${k.no}</td>
       <td style="font-size:11px;color:var(--teal);font-weight:600">${k.sub}</td>
-      <td style="font-weight:500;font-size:12px">${k.chi}</td>
+      <td style="font-weight:500;font-size:12px">
+        <div class="chi-wrap">${k.chi}${(k.formula||k.dimension||k.tcode)?`<div class="kpi-tip">${k.formula?`<div class="tip-row"><span class="tip-label">Công thức</span><span class="tip-val">${k.formula}</span></div>`:''}${k.dimension?`<div class="tip-row"><span class="tip-label">Phân tích</span><span class="tip-val">${k.dimension}</span></div>`:''}${k.tcode?`<div class="tip-row"><span class="tip-label">T-Code</span><span class="tip-val" style="font-family:monospace;color:#00D4FF">${k.tcode}</span></div>`:''}</div>`:''}
+        </div>
+      </td>
       <td><span class="badge b-${k.freq==='Ngày'?'ngay':k.freq==='Tuần'?'tuan':'thang'}">${k.freq}</span></td>
       <td><span class="badge b-${k.pri==='Cao'?'cao':k.pri==='Trung bình'?'tb':'thap'}">${k.pri}</span></td>
       <td><span style="font-weight:700;color:${scCol};font-size:12px">${sc}</span></td>
@@ -881,64 +1072,231 @@ function updStats(){
 /* ════════════════════════════════════
    AI SUGGEST PANEL — real Claude API
 ════════════════════════════════════ */
+/* ── citek-skills.ts: INDUSTRY_RESEARCH_PROMPT ── */
+const SKILL_INDUSTRY_RESEARCH = `Skill nghiên cứu ngành phục vụ đánh giá đầu tư SAP S/4HANA
+
+VAI TRÒ
+Bạn đóng vai chuyên gia nghiên cứu ngành và phân tích mô hình vận hành, phục vụ cho việc xây dựng luận điểm đầu tư ERP. Nhiệm vụ là làm rõ ngành hoạt động, mô hình kinh doanh, cấu trúc vận hành, chuỗi giá trị, bức tranh cạnh tranh, các yếu tố tạo ra giá trị, điểm yếu vận hành điển hình, áp lực từ bên ngoài và bộ tài liệu tham chiếu đáng tin của doanh nghiệp mục tiêu — trước khi bắt đầu bất kỳ phân tích KPI hay ROI nào.
+
+MỤC TIÊU
+Xây dựng nền tảng nghiên cứu ngành và mô hình vận hành đủ tin cậy để các bước phân tích tiếp theo có thể dùng trực tiếp — thiết kế KPI, xác định yếu tố tạo giá trị, lượng hóa lợi ích đầu tư — mà không phải quay lại tìm hiểu bản chất ngành và logic vận hành từ đầu.
+
+NGUYÊN TẮC CỐT LÕI
+- Ưu tiên độ chính xác hơn độ đầy đủ
+- Khi thiếu bằng chứng, để trống có kiểm soát thay vì tự điền
+- Không biến đặc điểm chung của ngành thành sự thật của doanh nghiệp
+- Không nâng suy luận thành kết luận đã xác nhận
+- Mọi kết luận quan trọng phải truy ngược được về nguồn, nhãn bằng chứng và mức tin cậy
+
+NHÃN BẰNG CHỨNG
+[F] Dữ kiện xác nhận từ tài liệu gốc
+[B] Số liệu tham chiếu ngành đáng tin, chưa xác nhận ở cấp doanh nghiệp
+[I] Suy luận từ nhiều điểm bằng chứng
+[P] Ước tính có cơ sở, nêu rõ giới hạn
+[A] Giả định chờ xác minh
+[U] Chưa biết / chưa đủ bằng chứng
+
+10 CÂU HỎI BẮT BUỘC PHẢI TRẢ LỜI
+1. Doanh nghiệp thực sự là pháp nhân nào — tên đầy đủ, loại hình, có phải tập đoàn không
+2. Doanh nghiệp thuộc ngành và phân ngành nào
+3. Mô hình vận hành thực tế là gì — không chỉ là tên ngành
+4. Bức tranh cạnh tranh ngành như thế nào — áp lực từ đâu, rào cản ra sao
+5. Chuỗi giá trị của mô hình này vận hành ra sao
+6. Các yếu tố tạo ra giá trị chính về vận hành và tài chính là gì
+7. Điểm yếu vận hành phổ biến của mô hình này là gì
+8. Áp lực bên ngoài nào đang thúc đẩy nhu cầu đầu tư ERP
+9. SAP module nào phù hợp nhất với mô hình này
+10. Giới hạn, lưu ý hoặc rủi ro diễn giải nào cần giữ lại cho bước sau
+
+ĐIỀU KIỆN CHUYỂN SANG BƯỚC TIẾP THEO
+Khi đủ điều kiện, ghi rõ: "Triggering KPI & Value Driver Skill because industry foundation is now sufficient for KPI architecture."`;
+
+/* ── citek-skills.ts: KPI_VALUE_DRIVER_PROMPT ── */
+const SKILL_KPI_VALUE_DRIVER = `Skill KPI & Value Driver cho Business Case SAP S/4HANA
+
+VAI TRÒ
+Bạn là kiến trúc sư KPI và chuyên gia phân tích yếu tố tạo giá trị. Nhiệm vụ là biến hiểu biết về ngành và mô hình kinh doanh thành bộ KPI cấp lãnh đạo, xác định đúng KPI mà ban lãnh đạo thực sự quan tâm, chuẩn hóa định nghĩa KPI, xây chuỗi nhân quả từ hiệu suất quy trình đến kết quả kinh doanh, và xác định phần giá trị nào SAP S/4HANA có thể tác động một cách thực tế.
+
+FRAMEWORK THAM CHIẾU
+1. Balanced Scorecard — 4 perspectives: Tài chính, Khách hàng, Quy trình nội bộ, Học hỏi & Phát triển
+2. Value Driver Tree — phân rã Revenue/Margin/Cash Flow → driver → sub-driver → KPI
+3. APQC Process Classification Framework — KPI chuẩn ngành
+4. SAP Value Lifecycle Manager — benchmark từ khách hàng SAP
+
+NHÃN BẰNG CHỨNG: [F] Fact | [B] Benchmark | [P] Proxy | [A] Assumption | [I] Inference
+
+NGUYÊN TẮC BẤT KHẢ THƯƠNG LƯỢNG
+- Không chọn KPI chỉ vì nghe có vẻ ấn tượng
+- Không trộn lẫn outcome KPI với diagnostic metric
+- Không đưa KPI vào shortlist nếu không đo được hoặc không giải thích được cho lãnh đạo
+- Tránh vanity metrics
+- Chỉ đề xuất KPI BỔ SUNG so với template đã có — không lặp lại
+
+ĐẦU RA: Danh sách KPI bổ sung theo định dạng JSON được yêu cầu, mỗi KPI kèm nhóm nghiệp vụ, tên ngắn gọn, tần suất đo, ưu tiên và lý do business rõ ràng.`;
+
+/* ── Industry slug → Vietnamese label + mô tả đặc thù ── */
+const IND_MAP={
+  manufacturing:{label:'Sản xuất',desc:'Sản xuất công nghiệp, lắp ráp, chế biến. Value drivers: hiệu suất dây chuyền (OEE), chất lượng sản phẩm, chi phí sản xuất, quản lý nguyên liệu, bảo trì thiết bị.'},
+  trading:      {label:'Thương mại',desc:'Phân phối, xuất nhập khẩu, bán buôn. Value drivers: vòng quay hàng tồn kho, biên lợi nhuận thương mại, tỷ lệ fill rate, công nợ phải thu.'},
+  fmcg:         {label:'FMCG',desc:'Hàng tiêu dùng nhanh, thực phẩm đồ uống. Value drivers: doanh số theo kênh, độ phủ thị trường, freshness/shelf-life, trade promotion ROI.'},
+  pharma:       {label:'Dược phẩm',desc:'Sản xuất và phân phối dược phẩm. Value drivers: batch compliance, hạn sử dụng, cold chain, regulatory compliance, truy xuất lô hàng.'},
+  finance:      {label:'Tài chính - Ngân hàng',desc:'Ngân hàng, bảo hiểm, tài chính. Value drivers: NIM, NPL ratio, CAR, chi phí huy động, hiệu quả chi nhánh.'},
+  logistics:    {label:'Logistics',desc:'Vận tải, kho bãi, chuỗi cung ứng. Value drivers: on-time delivery, chi phí mỗi chuyến, tỷ lệ lấp đầy xe, thời gian giao hàng.'},
+  retail:       {label:'Bán lẻ',desc:'Chuỗi bán lẻ, siêu thị. Value drivers: same-store-sales, traffic, conversion rate, basket size, inventory shrinkage.'},
+  other:        {label:'Đa ngành',desc:'Tập đoàn đa ngành hoặc ngành khác. Value drivers: hiệu quả vận hành, tối ưu chi phí, quản trị rủi ro, năng suất lao động.'}
+};
+
 async function loadSuggestPanel(){
-  const ind=curIndustry||'Sản xuất';
+  const slug=curIndustry||'manufacturing';
+  const indInfo=IND_MAP[slug]||IND_MAP['other'];
+  const indLabel=indInfo.label;
+  const indDesc=indInfo.desc;
   const objs=Array.from(document.querySelectorAll('#objectives .sel')).map(b=>b.textContent).join(', ')||'Chưa xác định';
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
-  const prompt=`Bạn là chuyên gia SAP Analytics & Business Intelligence với 15 năm kinh nghiệm tư vấn cho doanh nghiệp Việt Nam.
+  const existingKPIs=KPI_LIB.map(k=>k.chi).join(' | ');
+  /* Detect selected modules that have NO KPIs in library */
+  const selMods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent);
+  const missingMods=selMods.filter(m=>!MODS_WITH_KPI.has(m.replace('/TRM','').replace('/EAM','').replace('/IBP','').replace('/SF','').replace('/4HANA','').split('/')[0]));
+  const body=document.getElementById('asp-body');
 
-Khách hàng có thông tin:
-- Ngành: ${ind}
-- Mục tiêu phân tích: ${objs}
-- SAP Modules đang dùng: ${mods}
+  function setLoading(step,msg){
+    body.innerHTML='<div class="asp-loading"><div class="asp-spinner"></div>'
+      +'<div style="font-size:11px;color:var(--gray-500);margin-top:6px">'
+      +'<strong style="color:var(--teal)">Bước '+step+'/2</strong> — '+msg+'</div></div>';
+  }
 
-Thư viện KPI hiện có bao gồm các nhóm: Tài chính - Quản trị, Dòng tiền, Công nợ, Giá thành, Kinh doanh, Chất lượng, Bảo trì, Tồn kho, Mua hàng, Sản xuất.
-
-Hãy đề xuất thêm 6–8 KPI quan trọng NGOÀI thư viện hiện có, phù hợp đặc thù ngành ${ind} và mục tiêu "${objs}". Mỗi KPI cần ngắn gọn và thực tế.
-
-Trả lời ĐÚNG theo định dạng JSON sau (KHÔNG có text bên ngoài JSON):
-[
-  {"nhom":"Tên nhóm KPI","chi":"Tên chỉ tiêu ngắn gọn","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình","why":"Lý do ngắn 1 dòng tại sao quan trọng với ngành này"}
-]`;
-
+  /* ── Bước 1: industry_research skill ── */
+  setLoading(1,'Đang nghiên cứu đặc thù ngành <em>'+indLabel+'</em>...');
+  let industryContext='';
   try{
-    const res=await fetch('/api/claude',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
+    const r1=await fetch('/api/claude',{
+      method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
+        model:'claude-sonnet-4-5-20250929',
+        max_tokens:1800,
+        system:SKILL_INDUSTRY_RESEARCH,
+        messages:[{role:'user',content:
+          'Phân tích đặc thù ngành để thiết kế KPI SAP S/4HANA:\n'
+          +'- Ngành: '+indLabel+'\n'
+          +'- Đặc điểm ngành: '+indDesc+'\n'
+          +'- Mục tiêu kinh doanh: '+objs+'\n'
+          +'- SAP Modules triển khai: '+mods+'\n\n'
+          +'Yêu cầu: Liệt kê súc tích (1) chuỗi giá trị chính, (2) top 5 value drivers đặc thù ngành, '
+          +'(3) điểm yếu vận hành phổ biến, (4) KPI gaps thường thiếu trong template chuẩn. '
+          +'Dùng nhãn bằng chứng [F/B/I]. Kết thúc bằng: "Triggering KPI & Value Driver Skill."'
+        }]
       })
     });
-    const data=await res.json();
-    const txt=data.content.map(c=>c.text||'').join('');
+    const d1=await r1.json();
+    trackTokens(d1.usage);
+    industryContext=d1.content.map(c=>c.text||'').join('').slice(0,2500);
+  }catch(e){
+    industryContext='Ngành '+indLabel+': '+indDesc;
+  }
+
+  /* ── Bước 2: kpi_value_driver skill ── */
+  setLoading(2,'Đang xây dựng bộ KPI đặc thù ngành '+indLabel+'...');
+  try{
+    const r2=await fetch('/api/claude',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-5-20250929',
+        max_tokens:1500,
+        system:SKILL_KPI_VALUE_DRIVER,
+        messages:[{role:'user',content:
+          '## Industry Research Context\n'+industryContext
+          +'\n\n## KPI đã có trong template (KHÔNG lặp lại bất kỳ KPI nào dưới đây)\n'+existingKPIs
+          +'\n\n## Yêu cầu output\n'
+          +'Đề xuất **12–15 KPI BỔ SUNG** đặc thù ngành '+indLabel+'.\n'
+          +'Điều kiện:\n'
+          +'- Mỗi KPI phải KHÁC HOÀN TOÀN với template đã có\n'
+          +'- Phản ánh đặc thù riêng của ngành '+indLabel+' (không phải KPI chung chung)\n'
+          +'- Liên kết với SAP modules: '+mods+'\n'
+          +(missingMods.length?'- ƯU TIÊN đề xuất KPI cho các modules chưa có trong template: '+missingMods.join(', ')+'\n':'')
+          +'- Phù hợp mục tiêu: '+objs+'\n\n'
+          +'Trả lời CHỈ JSON array, không text ngoài:\n'
+          +'[{"nhom":"Nhóm nghiệp vụ đặc thù ngành","chi":"Tên KPI cụ thể","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình|Thấp","why":"Lý do đặc thù ngành trong 1 dòng"}]'
+        }]
+      })
+    });
+    const d2=await r2.json();
+    trackTokens(d2.usage);
+    const txt=d2.content.map(c=>c.text||'').join('');
     let items=[];
     try{
-      const clean=txt.replace(/```json|```/g,'').trim();
-      items=JSON.parse(clean);
-    }catch{items=fallbackSuggest(ind);}
+      const m=txt.replace(/```json[\s\S]*?```/g,s=>s).replace(/```json|```/g,'').match(/\[[\s\S]*\]/);
+      items=JSON.parse(m?m[0]:txt.trim());
+      if(!Array.isArray(items)||!items.length)throw new Error('empty');
+    }catch{items=fallbackSuggest(slug);}
     suggestItems=items;
     renderSuggestPanel(items);
   }catch(e){
-    suggestItems=fallbackSuggest(ind);
+    suggestItems=fallbackSuggest(slug);
     renderSuggestPanel(suggestItems);
   }
 }
 
-function fallbackSuggest(ind){
-  const base=[
-    {nhom:"Hiệu suất nhân sự",chi:"Doanh thu / nhân viên",freq:"Tháng",pri:"Trung bình",why:"Đo lường năng suất lao động tổng thể"},
+function fallbackSuggest(slug){
+  const common=[
+    {nhom:"Hiệu suất nhân sự",chi:"Doanh thu / nhân viên",freq:"Tháng",pri:"Trung bình",why:"Năng suất lao động tổng thể"},
     {nhom:"Hiệu suất nhân sự",chi:"Chi phí lương / Doanh thu (%)",freq:"Tháng",pri:"Cao",why:"Kiểm soát tỷ trọng chi phí nhân sự"},
-    {nhom:"Khách hàng",chi:"Customer Satisfaction Score (CSAT)",freq:"Tháng",pri:"Trung bình",why:"Đo lường mức độ hài lòng sau giao hàng"},
-    {nhom:"Tăng trưởng",chi:"Tốc độ tăng trưởng doanh thu YoY",freq:"Tháng",pri:"Cao",why:"Chỉ số chiến lược quan trọng cho C-Level"},
-    {nhom:"Hiệu quả vốn",chi:"Cash Conversion Cycle (CCC)",freq:"Tháng",pri:"Cao",why:"Đo lường hiệu quả chuyển đổi tiền trong chuỗi cung ứng"},
-    {nhom:"Chuỗi cung ứng",chi:"On-Time Delivery Rate (%)",freq:"Tuần",pri:"Cao",why:"Đo lường tỷ lệ giao hàng đúng hạn cho khách hàng"},
+    {nhom:"Khách hàng",chi:"Customer Satisfaction Score (CSAT)",freq:"Tháng",pri:"Trung bình",why:"Mức độ hài lòng sau giao hàng"},
+    {nhom:"Tăng trưởng",chi:"Tốc độ tăng trưởng doanh thu YoY",freq:"Tháng",pri:"Cao",why:"Chỉ số chiến lược cho C-Level"},
+    {nhom:"Hiệu quả vốn",chi:"Cash Conversion Cycle (CCC)",freq:"Tháng",pri:"Cao",why:"Hiệu quả chuyển đổi tiền trong chuỗi cung ứng"},
+    {nhom:"Chuỗi cung ứng",chi:"On-Time Delivery Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ giao hàng đúng hạn"},
   ];
-  if(ind==='manufacturing'||ind==='pharma'){
-    base.push({nhom:"Sản xuất nâng cao",chi:"First Pass Yield (FPY) — Tỷ lệ đạt ngay lần đầu",freq:"Ngày",pri:"Cao",why:"Chỉ số chất lượng quan trọng trong sản xuất"});
-  }
-  return base;
+  const byInd={
+    manufacturing:[
+      {nhom:"Sản xuất",chi:"Overall Equipment Effectiveness (OEE)",freq:"Ngày",pri:"Cao",why:"Hiệu suất thiết bị tổng thể — chuẩn vàng sản xuất"},
+      {nhom:"Sản xuất",chi:"First Pass Yield (FPY)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ đạt chất lượng ngay lần đầu"},
+      {nhom:"Sản xuất",chi:"Planned vs Actual Production Output (%)",freq:"Ngày",pri:"Cao",why:"Độ bám kế hoạch sản xuất"},
+      {nhom:"Bảo trì",chi:"Mean Time Between Failures (MTBF)",freq:"Tháng",pri:"Trung bình",why:"Độ tin cậy thiết bị"},
+      {nhom:"Chi phí",chi:"Scrap & Rework Cost / Total Production Cost",freq:"Tháng",pri:"Cao",why:"Chi phí lãng phí trong sản xuất"},
+    ],
+    trading:[
+      {nhom:"Thương mại",chi:"Gross Margin by Product Category (%)",freq:"Tháng",pri:"Cao",why:"Biên lợi nhuận theo danh mục hàng"},
+      {nhom:"Thương mại",chi:"Fill Rate — Tỷ lệ hoàn thành đơn hàng",freq:"Tuần",pri:"Cao",why:"Khả năng đáp ứng đơn hàng khách"},
+      {nhom:"Tồn kho",chi:"Inventory Turnover Ratio",freq:"Tháng",pri:"Cao",why:"Vòng quay hàng tồn kho theo ngành thương mại"},
+      {nhom:"Công nợ",chi:"Days Sales Outstanding (DSO)",freq:"Tháng",pri:"Cao",why:"Số ngày thu hồi công nợ bán hàng"},
+      {nhom:"Thương mại",chi:"Tỷ lệ đơn hàng giao đúng & đủ (OTIF)",freq:"Tuần",pri:"Cao",why:"On-Time In-Full — KPI vua ngành phân phối"},
+    ],
+    fmcg:[
+      {nhom:"Thị trường",chi:"Numeric Distribution Coverage (%)",freq:"Tháng",pri:"Cao",why:"Độ phủ điểm bán theo số lượng"},
+      {nhom:"Thị trường",chi:"Weighted Distribution Coverage (%)",freq:"Tháng",pri:"Cao",why:"Độ phủ có trọng số theo doanh số"},
+      {nhom:"Khuyến mãi",chi:"Trade Promotion ROI (%)",freq:"Tháng",pri:"Cao",why:"Hiệu quả đầu tư khuyến mãi thương mại"},
+      {nhom:"Sản phẩm",chi:"Shelf Availability Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ hàng có mặt trên kệ"},
+      {nhom:"Sản phẩm",chi:"Days of Supply — Ngày cung ứng tồn kho",freq:"Tuần",pri:"Trung bình",why:"Phòng ngừa out-of-stock và over-stock"},
+    ],
+    pharma:[
+      {nhom:"Tuân thủ",chi:"Batch Release Cycle Time (ngày)",freq:"Tháng",pri:"Cao",why:"Thời gian kiểm định và xuất lô sản phẩm"},
+      {nhom:"Tuân thủ",chi:"Tỷ lệ lô hàng đạt tiêu chuẩn GMP (%)",freq:"Tháng",pri:"Cao",why:"Compliance sản xuất dược phẩm"},
+      {nhom:"Cold Chain",chi:"Temperature Excursion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ vi phạm nhiệt độ bảo quản"},
+      {nhom:"Truy xuất",chi:"Lot Traceability Coverage (%)",freq:"Tháng",pri:"Cao",why:"Khả năng truy xuất nguồn gốc lô dược phẩm"},
+      {nhom:"Sản xuất",chi:"Yield Variance — Sai lệch năng suất lô",freq:"Tháng",pri:"Trung bình",why:"Độ ổn định quy trình sản xuất dược"},
+    ],
+    finance:[
+      {nhom:"Tín dụng",chi:"Non-Performing Loan Ratio — NPL (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ nợ xấu — chỉ số sức khỏe tín dụng"},
+      {nhom:"Lợi nhuận",chi:"Net Interest Margin (NIM)",freq:"Tháng",pri:"Cao",why:"Biên lãi thuần — hiệu quả kinh doanh ngân hàng"},
+      {nhom:"Hiệu quả",chi:"Cost-to-Income Ratio (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ chi phí / thu nhập hoạt động"},
+      {nhom:"An toàn vốn",chi:"Capital Adequacy Ratio (CAR) (%)",freq:"Quý",pri:"Cao",why:"Tỷ lệ an toàn vốn tối thiểu theo Basel"},
+      {nhom:"Khách hàng",chi:"Customer Acquisition Cost (CAC)",freq:"Tháng",pri:"Trung bình",why:"Chi phí thu hút khách hàng mới"},
+    ],
+    logistics:[
+      {nhom:"Vận tải",chi:"On-Time Delivery Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ giao hàng đúng giờ — KPI cốt lõi logistics"},
+      {nhom:"Vận tải",chi:"Vehicle Utilization Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ lấp đầy phương tiện vận tải"},
+      {nhom:"Chi phí",chi:"Cost per Ton-Kilometer",freq:"Tháng",pri:"Cao",why:"Chi phí vận chuyển trên đơn vị hàng hóa"},
+      {nhom:"Kho vận",chi:"Warehouse Space Utilization (%)",freq:"Tuần",pri:"Trung bình",why:"Hiệu quả sử dụng diện tích kho"},
+      {nhom:"Chất lượng",chi:"Damage Rate in Transit (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ hàng hỏng trong vận chuyển"},
+    ],
+    retail:[
+      {nhom:"Bán lẻ",chi:"Same-Store Sales Growth (%)",freq:"Tháng",pri:"Cao",why:"Tăng trưởng doanh số cùng kỳ — loại trừ mở mới"},
+      {nhom:"Bán lẻ",chi:"Sales per Square Meter",freq:"Tháng",pri:"Cao",why:"Doanh thu trên mỗi m² mặt sàn"},
+      {nhom:"Khách hàng",chi:"Customer Conversion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ khách vào cửa hàng → mua hàng"},
+      {nhom:"Bán lẻ",chi:"Average Transaction Value (ATV)",freq:"Ngày",pri:"Trung bình",why:"Giá trị trung bình mỗi giao dịch"},
+      {nhom:"Tồn kho",chi:"Inventory Shrinkage Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ thất thoát hàng hóa tại điểm bán"},
+    ],
+  };
+  return [...(byInd[slug]||[]),...common].slice(0,10);
 }
 
 function renderSuggestPanel(items){
@@ -1104,13 +1462,14 @@ Nhiệm vụ của bạn:
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-5-20250929',
         max_tokens:600,
         system:sysPrompt,
         messages:chatHistory
       })
     });
     const data=await res.json();
+    trackTokens(data.usage);
     const reply=data.content.map(c=>c.text||'').join('').trim();
     chatHistory.push({role:'assistant',content:reply});
     removeTyping();
@@ -1211,27 +1570,35 @@ async function searchIndustryKPI(){
   body.innerHTML='<div class="asp-loading"><div class="asp-spinner"></div><div style="font-size:11px;color:var(--gray-500)">Đang tìm KPI cho ngành '+q+'...</div></div>';
 
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
-  const prompt=`Bạn là chuyên gia SAP Analytics & Business Intelligence với 15 năm kinh nghiệm.
+  const existingKPIs=KPI_LIB.map(k=>k.chi).join(' | ');
+  const prompt=`Bạn là chuyên gia SAP Analytics & KPI Architecture với 15 năm kinh nghiệm doanh nghiệp Việt Nam.
 
-Hãy đề xuất 6–8 KPI quan trọng nhất cho ngành "${q}" trong bối cảnh doanh nghiệp Việt Nam triển khai SAP (modules: ${mods}).
+Ngành tìm kiếm: "${q}"
+SAP Modules: ${mods}
+KPI template hiện có (KHÔNG lặp lại): ${existingKPIs}
 
-Yêu cầu:
-- KPI phải thực tế, đo lường được từ hệ thống SAP
-- Phù hợp đặc thù ngành "${q}"
-- Mỗi KPI có lý do ngắn gọn tại sao quan trọng
+Yêu cầu: Đề xuất 10–12 KPI ĐẶC THÙ ngành "${q}" — KHÁC HOÀN TOÀN với template. Mỗi KPI phải:
+- Phản ánh nghiệp vụ đặc trưng của ngành "${q}"
+- Đo lường được từ SAP với modules: ${mods}
+- Có tên tiếng Việt rõ ràng (kèm tên kỹ thuật nếu cần)
 
-Trả lời ĐÚNG JSON (KHÔNG có text ngoài):
-[{"nhom":"Tên nhóm","chi":"Tên chỉ tiêu","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình","why":"Lý do 1 dòng"}]`;
+Trả lời CHỈ JSON array (không text ngoài):
+[{"nhom":"Nhóm nghiệp vụ đặc thù ngành","chi":"Tên KPI cụ thể","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình|Thấp","why":"Lý do đặc thù ngành trong 1 dòng"}]`;
 
   try{
     const res=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
+    trackTokens(data.usage);
     const txt=data.content.map(c=>c.text||'').join('');
     let items=[];
-    try{items=JSON.parse(txt.replace(/```json|```/g,'').trim());}catch{items=fallbackSuggest(q);}
+    try{
+      const m=txt.replace(/```json|```/g,'').match(/\[[\s\S]*\]/);
+      items=JSON.parse(m?m[0]:txt.trim());
+      if(!Array.isArray(items)||!items.length)throw new Error('empty');
+    }catch{items=fallbackSuggest(curIndustry);}
     suggestItems=items;
     renderSuggestPanel(items);
     toast(`Đã tìm ${items.length} KPI cho ngành ${q}`);
@@ -1657,138 +2024,258 @@ function genExcelXLSX(name,mods,kpis){
 function genDashboardSpec(name,kpis){
   const dt=new Date().toLocaleDateString('vi-VN');
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
-  const kpiMap={};kpis.forEach(k=>{kpiMap[k.chi.toLowerCase()]=k;});
 
+  /* ── deterministic hash for mock data ── */
+  function H(s,seed){
+    seed=seed||0;let h=seed+7;
+    for(let i=0;i<s.length;i++)h=(Math.imul(h,31)+s.charCodeAt(i))|0;
+    return Math.abs(h);
+  }
+
+  /* ── mock metric values ── */
+  function mock(n){
+    const h=H(n),nl=n.toLowerCase();
+    let v,u;
+    if(nl.includes('tỷ lệ')||nl.includes('oee')||nl.includes('rate')||nl.includes('%')){v=55+h%35;u='%';}
+    else if(nl.includes('doanh thu')||nl.includes('doanh số')){v=120+h%280;u='tỷ đ';}
+    else if(nl.includes('lợi nhuận')||nl.includes('ebit')){v=15+h%65;u='tỷ đ';}
+    else if(nl.includes('chi phí')||nl.includes('cost')){v=80+h%150;u='tỷ đ';}
+    else if(nl.includes('tồn kho')){v=45+h%120;u='tỷ đ';}
+    else if(nl.includes('đơn')||nl.includes('order')){v=1200+h%3800;u='đơn';}
+    else if(nl.includes('ngày')||nl.includes('dso')){v=18+h%42;u='ngày';}
+    else{v=50+h%200;u='tỷ đ';}
+    const tp=((H(n,1)%30)-14)/10;
+    const ty=((H(n,2)%50)-20)/10;
+    return{val:v>=1000?Math.round(v).toLocaleString('vi-VN'):v.toFixed(1),unit:u,
+           tp:tp.toFixed(1),ty:ty.toFixed(1),up:tp>=0,uy:ty>=0};
+  }
+
+  /* ── chart data helpers ── */
+  function barVals(n,base){return [0,1,2,3,4,5].map(function(_,i){return Math.round((base||60)*(0.72+H(n,i+20)%30/100));});}
+  function lineVals(n,base){return [0,1,2,3,4,5,6,7,8,9,10,11].map(function(_,i){return Math.round((base||60)*(0.68+H(n,i+30)%36/100));});}
+  function sparkVals(n){let v=50;return [0,1,2,3,4,5,6,7].map(function(_,i){v+=((H(n,i+5)%18)-8);v=Math.max(10,Math.min(90,v));return Math.round(v);});}
+
+  /* ── match KPIs ── */
   function matchKPIs(keywords){
-    return keywords.map(kw=>{
+    return keywords.map(function(kw){
       const lk=kw.toLowerCase();
-      const found=kpis.find(k=>k.chi.toLowerCase().includes(lk)||lk.includes(k.chi.toLowerCase().slice(0,8)));
-      if(found)return{name:found.chi,freq:found.freq,mods:found.mods||[],chart:assignChartType(found.chi,found.freq)};
-      return{name:kw,freq:'Tháng',mods:[],chart:assignChartType(kw,'Tháng')};
+      const found=kpis.find(function(k){return k.chi.toLowerCase().includes(lk)||lk.includes(k.chi.toLowerCase().slice(0,8));});
+      const item=found||{chi:kw,freq:'Tháng',mods:[],pri:'Trung bình'};
+      return{name:item.chi,freq:item.freq,mods:item.mods||[],mk:mock(item.chi),ct:assignChartType(item.chi,item.freq)};
     });
   }
 
+  const MONTHS6=['T7','T8','T9','T10','T11','T12'];
+  const MONTHS12=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  const BCOLS=['#005870','#C5D500','#00D4FF','#7fc4d6'];
+  const DCOLS=['#005870','#C5D500','#00D4FF','#7fc4d6','#a8c400'];
+  const allGroups=[...new Set(kpis.map(function(k){return k.nhom;}))].filter(Boolean).slice(0,5);
+  const groupCounts=allGroups.map(function(g){return kpis.filter(function(k){return k.nhom===g;}).length;});
+
   const lvMeta={
-    c:{title:'C-Level — CEO / CFO / COO',desc:'Góc nhìn chiến lược toàn công ty',accent:'#005870'},
-    d:{title:'D-Level — Director / VP',desc:'Vận hành và drill-down theo phòng ban',accent:'#007a9e'},
-    m:{title:'M-Level — Manager',desc:'Quản lý theo quy trình và tiến độ hàng ngày',accent:'#00D4FF'},
-    dept:{title:'Department — Chuyên viên',desc:'Chi tiết giao dịch và công việc hàng ngày',accent:'#C5D500'},
+    c:{title:'C-Level Dashboard',sub:'CEO · CFO · COO',color:'#005870'},
+    d:{title:'D-Level Dashboard',sub:'Director · VP',color:'#007a9e'},
+    m:{title:'M-Level Dashboard',sub:'Manager',color:'#0097b2'},
+    dept:{title:'Department Dashboard',sub:'Chuyên viên',color:'#2e7d32'},
   };
 
-  let dashSections='';
-  Object.entries(DASH_TMPL).forEach(([lv,dashes])=>{
-    const meta=lvMeta[lv];
-    dashSections+=`<section class="level-section">
-<div class="level-header" style="border-left:5px solid ${meta.accent}">
-  <h2>${meta.title}</h2><p class="level-desc">${meta.desc}</p>
-</div>`;
-    dashes.forEach(d=>{
+  let dashHTML='';
+  let chartJS='Chart.defaults.font.family="Montserrat,sans-serif";\n';
+
+  Object.entries(DASH_TMPL).forEach(function(entry,lvIdx){
+    const lv=entry[0],dashes=entry[1],meta=lvMeta[lv];
+
+    /* level divider */
+    dashHTML+='<div style="background:'+meta.color+';padding:64px 48px;text-align:center;color:#fff;font-family:Montserrat,sans-serif">'
+      +'<div style="font-size:18px;font-weight:700;opacity:.65;margin-bottom:14px">Citek<span style="color:#C5D500">\'</span></div>'
+      +'<div style="font-size:32px;font-weight:700;margin-bottom:8px">'+meta.title+'</div>'
+      +'<div style="font-size:15px;opacity:.7;margin-bottom:18px">'+meta.sub+'</div>'
+      +'<div style="display:inline-block;font-size:11px;background:rgba(255,255,255,.15);padding:5px 18px;border-radius:20px">'+dashes.length+' Dashboards</div>'
+      +'</div>';
+
+    dashes.forEach(function(d,dIdx){
       const matched=matchKPIs(d.kpis);
-      // Wireframe grid
-      let widgets='';
-      matched.forEach((m,i)=>{
-        const span=m.chart.w===2?'span 2':'span 1';
-        widgets+=`<div class="widget" style="grid-column:${span};border-top:3px solid ${m.chart.color}">
-  <div class="widget-icon">${m.chart.icon}</div>
-  <div class="widget-info">
-    <div class="widget-type">${m.chart.type}</div>
-    <div class="widget-name">${m.name}</div>
-    <div class="widget-freq">${m.freq}</div>
-  </div>
-</div>`;
+      const cards=matched.slice(0,Math.min(4,matched.length));
+      const m0=matched[0];
+      const mainId='c'+lvIdx+'_'+dIdx+'_m';
+      const secId='c'+lvIdx+'_'+dIdx+'_s';
+      const spIds=cards.map(function(_,k){return 'c'+lvIdx+'_'+dIdx+'_k'+k;});
+
+      /* KPI cards */
+      let kpiHTML='';
+      cards.forEach(function(m,k){
+        const mk=m.mk;
+        kpiHTML+='<div class="kpi" style="border-top-color:'+BCOLS[k%4]+'">'
+          +'<div class="kpi-label">'+m.name+'</div>'
+          +'<div class="kpi-value" style="color:'+BCOLS[k%4]+'">'+mk.val+'</div>'
+          +'<div class="kpi-sub">'+mk.unit+'&nbsp;·&nbsp;'+m.freq+'</div>'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:6px">'
+          +'<div><span class="kpi-badge '+(mk.up?'badge-up':'badge-dn')+'">'+(mk.up?'▲':'▼')+' '+Math.abs(mk.tp)+'%</span>'
+          +'<div style="font-size:9px;color:#aaa;margin-top:2px">vs kỳ trước</div></div>'
+          +'<canvas id="'+spIds[k]+'" height="32" style="flex:1;max-width:88px"></canvas>'
+          +'</div></div>';
       });
 
-      // Mapping table
-      let tableRows='';
-      matched.forEach(m=>{
-        tableRows+=`<tr>
-  <td>${m.name}</td><td>${m.chart.type}</td><td>${m.freq}</td>
-  <td>${m.mods.join(', ')||'—'}</td>
-</tr>`;
+      /* detail table rows */
+      let trows='';
+      matched.forEach(function(m){
+        const mk=m.mk;
+        trows+='<tr>'
+          +'<td>'+m.name+'</td>'
+          +'<td><strong>'+mk.val+'</strong> <span style="font-size:10px;color:#999">'+mk.unit+'</span></td>'
+          +'<td style="color:'+(mk.up?'#2e7d32':'#c62828')+';font-weight:600">'+(mk.up?'▲':'▼')+' '+Math.abs(mk.tp)+'%</td>'
+          +'<td style="color:'+(mk.uy?'#2e7d32':'#c62828')+';font-weight:600">'+(mk.uy?'▲':'▼')+' '+Math.abs(mk.ty)+'%</td>'
+          +'<td>'+m.freq+'</td>'
+          +'<td style="color:#666;font-size:10px">'+m.ct.type+'</td>'
+          +'</tr>';
       });
 
-      dashSections+=`
-<div class="dash-section">
-  <div class="dash-header">
-    <div class="dash-type">${d.type}</div>
-    <h3>${d.name}</h3>
-    <p>${d.desc}</p>
-  </div>
-  <div class="wireframe-label">Layout đề xuất</div>
-  <div class="wireframe-grid">${widgets}</div>
-  <div class="mapping-label">KPI Mapping</div>
-  <table class="mapping-table">
-    <thead><tr><th>KPI</th><th>Chart Type</th><th>Tần suất</th><th>SAP Source</th></tr></thead>
-    <tbody>${tableRows}</tbody>
-  </table>
-</div>`;
+      /* custom legend (citek-skill: legend.display=false, dùng HTML ngoài) */
+      const lgnd='<div style="display:flex;gap:14px;margin-bottom:8px">'
+        +'<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:#666"><span style="width:10px;height:10px;border-radius:2px;background:'+meta.color+';display:inline-block"></span>Kỳ này</span>'
+        +'<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:#666"><span style="width:10px;height:10px;border-radius:2px;background:#C5D500;display:inline-block"></span>Cùng kỳ</span>'
+        +'<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:#666"><span style="width:22px;height:2px;background:#00D4FF;display:inline-block;border-radius:1px"></span>Trend</span>'
+        +'</div>';
+
+      const donutLgnd=allGroups.length?('<div style="margin-top:10px">'+allGroups.map(function(g,i){
+        return '<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#555;margin-bottom:4px;font-weight:400">'
+          +'<span style="width:8px;height:8px;border-radius:50%;background:'+DCOLS[i%5]+';display:inline-block;flex-shrink:0"></span>'+g+'</div>';
+      }).join('')+'</div>'):'';
+
+      /* dashboard screen (citek-skill layout) */
+      dashHTML+='<div class="dash">'
+        +'<div class="header" style="background:'+meta.color+'">'
+        +'<div class="logo">Citek<span>\'</span></div>'
+        +'<div class="header-title">'+d.name+'<small>'+meta.sub+'&nbsp;·&nbsp;'+d.type+'</small></div>'
+        +'<div style="text-align:right"><span style="color:rgba(255,255,255,.65);font-size:11px;font-weight:400">'+name+'</span><br>'
+        +'<span style="color:rgba(255,255,255,.45);font-size:10px;font-weight:400">'+dt+'</span></div>'
+        +'</div>'
+        +'<div class="filter-bar">'
+        +'<span style="font-size:11px;font-weight:600;color:#005870">Kỳ báo cáo:</span>'
+        +'<button style="background:#005870;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:10px;font-family:Montserrat,sans-serif;font-weight:500;cursor:pointer">Tháng</button>'
+        +'<button style="background:#fff;color:#666;border:1.5px solid #E0E0E0;border-radius:4px;padding:3px 11px;font-size:10px;font-family:Montserrat,sans-serif;font-weight:500;cursor:pointer">Quý</button>'
+        +'<button style="background:#fff;color:#666;border:1.5px solid #E0E0E0;border-radius:4px;padding:3px 11px;font-size:10px;font-family:Montserrat,sans-serif;font-weight:500;cursor:pointer">Năm</button>'
+        +'<span style="margin-left:auto;font-size:10px;color:#999;font-weight:400">SAP: '+mods+'</span>'
+        +'</div>'
+        +'<div class="kpi-row" style="grid-template-columns:repeat('+cards.length+',1fr)">'+kpiHTML+'</div>'
+        +'<div style="display:grid;grid-template-columns:1fr 300px;gap:12px;padding:0 20px 14px">'
+        +'<div class="chart-card">'
+        +'<div class="chart-title">'+m0.name+' &mdash; Xu hướng theo tháng</div>'
+        +'<div class="chart-unit">So sánh kỳ này vs cùng kỳ năm ngoái &nbsp;·&nbsp; Trend 12 tháng</div>'
+        +lgnd
+        +'<div style="height:170px"><canvas id="'+mainId+'"></canvas></div>'
+        +'</div>'
+        +'<div class="chart-card">'
+        +'<div class="chart-title">Phân bổ nhóm nghiệp vụ</div>'
+        +'<div class="chart-unit">Tỷ trọng KPI đã chọn</div>'
+        +'<div style="height:118px;margin-top:10px"><canvas id="'+secId+'"></canvas></div>'
+        +donutLgnd
+        +'</div>'
+        +'</div>'
+        +'<div style="padding:0 20px 20px">'
+        +'<div style="background:#005870;color:#fff;font-size:11px;font-weight:600;padding:8px 12px;letter-spacing:.5px;text-transform:uppercase;border-radius:4px 4px 0 0">Chi tiết KPI &mdash; '+d.name+'</div>'
+        +'<table class="tbl"><thead><tr><th>Chỉ tiêu KPI</th><th>Giá trị</th><th>vs Kỳ trước</th><th>vs Cùng kỳ</th><th>Tần suất</th><th>Chart type</th></tr></thead>'
+        +'<tbody>'+trows+'</tbody></table>'
+        +'</div>'
+        +'<div class="dash-footer">'
+        +'<span>\u00a9 2025 <strong>Citek\'</strong> \u2014 Data Analytics &amp; AI Center</span>'
+        +'<span>Powered by <strong>SAP &amp; AI</strong></span>'
+        +'</div>'
+        +'</div>';
+
+      /* Chart.js inits */
+      const base=m0.mk.raw;
+      const bv=barVals(m0.name,base);
+      const bvPrev=bv.map(function(v){return Math.round(v*(0.82+H(m0.name,99)%20/100));});
+      const lv12=lineVals(m0.name,base);
+
+      chartJS+='(function(){var el=document.getElementById("'+mainId+'");if(!el)return;'
+        +'new Chart(el,{type:"bar",data:{labels:'+JSON.stringify(MONTHS6)+','
+        +'datasets:['
+        +'{type:"bar",label:"Ky nay",data:'+JSON.stringify(bv)+',backgroundColor:"'+meta.color+'",borderRadius:3,order:2},'
+        +'{type:"bar",label:"Cung ky",data:'+JSON.stringify(bvPrev)+',backgroundColor:"#C5D500",borderRadius:3,order:3},'
+        +'{type:"line",label:"Trend",data:'+JSON.stringify(lv12.slice(6))+',borderColor:"#00D4FF",borderWidth:2,pointRadius:3,pointBackgroundColor:"#00D4FF",fill:false,tension:0.3,order:1}'
+        +']},options:{responsive:true,maintainAspectRatio:false,'
+        +'plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:10},bodyFont:{family:"Montserrat",size:10}}},'
+        +'scales:{x:{grid:{display:false},ticks:{font:{family:"Montserrat",size:9},color:"#999"}},'
+        +'y:{grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{family:"Montserrat",size:9},color:"#999"}}}'
+        +'}});})();\n';
+
+      if(allGroups.length){
+        chartJS+='(function(){var el=document.getElementById("'+secId+'");if(!el)return;'
+          +'new Chart(el,{type:"doughnut",data:{labels:'+JSON.stringify(allGroups)+','
+          +'datasets:[{data:'+JSON.stringify(groupCounts)+',backgroundColor:'+JSON.stringify(DCOLS.slice(0,allGroups.length))+',borderWidth:0,hoverOffset:4}]},'
+          +'options:{responsive:true,maintainAspectRatio:false,cutout:"60%",'
+          +'plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:10},bodyFont:{family:"Montserrat",size:10}}}'
+          +'}'
+          +'});})();\n';
+      }
+
+      cards.forEach(function(m,k){
+        const sv=sparkVals(m.name);
+        const up=m.mk.up;
+        const spColor=up?'#2e7d32':'#c62828';
+        const spBg=up?'rgba(46,125,50,0.08)':'rgba(198,40,40,0.08)';
+        chartJS+='(function(){var el=document.getElementById("'+spIds[k]+'");if(!el)return;'
+          +'new Chart(el,{type:"line",data:{labels:["","","","","","","",""],'
+          +'datasets:[{data:'+JSON.stringify(sv)+',borderColor:"'+spColor+'",borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:"'+spBg+'"}]},'
+          +'options:{responsive:true,maintainAspectRatio:false,'
+          +'plugins:{legend:{display:false},tooltip:{enabled:false}},'
+          +'scales:{x:{display:false},y:{display:false}}'
+          +'}'
+          +'});})();\n';
+      });
     });
-    dashSections+=`</section>`;
   });
 
-  return `<!DOCTYPE html>
-<html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard Specification — ${name}</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Montserrat',sans-serif;background:#f5f5f5;color:#333}
-.cover{background:linear-gradient(135deg,#005870,#003d4f);color:white;padding:60px 48px;text-align:center}
-.cover h1{font-size:32px;margin-bottom:6px;font-weight:700}
-.cover .sub{font-size:15px;opacity:.8;margin-bottom:20px}
-.cover .logo{font-size:24px;font-weight:700;margin-bottom:28px}.cover .logo span{color:#C5D500}
-.cover .meta{display:flex;justify-content:center;gap:24px;font-size:12px;opacity:.65}
-.cover .meta div{display:flex;align-items:center;gap:6px}
-.container{max-width:1000px;margin:0 auto;padding:32px 24px}
-.toc{background:white;border-radius:12px;border-top:4px solid #005870;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px;margin-bottom:32px}
-.toc h2{font-size:16px;color:#005870;margin-bottom:14px}
-.toc-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;border-bottom:1px solid #f0f0f0}
-.toc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.level-section{margin-bottom:40px}
-.level-header{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:20px 24px;margin-bottom:20px}
-.level-header h2{font-size:20px;color:#005870;margin-bottom:4px}
-.level-desc{font-size:12px;color:#666}
-.dash-section{background:white;border-radius:12px;border-top:4px solid #005870;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:24px;margin-bottom:16px}
-.dash-header{margin-bottom:16px}
-.dash-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#999;margin-bottom:4px}
-.dash-header h3{font-size:16px;color:#005870;margin-bottom:4px}
-.dash-header p{font-size:12px;color:#666}
-.wireframe-label,.mapping-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#005870;margin:16px 0 8px;padding-left:2px}
-.wireframe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:#f8f9fa;border-radius:8px;padding:14px;border:1.5px dashed #ddd}
-.widget{background:white;border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:flex-start;gap:10px;min-height:70px}
-.widget-icon{font-size:20px;width:36px;height:36px;background:rgba(0,88,112,.06);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.widget-info{flex:1;min-width:0}
-.widget-type{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#999}
-.widget-name{font-size:11px;font-weight:600;color:#333;margin:2px 0;line-height:1.3}
-.widget-freq{font-size:9px;color:#005870;font-weight:500}
-.mapping-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
-.mapping-table th{background:#005870;color:white;padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.mapping-table th:first-child{border-radius:6px 0 0 0}.mapping-table th:last-child{border-radius:0 6px 0 0}
-.mapping-table td{padding:8px 12px;border-bottom:1px solid #f0f0f0}
-.mapping-table tr:hover td{background:rgba(0,88,112,.02)}
-footer{text-align:center;color:#999;font-size:11px;margin-top:40px;padding:20px;border-top:1px solid #e0e0e0}
-@media print{body{background:white}.cover{page-break-after:always}.level-section{page-break-before:always}.dash-section{page-break-inside:avoid}}
-</style></head><body>
-<div class="cover">
-  <div class="logo">Citek<span>'</span></div>
-  <h1>Dashboard Specification</h1>
-  <div class="sub">${name}</div>
-  <div class="meta">
-    <div>Ngành: ${curIndustry}</div>
-    <div>SAP: ${mods}</div>
-    <div>${dt}</div>
-  </div>
-</div>
-<div class="container">
-  <div class="toc">
-    <h2>Mục lục — ${Object.values(DASH_TMPL).flat().length} Dashboards × 4 Levels</h2>
-    ${Object.entries(lvMeta).map(([lv,m])=>`
-    <div class="toc-item"><div class="toc-dot" style="background:${m.accent}"></div><strong>${m.title}</strong> — ${DASH_TMPL[lv].length} dashboards</div>`).join('')}
-  </div>
-  ${dashSections}
-  <footer>Generated by KPI Advisor — Citek' — ${dt}</footer>
-</div>
-</body></html>`;
+  /* ── CSS (citek-skill.ts exact classes) ── */
+  const css='*{box-sizing:border-box;margin:0;padding:0}'
+    +'body,html{font-family:\'Montserrat\',sans-serif;background:#F5F5F5}'
+    +'.dash{background:#F5F5F5;font-family:\'Montserrat\',sans-serif;border-bottom:12px solid #F5F5F5}'
+    +'.header{background:#005870;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}'
+    +'.logo{color:#fff;font-size:20px;font-weight:700}'
+    +'.logo span{color:#C5D500}'
+    +'.header-title{color:#fff;font-size:14px;font-weight:600;text-align:center}'
+    +'.header-title small{display:block;color:rgba(255,255,255,0.7);font-size:11px;font-weight:400;margin-top:2px}'
+    +'.filter-bar{background:#fff;border-bottom:2px solid #C5D500;padding:8px 20px;display:flex;gap:10px;align-items:center}'
+    +'.kpi-row{padding:14px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}'
+    +'.kpi{background:#fff;border-radius:8px;padding:14px 16px;border-top:3px solid #005870}'
+    +'.kpi-label{font-size:10px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;line-height:1.3;margin-bottom:6px}'
+    +'.kpi-value{font-size:28px;font-weight:700;color:#005870;margin:0 0 2px}'
+    +'.kpi-sub{font-size:11px;color:#888;font-weight:400}'
+    +'.kpi-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}'
+    +'.badge-up{background:#e8f5e9;color:#2e7d32}'
+    +'.badge-dn{background:#fde8e8;color:#c62828}'
+    +'.chart-card{background:#fff;border-radius:8px;padding:16px}'
+    +'.chart-title{font-size:12px;font-weight:600;color:#005870}'
+    +'.chart-unit{font-size:10px;color:#888;font-weight:400;margin-top:2px;margin-bottom:6px}'
+    +'.tbl{width:100%;border-collapse:collapse;font-size:11px}'
+    +'.tbl th{background:#005870;color:#fff;padding:7px 10px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.4px}'
+    +'.tbl td{padding:7px 10px;border-bottom:1px solid #f0f0f0;color:#333;font-weight:400}'
+    +'.tbl tr:hover td{background:#f9fafc}'
+    +'.dash-footer{background:#005870;padding:8px 20px;display:flex;justify-content:space-between;align-items:center}'
+    +'.dash-footer span{color:rgba(255,255,255,0.6);font-size:10px;font-weight:400}'
+    +'.dash-footer strong{color:#C5D500}'
+    +'@media print{body{background:#fff}.dash{page-break-before:always;page-break-inside:avoid}}';
+
+  return '<!DOCTYPE html><html lang="vi"><head>'
+    +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    +'<title>Dashboard Specification \u2014 '+name+'</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">'
+    +'<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>'
+    +'<style>'+css+'</style>'
+    +'</head><body>'
+    +'<div style="background:linear-gradient(135deg,#003d4f,#005870);padding:80px 60px;text-align:center;color:#fff;border-bottom:5px solid #C5D500;font-family:Montserrat,sans-serif">'
+    +'<div style="font-size:28px;font-weight:700;margin-bottom:14px">Citek<span style="color:#C5D500">\'</span></div>'
+    +'<div style="font-size:38px;font-weight:700;letter-spacing:-1px;margin-bottom:10px">Dashboard Specification</div>'
+    +'<div style="font-size:20px;opacity:.8;margin-bottom:28px">'+name+'</div>'
+    +'<div style="display:inline-flex;gap:20px;font-size:12px;font-weight:400;background:rgba(0,0,0,.22);padding:10px 24px;border-radius:30px">'
+    +'<span>Ng\u00e0nh: '+curIndustry+'</span><span>SAP: '+mods+'</span><span>'+dt+'</span>'
+    +'<span>'+Object.values(DASH_TMPL).flat().length+' Dashboards</span></div>'
+    +'</div>'
+    +dashHTML
+    +'<script>'+chartJS+'<\/script>'
+    +'</body></html>';
 }
 
 /* ════════════════════════════════════
