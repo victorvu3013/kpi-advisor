@@ -48,6 +48,14 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
 .step2-main{min-width:0;}
 .step2-sidebar{position:sticky;top:74px;display:flex;flex-direction:column;gap:16px;}
 
+/* ─── SAP MODULE GROUPS ─── */
+.mod-sections{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.mod-sec{background:var(--gray-50);border-radius:8px;padding:8px 10px;}
+.mod-sec-lbl{font-size:9px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.mod-sec .prow{margin-top:0;}
+button.pb.ai-mod{position:relative;}
+button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;background:var(--cyan);color:#fff;font-size:7px;font-weight:700;border-radius:4px;padding:1px 3px;line-height:1.2;}
+
 /* PAGE HEADER */
 .ph{margin-bottom:22px;}
 .ph h1{font-size:24px;font-weight:700;color:var(--teal);line-height:1.2;}
@@ -390,16 +398,47 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
         </select>
       </div>
       <div class="fgl"><label>SAP Module đang dùng</label>
-        <div class="prow" id="sap-mods">
-          <button class="pb" onclick="togBtn(this)">FI-GL</button>
-          <button class="pb" onclick="togBtn(this)">FI-AR</button>
-          <button class="pb" onclick="togBtn(this)">FI-CO</button>
-          <button class="pb" onclick="togBtn(this)">SD</button>
-          <button class="pb" onclick="togBtn(this)">MM</button>
-          <button class="pb" onclick="togBtn(this)">PP</button>
-          <button class="pb" onclick="togBtn(this)">QM</button>
-          <button class="pb" onclick="togBtn(this)">PM</button>
-          <button class="pb" onclick="togBtn(this)">Treasury</button>
+        <div id="sap-mods" class="mod-sections">
+          <div class="mod-sec">
+            <div class="mod-sec-lbl">Finance &amp; Controlling</div>
+            <div class="prow">
+              <button class="pb" onclick="togMod(this,'FI-GL')">FI-GL</button>
+              <button class="pb" onclick="togMod(this,'FI-AR')">FI-AR</button>
+              <button class="pb" onclick="togMod(this,'FI-AP')">FI-AP</button>
+              <button class="pb" onclick="togMod(this,'FI-AA')">FI-AA</button>
+              <button class="pb" onclick="togMod(this,'FI-CO')">FI-CO</button>
+              <button class="pb" onclick="togMod(this,'CO-PA')">CO-PA</button>
+              <button class="pb" onclick="togMod(this,'CO-PC')">CO-PC</button>
+              <button class="pb" onclick="togMod(this,'Treasury')">Treasury/TRM</button>
+              <button class="pb" onclick="togMod(this,'GRC')">GRC</button>
+            </div>
+          </div>
+          <div class="mod-sec">
+            <div class="mod-sec-lbl">Sales, Operations &amp; Supply Chain</div>
+            <div class="prow">
+              <button class="pb" onclick="togMod(this,'SD')">SD</button>
+              <button class="pb" onclick="togMod(this,'MM')">MM</button>
+              <button class="pb" onclick="togMod(this,'PP')">PP</button>
+              <button class="pb" onclick="togMod(this,'PP-PI')">PP-PI</button>
+              <button class="pb" onclick="togMod(this,'QM')">QM</button>
+              <button class="pb" onclick="togMod(this,'PM')">PM/EAM</button>
+              <button class="pb" onclick="togMod(this,'WM')">WM/EWM</button>
+              <button class="pb" onclick="togMod(this,'PS')">PS</button>
+              <button class="pb" onclick="togMod(this,'EHS')">EHS</button>
+            </div>
+          </div>
+          <div class="mod-sec">
+            <div class="mod-sec-lbl">Procurement, HR &amp; Analytics</div>
+            <div class="prow">
+              <button class="pb" onclick="togMod(this,'Ariba')">Ariba</button>
+              <button class="pb" onclick="togMod(this,'SCM')">SCM/IBP</button>
+              <button class="pb" onclick="togMod(this,'CX')">CX/CRM</button>
+              <button class="pb" onclick="togMod(this,'HCM')">HCM/SF</button>
+              <button class="pb" onclick="togMod(this,'SAC')">SAC</button>
+              <button class="pb" onclick="togMod(this,'BTP')">BTP</button>
+              <button class="pb" onclick="togMod(this,'BW')">BW/4HANA</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="fgl ff"><label>Mục tiêu phân tích chính</label>
@@ -768,6 +807,17 @@ let maxStep = 1;         // highest step reached
 /* ─── HELPERS ─── */
 function selInd(el,v){document.querySelectorAll('.ic').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');curIndustry=v;}
 function togBtn(btn){btn.classList.toggle('sel');}
+
+/* Modules with KPIs in KPI_LIB */
+const MODS_WITH_KPI=new Set(['FI-GL','FI-AR','FI-CO','FI','SD','MM','PP','QM','PM','Treasury']);
+
+function togMod(btn,mod){
+  btn.classList.toggle('sel');
+  /* Visual hint: modules without template KPIs get AI badge */
+  if(!MODS_WITH_KPI.has(mod)){
+    btn.classList.toggle('ai-mod',btn.classList.contains('sel'));
+  }
+}
 function toast(msg){const t=document.getElementById('toastEl');document.getElementById('toast-txt').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function getTime(){const d=new Date();return d.getHours()+':'+(d.getMinutes()+'').padStart(2,'0');}
 
@@ -951,30 +1001,39 @@ function updStats(){
 const SKILL_INDUSTRY_RESEARCH = `Skill nghiên cứu ngành phục vụ đánh giá đầu tư SAP S/4HANA
 
 VAI TRÒ
-Bạn đóng vai chuyên gia nghiên cứu ngành và phân tích mô hình vận hành. Nhiệm vụ là làm rõ ngành hoạt động, mô hình kinh doanh, cấu trúc vận hành, chuỗi giá trị, bức tranh cạnh tranh, các yếu tố tạo ra giá trị, điểm yếu vận hành điển hình, áp lực từ bên ngoài và bộ tài liệu tham chiếu đáng tin của doanh nghiệp mục tiêu — trước khi bắt đầu bất kỳ phân tích KPI hay ROI nào.
+Bạn đóng vai chuyên gia nghiên cứu ngành và phân tích mô hình vận hành, phục vụ cho việc xây dựng luận điểm đầu tư ERP. Nhiệm vụ là làm rõ ngành hoạt động, mô hình kinh doanh, cấu trúc vận hành, chuỗi giá trị, bức tranh cạnh tranh, các yếu tố tạo ra giá trị, điểm yếu vận hành điển hình, áp lực từ bên ngoài và bộ tài liệu tham chiếu đáng tin của doanh nghiệp mục tiêu — trước khi bắt đầu bất kỳ phân tích KPI hay ROI nào.
+
+MỤC TIÊU
+Xây dựng nền tảng nghiên cứu ngành và mô hình vận hành đủ tin cậy để các bước phân tích tiếp theo có thể dùng trực tiếp — thiết kế KPI, xác định yếu tố tạo giá trị, lượng hóa lợi ích đầu tư — mà không phải quay lại tìm hiểu bản chất ngành và logic vận hành từ đầu.
 
 NGUYÊN TẮC CỐT LÕI
 - Ưu tiên độ chính xác hơn độ đầy đủ
 - Khi thiếu bằng chứng, để trống có kiểm soát thay vì tự điền
 - Không biến đặc điểm chung của ngành thành sự thật của doanh nghiệp
+- Không nâng suy luận thành kết luận đã xác nhận
 - Mọi kết luận quan trọng phải truy ngược được về nguồn, nhãn bằng chứng và mức tin cậy
 
-NHÃN BẰNG CHỨNG: [F] Fact | [B] Benchmark | [I] Inference | [P] Proxy | [A] Assumption | [U] Unknown
+NHÃN BẰNG CHỨNG
+[F] Dữ kiện xác nhận từ tài liệu gốc
+[B] Số liệu tham chiếu ngành đáng tin, chưa xác nhận ở cấp doanh nghiệp
+[I] Suy luận từ nhiều điểm bằng chứng
+[P] Ước tính có cơ sở, nêu rõ giới hạn
+[A] Giả định chờ xác minh
+[U] Chưa biết / chưa đủ bằng chứng
 
 10 CÂU HỎI BẮT BUỘC PHẢI TRẢ LỜI
-1. Doanh nghiệp thuộc ngành và phân ngành nào
-2. Mô hình vận hành thực tế là gì — không chỉ là tên ngành
-3. Bức tranh cạnh tranh ngành như thế nào — áp lực từ đâu, rào cản ra sao
-4. Chuỗi giá trị của mô hình này vận hành ra sao
-5. Các yếu tố tạo ra giá trị chính về vận hành và tài chính là gì
-6. Điểm yếu vận hành phổ biến của mô hình này là gì
-7. Áp lực bên ngoài nào đang thúc đẩy nhu cầu đầu tư ERP
-8. SAP module nào phù hợp nhất với mô hình này
-9. Nguồn tham chiếu nào đáng tin cho bối cảnh này
+1. Doanh nghiệp thực sự là pháp nhân nào — tên đầy đủ, loại hình, có phải tập đoàn không
+2. Doanh nghiệp thuộc ngành và phân ngành nào
+3. Mô hình vận hành thực tế là gì — không chỉ là tên ngành
+4. Bức tranh cạnh tranh ngành như thế nào — áp lực từ đâu, rào cản ra sao
+5. Chuỗi giá trị của mô hình này vận hành ra sao
+6. Các yếu tố tạo ra giá trị chính về vận hành và tài chính là gì
+7. Điểm yếu vận hành phổ biến của mô hình này là gì
+8. Áp lực bên ngoài nào đang thúc đẩy nhu cầu đầu tư ERP
+9. SAP module nào phù hợp nhất với mô hình này
 10. Giới hạn, lưu ý hoặc rủi ro diễn giải nào cần giữ lại cho bước sau
 
-ĐẦU RA: Hồ sơ ngành | Phân loại mô hình kinh doanh | Bản đồ chuỗi giá trị | Bản đồ yếu tố tạo giá trị | Bản đồ điểm yếu vận hành | Lý do đầu tư ERP
-
+ĐIỀU KIỆN CHUYỂN SANG BƯỚC TIẾP THEO
 Khi đủ điều kiện, ghi rõ: "Triggering KPI & Value Driver Skill because industry foundation is now sufficient for KPI architecture."`;
 
 /* ── citek-skills.ts: KPI_VALUE_DRIVER_PROMPT ── */
@@ -983,9 +1042,11 @@ const SKILL_KPI_VALUE_DRIVER = `Skill KPI & Value Driver cho Business Case SAP S
 VAI TRÒ
 Bạn là kiến trúc sư KPI và chuyên gia phân tích yếu tố tạo giá trị. Nhiệm vụ là biến hiểu biết về ngành và mô hình kinh doanh thành bộ KPI cấp lãnh đạo, xác định đúng KPI mà ban lãnh đạo thực sự quan tâm, chuẩn hóa định nghĩa KPI, xây chuỗi nhân quả từ hiệu suất quy trình đến kết quả kinh doanh, và xác định phần giá trị nào SAP S/4HANA có thể tác động một cách thực tế.
 
-Bạn không được bịa đặt benchmark. Bạn phải làm việc như một value advisory architect — tư vấn giá trị trung lập.
-
-FRAMEWORK: Balanced Scorecard (4 perspectives) | Value Driver Tree | APQC Process Classification Framework | KPI Tree / ROKS Methodology | SAP Value Lifecycle Manager
+FRAMEWORK THAM CHIẾU
+1. Balanced Scorecard — 4 perspectives: Tài chính, Khách hàng, Quy trình nội bộ, Học hỏi & Phát triển
+2. Value Driver Tree — phân rã Revenue/Margin/Cash Flow → driver → sub-driver → KPI
+3. APQC Process Classification Framework — KPI chuẩn ngành
+4. SAP Value Lifecycle Manager — benchmark từ khách hàng SAP
 
 NHÃN BẰNG CHỨNG: [F] Fact | [B] Benchmark | [P] Proxy | [A] Assumption | [I] Inference
 
@@ -1018,6 +1079,9 @@ async function loadSuggestPanel(){
   const objs=Array.from(document.querySelectorAll('#objectives .sel')).map(b=>b.textContent).join(', ')||'Chưa xác định';
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
   const existingKPIs=KPI_LIB.map(k=>k.chi).join(' | ');
+  /* Detect selected modules that have NO KPIs in library */
+  const selMods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent);
+  const missingMods=selMods.filter(m=>!MODS_WITH_KPI.has(m.replace('/TRM','').replace('/EAM','').replace('/IBP','').replace('/SF','').replace('/4HANA','').split('/')[0]));
   const body=document.getElementById('asp-body');
 
   function setLoading(step,msg){
@@ -1073,6 +1137,7 @@ async function loadSuggestPanel(){
           +'- Mỗi KPI phải KHÁC HOÀN TOÀN với template đã có\n'
           +'- Phản ánh đặc thù riêng của ngành '+indLabel+' (không phải KPI chung chung)\n'
           +'- Liên kết với SAP modules: '+mods+'\n'
+          +(missingMods.length?'- ƯU TIÊN đề xuất KPI cho các modules chưa có trong template: '+missingMods.join(', ')+'\n':'')
           +'- Phù hợp mục tiêu: '+objs+'\n\n'
           +'Trả lời CHỈ JSON array, không text ngoài:\n'
           +'[{"nhom":"Nhóm nghiệp vụ đặc thù ngành","chi":"Tên KPI cụ thể","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình|Thấp","why":"Lý do đặc thù ngành trong 1 dòng"}]'
