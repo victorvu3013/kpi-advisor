@@ -255,6 +255,52 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
 .toast{position:fixed;bottom:22px;right:22px;background:var(--teal);color:white;padding:11px 18px;border-radius:var(--r);font-size:12px;font-weight:500;box-shadow:var(--s3);transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999;display:flex;align-items:center;gap:7px;max-width:320px;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);flex-shrink:0;}
+
+/* CLICKABLE NAV DOTS */
+.s-dot.done{cursor:pointer;transition:transform .15s;}
+.s-dot.done:hover{transform:scale(1.15);box-shadow:0 0 0 3px rgba(197,213,0,.3);}
+.s-lbl.clickable{cursor:pointer;}
+.s-lbl.clickable:hover{color:var(--teal);}
+
+/* DRAFT BANNER */
+.draft-banner{background:linear-gradient(135deg,rgba(0,88,112,.06),rgba(197,213,0,.08));border:1.5px solid rgba(0,88,112,.15);border-radius:var(--rl);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;animation:fi .3s ease;}
+.draft-icon{width:40px;height:40px;background:var(--teal);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.draft-icon svg{width:20px;height:20px;fill:white;}
+.draft-info{flex:1;}
+.draft-info h4{font-size:13px;font-weight:700;color:var(--teal);margin-bottom:2px;}
+.draft-info p{font-size:11px;color:var(--gray-600);}
+.draft-actions{display:flex;gap:8px;}
+
+/* INDUSTRY SEARCH */
+.ind-search-box{margin-bottom:14px;position:relative;}
+.ind-search-row{display:flex;gap:6px;}
+.ind-search-inp{flex:1;border:1.5px solid var(--gray-200);border-radius:var(--r);padding:8px 11px;font-family:var(--font);font-size:11px;outline:none;transition:border-color .2s;}
+.ind-search-inp:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(0,88,112,.08);}
+.ind-search-btn{padding:8px 14px;border:none;border-radius:var(--r);background:var(--teal);color:white;font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .2s;}
+.ind-search-btn:hover{background:var(--teal-light);}
+.ind-search-btn:disabled{background:var(--gray-200);cursor:not-allowed;}
+.ind-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.ind-tag{padding:3px 9px;border-radius:10px;border:1px solid var(--gray-200);font-size:10px;font-weight:500;color:var(--gray-600);cursor:pointer;background:white;transition:all .15s;font-family:var(--font);}
+.ind-tag:hover{border-color:var(--teal);color:var(--teal);background:rgba(0,88,112,.04);}
+
+/* EXPORT */
+.export-progress{margin-top:18px;}
+.ep-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--gray-100);border-radius:var(--r);margin-bottom:6px;font-size:12px;transition:all .2s;}
+.ep-item.done{border-color:rgba(197,213,0,.4);background:rgba(197,213,0,.04);}
+.ep-item.active{border-color:var(--teal);background:rgba(0,88,112,.03);}
+.ep-item.error{border-color:#e74c3c;background:rgba(231,76,60,.04);}
+.ep-status{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.ep-status.pending{background:var(--gray-100);color:var(--gray-500);}
+.ep-status.spinning{background:var(--teal);color:white;animation:spin .7s linear infinite;}
+.ep-status.ok{background:var(--lime);color:var(--teal-dark);}
+.ep-status.err{background:#e74c3c;color:white;}
+.ep-name{flex:1;font-weight:500;}
+.ep-dl{padding:4px 12px;border:none;border-radius:6px;background:var(--teal);color:white;font-family:var(--font);font-size:10px;font-weight:600;cursor:pointer;transition:background .2s;}
+.ep-dl:hover{background:var(--teal-light);}
+
+/* SAVE DRAFT FLOATING */
+.save-float{position:fixed;bottom:22px;left:22px;z-index:199;}
+.save-float .btn{box-shadow:var(--s3);display:flex;align-items:center;gap:6px;font-size:12px;}
 </style>
 </head>
 <body>
@@ -265,13 +311,13 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
     <span class="nav-brand">Citek<span>'</span></span>
   </div>
   <div class="nav-steps">
-    <div class="s-item"><div class="s-dot active" id="dot-1">1</div><span class="s-lbl active" id="lbl-1">Thông tin KH</span></div>
+    <div class="s-item"><div class="s-dot active" id="dot-1" onclick="navDotClick(1)">1</div><span class="s-lbl active" id="lbl-1" onclick="navDotClick(1)">Thông tin KH</span></div>
     <div class="s-sep"></div>
-    <div class="s-item"><div class="s-dot" id="dot-2">2</div><span class="s-lbl" id="lbl-2">Chọn KPI</span></div>
+    <div class="s-item"><div class="s-dot" id="dot-2" onclick="navDotClick(2)">2</div><span class="s-lbl" id="lbl-2" onclick="navDotClick(2)">Chọn KPI</span></div>
     <div class="s-sep"></div>
-    <div class="s-item"><div class="s-dot" id="dot-3">3</div><span class="s-lbl" id="lbl-3">Dashboard</span></div>
+    <div class="s-item"><div class="s-dot" id="dot-3" onclick="navDotClick(3)">3</div><span class="s-lbl" id="lbl-3" onclick="navDotClick(3)">Dashboard</span></div>
     <div class="s-sep"></div>
-    <div class="s-item"><div class="s-dot" id="dot-4">4</div><span class="s-lbl" id="lbl-4">Xuất file</span></div>
+    <div class="s-item"><div class="s-dot" id="dot-4" onclick="navDotClick(4)">4</div><span class="s-lbl" id="lbl-4" onclick="navDotClick(4)">Xuất file</span></div>
   </div>
   <span class="nav-tag">KPI Advisor v2</span>
 </nav>
@@ -282,6 +328,14 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
      STEP 1 — CUSTOMER INFO
 ═══════════════════════════════════════════ -->
 <div class="page active" id="page-1">
+  <div id="draft-banner" style="display:none" class="draft-banner">
+    <div class="draft-icon"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div>
+    <div class="draft-info"><h4>Phát hiện bản nháp đã lưu</h4><p id="draft-desc">Phiên làm việc trước đó — bấm Khôi phục để tiếp tục</p></div>
+    <div class="draft-actions">
+      <button class="btn btn-p" onclick="loadDraft()" style="font-size:12px;padding:8px 16px">Khôi phục</button>
+      <button class="btn btn-g" onclick="clearDraft()" style="font-size:12px;padding:8px 16px">Xoá</button>
+    </div>
+  </div>
   <div class="ph"><h1>Thông tin khách hàng</h1><div class="tbar"></div><p>Nhập thông tin cơ bản để AI đề xuất bộ KPI phù hợp nhất cho dự án</p></div>
   <div class="card">
     <div class="fg">
@@ -442,6 +496,21 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
             </div>
             <button class="pb" style="font-size:10px;padding:5px 10px" onclick="refreshSuggest()">↻ Làm mới</button>
           </div>
+          <div style="padding:10px 16px 0">
+            <div class="ind-search-box">
+              <div class="ind-search-row">
+                <input class="ind-search-inp" id="ind-search-inp" placeholder="Tìm KPI theo ngành (VD: dệt may, xây dựng...)" onkeydown="if(event.key==='Enter')searchIndustryKPI()">
+                <button class="ind-search-btn" id="ind-search-btn" onclick="searchIndustryKPI()">🔍 Tìm</button>
+              </div>
+              <div class="ind-tags">
+                <span class="ind-tag" onclick="searchByTag(this)">Dệt may</span>
+                <span class="ind-tag" onclick="searchByTag(this)">Xây dựng</span>
+                <span class="ind-tag" onclick="searchByTag(this)">F&B</span>
+                <span class="ind-tag" onclick="searchByTag(this)">Bất động sản</span>
+                <span class="ind-tag" onclick="searchByTag(this)">Năng lượng</span>
+              </div>
+            </div>
+          </div>
           <div class="asp-body" id="asp-body">
             <div class="asp-loading"><div class="asp-spinner"></div><div style="font-size:11px;color:var(--gray-500)">Đang phân tích...</div></div>
           </div>
@@ -516,17 +585,22 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
   <div class="card" style="margin-top:18px">
     <div style="font-size:11px;font-weight:700;color:var(--teal);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">Tóm tắt phiên làm việc</div>
     <table class="sum-table" id="sum-tbl"></table>
+    <div id="export-progress" class="export-progress" style="display:none"></div>
     <div class="abar">
       <button class="btn btn-g" onclick="goStep(3)">← Quay lại</button>
       <div style="display:flex;gap:10px">
-        <button class="btn btn-s" onclick="toast('Đã lưu draft phiên làm việc')">Lưu Draft</button>
-        <button class="btn btn-p" onclick="genOutputs()">Tạo tất cả tài liệu →</button>
+        <button class="btn btn-g" onclick="saveDraft()" style="display:flex;align-items:center;gap:5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu Draft</button>
+        <button class="btn btn-s" onclick="downloadDraft()" style="display:flex;align-items:center;gap:5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Tải Draft (.md)</button>
+        <button class="btn btn-p" id="gen-btn" onclick="genOutputs()">Tạo tất cả tài liệu →</button>
       </div>
     </div>
   </div>
 </div>
 
 </div><!-- .wrap -->
+<div class="save-float" id="save-float" style="display:none">
+  <button class="btn btn-s" onclick="saveDraft()" style="display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu nháp</button>
+</div>
 <div class="toast" id="toastEl"><div class="toast-dot"></div><span id="toast-txt"></span></div>
 
 <script>
@@ -621,6 +695,8 @@ let selOuts = new Set(['doc','dash','xl','pp']);
 let curIndustry = '', chatHistory = [];
 let aiScores = {};
 let suggestItems = [];   // items shown in suggest panel
+let curStep = 1;         // track current wizard step
+let maxStep = 1;         // highest step reached
 
 /* ─── HELPERS ─── */
 function selInd(el,v){document.querySelectorAll('.ic').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');curIndustry=v;}
@@ -630,17 +706,45 @@ function getTime(){const d=new Date();return d.getHours()+':'+(d.getMinutes()+''
 
 /* ─── STEP NAV ─── */
 function goStep(n){
+  curStep=n;
+  if(n>maxStep)maxStep=n;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(`page-${n}`).classList.add('active');
   for(let i=1;i<=4;i++){
     const d=document.getElementById(`dot-${i}`),l=document.getElementById(`lbl-${i}`);
-    if(i<n){d.className='s-dot done';d.textContent='✓';l.className='s-lbl';}
+    if(i<n){d.className='s-dot done';d.textContent='✓';l.className='s-lbl clickable';}
     else if(i===n){d.className='s-dot active';d.textContent=i;l.className='s-lbl active';}
     else{d.className='s-dot';d.textContent=i;l.className='s-lbl';}
   }
+  // Show floating save button when past step 1
+  const sf=document.getElementById('save-float');
+  if(sf)sf.style.display=n>1?'block':'none';
   if(n===3)buildDashes();
   if(n===4)buildSummary();
   window.scrollTo(0,0);
+}
+
+function navDotClick(n){
+  // Only allow clicking on completed steps (going back) or current step
+  if(n<curStep){
+    // Going back — special handling for step 2 (skip loading)
+    if(n===2&&document.getElementById('kpi-main').style.display==='block'){
+      goStep(2);
+    }else if(n===2){
+      // Step 2 hasn't been initialized — go to step 1 instead
+      goStep(1);
+    }else{
+      goStep(n);
+    }
+  }
+  // If clicking on a step we've already visited (maxStep) we can also go there
+  else if(n<=maxStep&&n!==curStep){
+    if(n===2){
+      document.getElementById('ai-load-view').style.display='none';
+      document.getElementById('kpi-main').style.display='block';
+    }
+    goStep(n);
+  }
 }
 
 /* ─── START AI ANALYSIS ─── */
@@ -1089,10 +1193,456 @@ function buildSummary(){
     <tr><td>Định dạng xuất</td><td>${outs||'Chưa chọn'}</td></tr>`;
 }
 
-function genOutputs(){
-  if(selOuts.size===0){toast('Vui lòng chọn ít nhất 1 định dạng');return;}
-  toast('Đang tạo tài liệu... (tính năng này sẽ gọi đầy đủ API trong production)');
+/* ════════════════════════════════════
+   INDUSTRY KPI SEARCH
+════════════════════════════════════ */
+function searchByTag(el){
+  document.getElementById('ind-search-inp').value=el.textContent;
+  searchIndustryKPI();
 }
+
+async function searchIndustryKPI(){
+  const q=document.getElementById('ind-search-inp').value.trim();
+  if(!q){toast('Nhập ngành hoặc từ khoá để tìm');return;}
+  const btn=document.getElementById('ind-search-btn');
+  btn.disabled=true;btn.textContent='Đang tìm...';
+  const body=document.getElementById('asp-body');
+  body.innerHTML='<div class="asp-loading"><div class="asp-spinner"></div><div style="font-size:11px;color:var(--gray-500)">Đang tìm KPI cho ngành '+q+'...</div></div>';
+
+  const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
+  const prompt=`Bạn là chuyên gia SAP Analytics & Business Intelligence với 15 năm kinh nghiệm.
+
+Hãy đề xuất 6–8 KPI quan trọng nhất cho ngành "${q}" trong bối cảnh doanh nghiệp Việt Nam triển khai SAP (modules: ${mods}).
+
+Yêu cầu:
+- KPI phải thực tế, đo lường được từ hệ thống SAP
+- Phù hợp đặc thù ngành "${q}"
+- Mỗi KPI có lý do ngắn gọn tại sao quan trọng
+
+Trả lời ĐÚNG JSON (KHÔNG có text ngoài):
+[{"nhom":"Tên nhóm","chi":"Tên chỉ tiêu","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình","why":"Lý do 1 dòng"}]`;
+
+  try{
+    const res=await fetch('/api/claude',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const txt=data.content.map(c=>c.text||'').join('');
+    let items=[];
+    try{items=JSON.parse(txt.replace(/```json|```/g,'').trim());}catch{items=fallbackSuggest(q);}
+    suggestItems=items;
+    renderSuggestPanel(items);
+    toast(`Đã tìm ${items.length} KPI cho ngành ${q}`);
+  }catch{
+    suggestItems=fallbackSuggest(curIndustry);
+    renderSuggestPanel(suggestItems);
+    toast('Lỗi kết nối — hiển thị đề xuất mặc định');
+  }
+  btn.disabled=false;btn.textContent='🔍 Tìm';
+}
+
+/* ════════════════════════════════════
+   DRAFT SAVE / LOAD
+════════════════════════════════════ */
+function gatherState(){
+  return {
+    version:2,
+    savedAt:new Date().toISOString(),
+    curStep,maxStep,curIndustry,
+    customer:{
+      name:document.getElementById('c-name').value,
+      size:document.getElementById('c-size').value,
+      erp:document.getElementById('c-erp').value,
+      notes:document.getElementById('c-notes').value,
+      mods:Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent),
+      objs:Array.from(document.querySelectorAll('#objectives .sel')).map(b=>b.textContent),
+    },
+    selKPIs:[...selKPIs],
+    aiAddedNos:[...aiAddedNos],
+    aiKPIs:aiKPIs.slice(),
+    aiScores:{...aiScores},
+    selOuts:[...selOuts],
+    suggestItems:suggestItems.slice(),
+  };
+}
+
+function saveDraft(){
+  const state=gatherState();
+  localStorage.setItem('kpi-advisor-draft',JSON.stringify(state));
+  toast('Đã lưu draft vào trình duyệt');
+}
+
+function downloadDraft(){
+  const s=gatherState();
+  const kpiList=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no));
+  const mods=s.customer.mods.join(', ')||'Chưa chọn';
+  const objs=s.customer.objs.join(', ')||'Chưa xác định';
+
+  let md=`# KPI Advisor — Draft\n`;
+  md+=`> Lưu lúc: ${new Date(s.savedAt).toLocaleString('vi-VN')}\n\n`;
+  md+=`## 1. Thông tin khách hàng\n`;
+  md+=`| Mục | Giá trị |\n|---|---|\n`;
+  md+=`| Tên KH | ${s.customer.name||'—'} |\n`;
+  md+=`| Quy mô | ${s.customer.size||'—'} |\n`;
+  md+=`| Ngành | ${s.curIndustry||'—'} |\n`;
+  md+=`| ERP | ${s.customer.erp||'—'} |\n`;
+  md+=`| SAP Modules | ${mods} |\n`;
+  md+=`| Mục tiêu | ${objs} |\n`;
+  md+=`| Ghi chú | ${s.customer.notes||'—'} |\n\n`;
+
+  md+=`## 2. Danh sách KPI đã chọn (${kpiList.length})\n`;
+  md+=`| # | Nhóm | Chỉ tiêu | Tần suất | Ưu tiên | Nguồn |\n|---|---|---|---|---|---|\n`;
+  kpiList.forEach(k=>{
+    const src=aiAddedNos.has(k.no)?'AI':'Library';
+    md+=`| ${k.no} | ${k.nhom} | ${k.chi} | ${k.freq} | ${k.pri} | ${src} |\n`;
+  });
+
+  md+=`\n## 3. Dashboard Levels\n`;
+  Object.entries({c:'C-Level',d:'D-Level',m:'M-Level',dept:'Department'}).forEach(([k,v])=>{
+    md+=`### ${v}\n`;
+    DASH_TMPL[k].forEach(d=>{md+=`- **${d.name}** (${d.type}): ${d.desc}\n`;});
+    md+=`\n`;
+  });
+
+  md+=`## 4. Định dạng xuất\n`;
+  [...selOuts].forEach(k=>{
+    md+=`- ${({doc:'KPI Document',dash:'Dashboard Spec',xl:'Excel',pp:'Presentation'})[k]}\n`;
+  });
+
+  md+=`\n---\n*Generated by KPI Advisor — Citek'*\n`;
+
+  const blob=new Blob([md],{type:'text/markdown;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`kpi-draft-${(s.customer.name||'session').replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.md`;
+  a.click();URL.revokeObjectURL(url);
+  toast('Đã tải file draft Markdown');
+}
+
+function loadDraft(){
+  const raw=localStorage.getItem('kpi-advisor-draft');
+  if(!raw)return;
+  try{
+    const s=JSON.parse(raw);
+    // Restore customer info
+    document.getElementById('c-name').value=s.customer.name||'';
+    document.getElementById('c-size').value=s.customer.size||'';
+    document.getElementById('c-erp').value=s.customer.erp||'';
+    document.getElementById('c-notes').value=s.customer.notes||'';
+    curIndustry=s.curIndustry||'';
+    // Restore industry selection
+    document.querySelectorAll('.ic').forEach(c=>{
+      c.classList.remove('sel');
+      if(c.getAttribute('onclick')?.includes(`'${curIndustry}'`))c.classList.add('sel');
+    });
+    // Restore SAP modules
+    document.querySelectorAll('#sap-mods .pb').forEach(b=>{
+      b.classList.toggle('sel',s.customer.mods.includes(b.textContent));
+    });
+    // Restore objectives
+    document.querySelectorAll('#objectives .pb').forEach(b=>{
+      b.classList.toggle('sel',s.customer.objs.includes(b.textContent));
+    });
+    // Restore KPI state
+    selKPIs=new Set(s.selKPIs||[]);
+    aiAddedNos=new Set(s.aiAddedNos||[]);
+    aiKPIs=s.aiKPIs||[];
+    aiScores=s.aiScores||{};
+    selOuts=new Set(s.selOuts||['doc','dash','xl','pp']);
+    suggestItems=s.suggestItems||[];
+    maxStep=s.maxStep||1;
+
+    // If we had progressed past step 1, restore to step 2
+    if(maxStep>=2&&curIndustry){
+      document.getElementById('ai-load-view').style.display='none';
+      document.getElementById('kpi-main').style.display='block';
+      buildScores();
+      renderTable(KPI_LIB.concat(aiKPIs));
+      updStats();
+      if(suggestItems.length)renderSuggestPanel(suggestItems);
+      else loadSuggestPanel();
+      initChat();
+      goStep(Math.min(s.curStep||2,maxStep));
+    }else{
+      goStep(1);
+    }
+    // Restore output selections
+    ['doc','dash','xl','pp'].forEach(k=>{
+      const el=document.getElementById(`oc-${k}`);
+      if(el)el.classList.toggle('sel',selOuts.has(k));
+    });
+
+    document.getElementById('draft-banner').style.display='none';
+    toast('Đã khôi phục phiên làm việc trước');
+  }catch(e){
+    toast('Lỗi đọc draft — dữ liệu có thể bị hỏng');
+    console.error('Draft load error:',e);
+  }
+}
+
+function clearDraft(){
+  localStorage.removeItem('kpi-advisor-draft');
+  document.getElementById('draft-banner').style.display='none';
+  toast('Đã xoá bản nháp');
+}
+
+function checkDraft(){
+  const raw=localStorage.getItem('kpi-advisor-draft');
+  if(!raw)return;
+  try{
+    const s=JSON.parse(raw);
+    const dt=new Date(s.savedAt);
+    const name=s.customer?.name||'Phiên trước';
+    document.getElementById('draft-desc').textContent=`${name} — ${dt.toLocaleString('vi-VN')} — Bước ${s.curStep}/4, ${(s.selKPIs||[]).length} KPI`;
+    document.getElementById('draft-banner').style.display='flex';
+  }catch{}
+}
+
+/* ════════════════════════════════════
+   EXPORT — GENERATE OUTPUTS
+════════════════════════════════════ */
+async function genOutputs(){
+  if(selOuts.size===0){toast('Vui lòng chọn ít nhất 1 định dạng');return;}
+
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=true;btn.textContent='Đang tạo...';
+
+  const prog=document.getElementById('export-progress');
+  prog.style.display='block';
+
+  const formats={
+    doc:{name:'KPI Document (Markdown)',ext:'md',mime:'text/markdown'},
+    dash:{name:'Dashboard Specification (HTML)',ext:'html',mime:'text/html'},
+    xl:{name:'Excel Export (CSV)',ext:'csv',mime:'text/csv'},
+    pp:{name:'Presentation Summary (HTML)',ext:'html',mime:'text/html'},
+  };
+
+  const selected=[...selOuts];
+  prog.innerHTML=selected.map(k=>`<div class="ep-item" id="ep-${k}"><div class="ep-status pending">·</div><div class="ep-name">${formats[k].name}</div><span style="font-size:11px;color:var(--gray-500)">Đang chờ</span></div>`).join('');
+
+  const name=document.getElementById('c-name').value||'Khách hàng';
+  const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
+  const kpiList=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no));
+
+  for(const fmt of selected){
+    const el=document.getElementById(`ep-${fmt}`);
+    el.className='ep-item active';
+    el.querySelector('.ep-status').className='ep-status spinning';
+    el.querySelector('.ep-status').textContent='';
+    el.lastElementChild.textContent='Đang tạo...';
+
+    try{
+      let content='';
+      if(fmt==='doc') content=await genKPIDocument(name,mods,kpiList);
+      else if(fmt==='dash') content=await genDashboardSpec(name,kpiList);
+      else if(fmt==='xl') content=genExcelCSV(name,mods,kpiList);
+      else if(fmt==='pp') content=await genPresentation(name,mods,kpiList);
+
+      el.className='ep-item done';
+      el.querySelector('.ep-status').className='ep-status ok';
+      el.querySelector('.ep-status').textContent='✓';
+      el.lastElementChild.remove();
+      const dlBtn=document.createElement('button');
+      dlBtn.className='ep-dl';
+      dlBtn.textContent='⬇ Tải xuống';
+      dlBtn.onclick=()=>downloadFile(content,`kpi-${fmt}-${name.replace(/\s+/g,'-')}`,formats[fmt].ext,formats[fmt].mime);
+      el.appendChild(dlBtn);
+    }catch(e){
+      el.className='ep-item error';
+      el.querySelector('.ep-status').className='ep-status err';
+      el.querySelector('.ep-status').textContent='✕';
+      el.lastElementChild.textContent='Lỗi: '+e.message;
+    }
+  }
+
+  btn.disabled=false;btn.textContent='Tạo tất cả tài liệu →';
+  // Auto-save draft after export
+  saveDraft();
+}
+
+function downloadFile(content,name,ext,mime){
+  const bom=ext==='csv'?'\uFEFF':'';
+  const blob=new Blob([bom+content],{type:mime+';charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`${name}.${ext}`;a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function genKPIDocument(name,mods,kpis){
+  const kpiTable=kpis.map(k=>`| ${k.no} | ${k.nhom} | ${k.chi} | ${k.freq} | ${k.pri} | ${aiAddedNos.has(k.no)?'AI':'Library'} |`).join('\n');
+  const prompt=`Tạo tài liệu KPI Document chuyên nghiệp cho dự án SAP BI.
+
+Thông tin:
+- Khách hàng: ${name}
+- Ngành: ${curIndustry}
+- SAP Modules: ${mods}
+- Số KPI: ${kpis.length}
+
+Danh sách KPI đã chọn:
+${kpis.slice(0,25).map(k=>`- ${k.chi} (${k.nhom}, ${k.freq}, ${k.pri})`).join('\n')}
+
+Hãy tạo tài liệu Markdown đầy đủ gồm:
+1. Trang bìa (tên dự án, KH, ngày)
+2. Mục lục
+3. Tổng quan dự án (2-3 đoạn)
+4. Bảng KPI đầy đủ có cột: #, Nhóm, Chỉ tiêu, Công thức/Mô tả, Tần suất, Ưu tiên, SAP Source
+5. Phân tích theo từng nhóm KPI (mỗi nhóm 2-3 câu giải thích)
+6. Khuyến nghị triển khai (3-5 bullet points)
+
+Viết bằng tiếng Việt, chuyên nghiệp, format Markdown chuẩn.`;
+
+  const res=await fetch('/api/claude',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:3000,messages:[{role:'user',content:prompt}]})
+  });
+  const data=await res.json();
+  return data.content.map(c=>c.text||'').join('');
+}
+
+async function genDashboardSpec(name,kpis){
+  const kpiNames=kpis.map(k=>k.chi).slice(0,20).join(', ');
+  const html=`<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8"><title>Dashboard Spec — ${name}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#333;padding:24px}
+h1{color:#005870;margin-bottom:4px}h2{color:#005870;margin:28px 0 12px;border-bottom:2px solid #C5D500;padding-bottom:6px}
+.meta{color:#666;font-size:13px;margin-bottom:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px}
+.card{background:white;border-radius:10px;border-top:4px solid #005870;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:18px}
+.card h3{font-size:14px;color:#005870;margin-bottom:4px}.card .type{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#999;font-weight:600}
+.card p{font-size:12px;color:#666;line-height:1.5;margin:6px 0}.card .kpis{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.tag{background:#f0f0f0;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:500;color:#005870}
+.chart-placeholder{height:60px;background:linear-gradient(135deg,rgba(0,88,112,.06),rgba(197,213,0,.08));border-radius:6px;margin-top:10px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#999}
+footer{text-align:center;color:#999;font-size:11px;margin-top:32px;padding-top:16px;border-top:1px solid #e0e0e0}
+</style></head><body>
+<h1>Dashboard Specification</h1>
+<p class="meta">${name} — Ngành: ${curIndustry} — ${new Date().toLocaleDateString('vi-VN')}</p>
+${Object.entries({c:'C-Level — CEO / CFO / COO',d:'D-Level — Director / VP',m:'M-Level — Manager',dept:'Department — Chuyên viên'}).map(([k,v])=>`
+<h2>${v}</h2>
+<div class="grid">${DASH_TMPL[k].map(d=>`
+<div class="card"><div class="type">${d.type}</div><h3>${d.name}</h3><p>${d.desc}</p>
+<div class="kpis">${d.kpis.map(kp=>`<span class="tag">${kp}</span>`).join('')}</div>
+<div class="chart-placeholder">📊 ${d.type} Chart</div></div>`).join('')}
+</div>`).join('')}
+<footer>Generated by KPI Advisor — Citek' — ${new Date().toLocaleDateString('vi-VN')}</footer>
+</body></html>`;
+  return html;
+}
+
+function genExcelCSV(name,mods,kpis){
+  let csv='STT,Nhóm,Nhóm con,Chỉ tiêu,Tần suất,Ưu tiên,AI Score,Nguồn,SAP Modules\n';
+  kpis.forEach((k,i)=>{
+    const src=aiAddedNos.has(k.no)?'AI':'Library';
+    const sc=aiScores[k.no]||'—';
+    const ms=k.mods?k.mods.join('; '):'—';
+    csv+=`${i+1},"${k.nhom}","${k.sub||''}","${k.chi}",${k.freq},${k.pri},${sc},${src},"${ms}"\n`;
+  });
+  // Add summary sheet separator
+  csv+='\n\nTÓM TẮT PHIÊN LÀM VIỆC\n';
+  csv+=`Khách hàng,"${name}"\n`;
+  csv+=`Ngành,${curIndustry}\n`;
+  csv+=`SAP Modules,"${mods}"\n`;
+  csv+=`Tổng KPI,${kpis.length}\n`;
+  csv+=`KPI AI bổ sung,${aiAddedNos.size}\n`;
+  csv+=`Ngày tạo,${new Date().toLocaleDateString('vi-VN')}\n`;
+  return csv;
+}
+
+async function genPresentation(name,mods,kpis){
+  const kpiByGroup={};
+  kpis.forEach(k=>{if(!kpiByGroup[k.nhom])kpiByGroup[k.nhom]=[];kpiByGroup[k.nhom].push(k);});
+  const groupSummary=Object.entries(kpiByGroup).map(([g,list])=>`${g}: ${list.map(k=>k.chi).join(', ')}`).join('\n');
+
+  const html=`<!DOCTYPE html>
+<html lang="vi"><head><meta charset="UTF-8"><title>KPI Presentation — ${name}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#1a1a2e;color:white}
+.slide{width:960px;min-height:540px;margin:20px auto;background:white;color:#333;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.3);overflow:hidden;page-break-after:always}
+.slide-cover{background:linear-gradient(135deg,#005870,#003d4f);color:white;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px}
+.slide-cover h1{font-size:36px;margin-bottom:8px}.slide-cover h2{font-size:18px;font-weight:400;opacity:.85;margin-bottom:24px}
+.slide-cover .meta{font-size:13px;opacity:.65;margin-top:20px}.slide-cover .logo{font-size:28px;font-weight:700;margin-bottom:32px}
+.slide-cover .logo span{color:#C5D500}
+.slide-body{padding:40px 48px}
+.slide-body h2{color:#005870;font-size:24px;margin-bottom:4px;border-bottom:3px solid #C5D500;padding-bottom:8px;display:inline-block}
+.slide-body h3{color:#005870;font-size:16px;margin:18px 0 8px}
+.stats-row{display:flex;gap:16px;margin:24px 0}
+.stat-box{flex:1;background:rgba(0,88,112,.05);border-radius:10px;padding:18px;text-align:center;border-top:3px solid #005870}
+.stat-box .num{font-size:32px;font-weight:700;color:#005870}.stat-box .lbl{font-size:11px;color:#666;margin-top:4px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.kpi-item{background:#fafafa;border-radius:8px;padding:10px 14px;border-left:3px solid #005870;font-size:12px}
+.kpi-item strong{color:#005870}
+.kpi-item .badge{display:inline-block;padding:1px 7px;border-radius:8px;font-size:9px;font-weight:600;margin-left:4px}
+.badge-cao{background:rgba(0,88,112,.1);color:#005870}.badge-tb{background:rgba(197,213,0,.2);color:#6b7400}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.dash-card{border:1px solid #e0e0e0;border-radius:8px;padding:12px;border-top:3px solid #005870}
+.dash-card h4{font-size:13px;color:#005870;margin-bottom:3px}.dash-card p{font-size:11px;color:#666}
+.footer{text-align:center;font-size:10px;color:#999;padding:12px;border-top:1px solid #eee;margin-top:auto}
+.slide-end{background:linear-gradient(135deg,#005870,#003d4f);color:white;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px}
+.slide-end h1{font-size:32px;margin-bottom:12px}.slide-end p{font-size:14px;opacity:.75}
+@media print{.slide{box-shadow:none;margin:0;page-break-after:always}}
+</style></head><body>
+
+<!-- SLIDE 1: Cover -->
+<div class="slide slide-cover">
+<div class="logo">Citek<span>'</span></div>
+<h1>KPI Advisor Report</h1>
+<h2>${name}</h2>
+<p>Ngành: ${curIndustry} · SAP Modules: ${mods}</p>
+<div class="meta">${new Date().toLocaleDateString('vi-VN')} · Powered by Claude AI</div>
+</div>
+
+<!-- SLIDE 2: Overview -->
+<div class="slide"><div class="slide-body">
+<h2>Tổng quan dự án</h2>
+<div class="stats-row">
+<div class="stat-box"><div class="num">${kpis.length}</div><div class="lbl">KPI đã chọn</div></div>
+<div class="stat-box"><div class="num">${aiAddedNos.size}</div><div class="lbl">AI bổ sung</div></div>
+<div class="stat-box"><div class="num">${Object.keys(kpiByGroup).length}</div><div class="lbl">Nhóm nghiệp vụ</div></div>
+<div class="stat-box"><div class="num">4</div><div class="lbl">Dashboard Levels</div></div>
+</div>
+<h3>SAP Modules</h3><p style="font-size:13px;color:#666">${mods}</p>
+<h3>Phân bổ KPI theo nhóm</h3>
+<div class="kpi-grid">
+${Object.entries(kpiByGroup).map(([g,list])=>`<div class="kpi-item"><strong>${g}</strong>: ${list.length} KPI</div>`).join('')}
+</div>
+<div class="footer">KPI Advisor — Citek'</div>
+</div></div>
+
+<!-- SLIDE 3: KPI Details -->
+<div class="slide"><div class="slide-body">
+<h2>Chi tiết KPI đã chọn</h2>
+<div class="kpi-grid">
+${kpis.slice(0,16).map(k=>`<div class="kpi-item"><strong>${k.chi}</strong><br><span style="font-size:10px;color:#999">${k.nhom} · ${k.freq}</span><span class="badge badge-${k.pri==='Cao'?'cao':'tb'}">${k.pri}</span></div>`).join('')}
+</div>
+${kpis.length>16?`<p style="margin-top:12px;font-size:11px;color:#999;text-align:center">... và ${kpis.length-16} KPI khác</p>`:''}
+<div class="footer">KPI Advisor — Citek'</div>
+</div></div>
+
+<!-- SLIDE 4: Dashboard Overview -->
+<div class="slide"><div class="slide-body">
+<h2>Dashboard theo cấp quản lý</h2>
+${Object.entries({c:'C-Level',d:'D-Level',m:'M-Level',dept:'Department'}).map(([k,v])=>`
+<h3>${v}</h3>
+<div class="dash-grid">${DASH_TMPL[k].slice(0,2).map(d=>`<div class="dash-card"><h4>${d.name}</h4><p>${d.desc}</p></div>`).join('')}</div>`).join('')}
+<div class="footer">KPI Advisor — Citek'</div>
+</div></div>
+
+<!-- SLIDE 5: End -->
+<div class="slide slide-end">
+<h1>Cảm ơn!</h1>
+<p>Powered by KPI Advisor — Citek'</p>
+<div style="margin-top:32px;font-size:12px;opacity:.5">${new Date().toLocaleDateString('vi-VN')}</div>
+</div>
+
+</body></html>`;
+  return html;
+}
+
+/* ─── INIT: Check for draft on page load ─── */
+checkDraft();
 </script>
 </body>
 </html>
