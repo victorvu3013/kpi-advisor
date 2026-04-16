@@ -564,7 +564,7 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
         <div class="token-meter" id="token-meter">
           <div class="tm-title">
             <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            Token Usage — claude-sonnet-4-6
+            Token Usage — claude-sonnet-4-5
           </div>
           <div class="tm-grid">
             <div class="tm-cell"><div class="tm-val" id="tm-in">0</div><div class="tm-lbl">Input</div></div>
@@ -1033,7 +1033,7 @@ async function loadSuggestPanel(){
     const r1=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-6',
+        model:'claude-sonnet-4-5-20250929',
         max_tokens:1800,
         system:SKILL_INDUSTRY_RESEARCH,
         messages:[{role:'user',content:
@@ -1061,8 +1061,8 @@ async function loadSuggestPanel(){
     const r2=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:2500,
+        model:'claude-sonnet-4-5-20250929',
+        max_tokens:1500,
         system:SKILL_KPI_VALUE_DRIVER,
         messages:[{role:'user',content:
           '## Industry Research Context\n'+industryContext
@@ -1322,7 +1322,7 @@ Nhiệm vụ của bạn:
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-6',
+        model:'claude-sonnet-4-5-20250929',
         max_tokens:600,
         system:sysPrompt,
         messages:chatHistory
@@ -1448,7 +1448,7 @@ Trả lời CHỈ JSON array (không text ngoài):
   try{
     const res=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     trackTokens(data.usage);
