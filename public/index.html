@@ -225,7 +225,7 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
 .ai-new-row td{border-left:3px solid var(--cyan);}
 
 /* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
 .sc{background:white;border-radius:var(--r);padding:14px;border-top:3px solid var(--teal);box-shadow:var(--s1);}
 .sc-num{font-size:26px;font-weight:700;color:var(--teal);line-height:1;}
 .sc-lbl{font-size:10px;color:var(--gray-500);font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.5px;}
@@ -345,6 +345,11 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
 /* SAVE DRAFT FLOATING */
 .save-float{position:fixed;bottom:22px;left:22px;z-index:199;}
 .save-float .btn{box-shadow:var(--s3);display:flex;align-items:center;gap:6px;font-size:12px;}
+
+/* DASHBOARD DYNAMIC */
+.dc-kpi-badge{display:inline-block;margin-top:6px;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;background:rgba(0,88,112,.1);color:var(--teal);}
+.dc-inactive{opacity:0.45;}
+.dc-inactive:hover{opacity:0.9;}
 </style>
 </head>
 <body>
@@ -362,6 +367,17 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
     <div class="s-item"><div class="s-dot" id="dot-3" onclick="navDotClick(3)">3</div><span class="s-lbl" id="lbl-3" onclick="navDotClick(3)">Dashboard</span></div>
     <div class="s-sep"></div>
     <div class="s-item"><div class="s-dot" id="dot-4" onclick="navDotClick(4)">4</div><span class="s-lbl" id="lbl-4" onclick="navDotClick(4)">Xuất file</span></div>
+  </div>
+  <div style="display:flex;gap:6px;margin-right:12px" id="nav-draft-btns">
+    <button onclick="saveDraftNamed()" class="btn btn-g" style="font-size:11px;padding:6px 12px;display:flex;align-items:center;gap:5px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Lưu Draft
+    </button>
+    <button onclick="openDraftList()" class="btn btn-s" style="font-size:11px;padding:6px 12px;display:flex;align-items:center;gap:5px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Mở Draft
+      <span id="draft-count-badge" style="display:none;background:var(--lime);color:var(--teal-dark);border-radius:8px;padding:1px 5px;font-size:9px;font-weight:700"></span>
+    </button>
   </div>
   <span class="nav-tag">KPI Advisor v2</span>
 </nav>
@@ -515,6 +531,7 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
           <div class="sc lime-top"><div class="sc-num" id="s-sel">0</div><div class="sc-lbl">Đã chọn</div></div>
           <div class="sc cyan-top"><div class="sc-num" id="s-ai">0</div><div class="sc-lbl">AI bổ sung</div></div>
           <div class="sc"><div class="sc-num" id="s-grp">0</div><div class="sc-lbl">Nhóm nghiệp vụ</div></div>
+          <div class="sc lime-top"><div class="sc-num" id="s-conf">0</div><div class="sc-lbl">Xác nhận</div></div>
         </div>
 
         <div class="card" style="padding:18px;">
@@ -536,6 +553,12 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
               <option value="">Mọi tần suất</option>
               <option>Ngày</option><option>Tuần</option><option>Tháng</option>
             </select>
+            <select class="fs" id="fstatus" onchange="filterT()">
+              <option value="">Mọi trạng thái</option>
+              <option value="confirmed">✅ Xác nhận</option>
+              <option value="proposed">⚪ Đề xuất</option>
+              <option value="rejected">❌ Loại bỏ</option>
+            </select>
             <button class="pb sel" style="font-size:11px" onclick="selAllVis()">Chọn tất cả</button>
             <button class="pb" style="font-size:11px" onclick="clearAll()">Bỏ chọn</button>
             <span class="fcnt">Hiển thị: <span id="vis-cnt">0</span></span>
@@ -546,7 +569,7 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
                 <tr>
                   <th style="width:32px"><input type="checkbox" id="chk-all" onchange="togAll(this)" style="accent-color:var(--lime);width:14px;height:14px"></th>
                   <th>#</th><th>Nhóm</th><th style="min-width:190px">Chỉ tiêu</th>
-                  <th>Tần suất</th><th>Ưu tiên</th><th>AI Score</th><th>Nguồn</th>
+                  <th>Tần suất</th><th>Ưu tiên</th><th>AI Score</th><th>Nguồn</th><th>Trạng thái</th>
                 </tr>
               </thead>
               <tbody id="ktbody"></tbody>
@@ -600,6 +623,7 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
               <div class="cb-name">KPI Assistant</div>
               <div class="cb-status"><div class="cb-online"></div>Claude AI · Sẵn sàng hỗ trợ</div>
             </div>
+            <button onclick="clearChatHistory()" title="Xóa lịch sử chat" style="background:none;border:1px solid var(--gray-200);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--gray-500);cursor:pointer;font-family:var(--font);transition:all .15s;margin-left:auto;" onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-500)'">🗑 Xóa</button>
           </div>
           <div class="cb-messages" id="chat-msgs"></div>
           <div class="cb-actions">
@@ -695,6 +719,39 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
   <button class="btn btn-s" onclick="saveDraft()" style="display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Lưu nháp</button>
 </div>
 <div class="toast" id="toastEl"><div class="toast-dot"></div><span id="toast-txt"></span></div>
+
+<!-- KPI DETAIL PANEL -->
+<div id="kpi-detail-panel" style="position:fixed;right:-420px;top:0;width:420px;height:100vh;background:white;z-index:1000;box-shadow:-4px 0 20px rgba(0,0,0,.15);transition:right .3s ease;display:flex;flex-direction:column;overflow:hidden;">
+  <div style="background:var(--teal);color:white;padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.7;margin-bottom:4px">Chi tiết KPI</div>
+      <div id="kdp-name" style="font-size:15px;font-weight:700;line-height:1.3"></div>
+      <div id="kdp-sub" style="font-size:11px;opacity:.75;margin-top:3px"></div>
+    </div>
+    <button onclick="closeKPIPanel()" style="background:rgba(255,255,255,.15);border:none;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;line-height:1">×</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:20px;">
+    <div id="kdp-body"></div>
+  </div>
+  <div style="padding:14px 20px;border-top:1px solid var(--gray-100);flex-shrink:0;">
+    <button id="kdp-toggle-btn" onclick="toggleKPIFromPanel()" style="width:100%;padding:11px;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;background:var(--teal);color:white;"></button>
+  </div>
+</div>
+<div id="kpi-panel-overlay" onclick="closeKPIPanel()" style="position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:999;display:none;"></div>
+
+<!-- DRAFT LIST MODAL -->
+<div id="draft-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:var(--rl);box-shadow:var(--s3);width:480px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="background:var(--teal);color:white;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:14px;font-weight:700">Danh sách Draft đã lưu</div>
+      <button onclick="closeDraftModal()" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="draft-list-body" style="flex:1;overflow-y:auto;padding:16px;"></div>
+    <div style="padding:12px 16px;border-top:1px solid var(--gray-100);text-align:right;">
+      <button onclick="closeDraftModal()" class="btn btn-g" style="font-size:12px">Đóng</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ─── KPI LIBRARY ─── */
@@ -841,6 +898,7 @@ let selOuts = new Set(['doc','dash','xl','pp']);
 let curIndustry = '', chatHistory = [];
 let aiScores = {};
 let suggestItems = [];   // items shown in suggest panel
+let kpiStatus = {};      // map: no → 'proposed' | 'confirmed' | 'rejected'
 
 /* ─── TOKEN COUNTER ─── */
 // Pricing: claude-sonnet-4-6 → $3/1M input, $15/1M output
@@ -984,7 +1042,7 @@ function renderTable(data){
       lastG=k.nhom;
       const gr=document.createElement('tr');
       gr.className='group-row';
-      gr.innerHTML=`<td></td><td colspan="7" style="font-size:11px">${k.nhom}</td>`;
+      gr.innerHTML=`<td></td><td colspan="8" style="font-size:11px">${k.nhom}</td>`;
       tb.appendChild(gr);
     }
     const tr=document.createElement('tr');
@@ -994,18 +1052,22 @@ function renderTable(data){
     const sc=aiScores[k.no]||75;
     const scCol=sc>=85?'var(--teal)':sc>=65?'#7a8500':'var(--gray-600)';
     const src=aiAddedNos.has(k.no)?'<span class="badge b-ai">AI</span>':'<span style="font-size:10px;color:var(--gray-400)">Library</span>';
+    const st=kpiStatus[k.no]||'proposed';
+    const stIcon=st==='confirmed'?'✅':st==='rejected'?'❌':'⚪';
+    const chiStyle=st==='rejected'?'text-decoration:line-through;color:var(--gray-400)':'';
     tr.innerHTML=`
       <td><input type="checkbox" class="kpi-check" ${selKPIs.has(k.no)?'checked':''} onchange="togKPI(this,${k.no},this.closest('tr'))"></td>
       <td style="color:var(--gray-400);font-size:10px">${k.no}</td>
       <td style="font-size:11px;color:var(--teal);font-weight:600">${k.sub}</td>
-      <td style="font-weight:500;font-size:12px">
-        <div class="chi-wrap">${k.chi}${(k.formula||k.dimension||k.tcode)?`<div class="kpi-tip">${k.formula?`<div class="tip-row"><span class="tip-label">Công thức</span><span class="tip-val">${k.formula}</span></div>`:''}${k.dimension?`<div class="tip-row"><span class="tip-label">Phân tích</span><span class="tip-val">${k.dimension}</span></div>`:''}${k.tcode?`<div class="tip-row"><span class="tip-label">T-Code</span><span class="tip-val" style="font-family:monospace;color:#00D4FF">${k.tcode}</span></div>`:''}</div>`:''}
+      <td style="font-weight:500;font-size:12px;${chiStyle}">
+        <div class="chi-wrap"><span onclick="openKPIPanel(${k.no})" style="cursor:pointer;text-decoration:underline dotted var(--gray-400);text-underline-offset:2px;">${k.chi}</span>${(k.formula||k.dimension||k.tcode)?`<div class="kpi-tip">${k.formula?`<div class="tip-row"><span class="tip-label">Công thức</span><span class="tip-val">${k.formula}</span></div>`:''}${k.dimension?`<div class="tip-row"><span class="tip-label">Phân tích</span><span class="tip-val">${k.dimension}</span></div>`:''}${k.tcode?`<div class="tip-row"><span class="tip-label">T-Code</span><span class="tip-val" style="font-family:monospace;color:#00D4FF">${k.tcode}</span></div>`:''}</div>`:''}
         </div>
       </td>
       <td><span class="badge b-${k.freq==='Ngày'?'ngay':k.freq==='Tuần'?'tuan':'thang'}">${k.freq}</span></td>
       <td><span class="badge b-${k.pri==='Cao'?'cao':k.pri==='Trung bình'?'tb':'thap'}">${k.pri}</span></td>
       <td><span style="font-weight:700;color:${scCol};font-size:12px">${sc}</span></td>
-      <td>${src}</td>`;
+      <td>${src}</td>
+      <td><button onclick="toggleStatus(${k.no},this)" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px" title="Click để thay đổi trạng thái">${stIcon}</button></td>`;
     tb.appendChild(tr);
   });
   document.getElementById('vis-cnt').textContent=data.length;
@@ -1044,25 +1106,46 @@ function filterT(){
   const g=document.getElementById('fg').value;
   const p=document.getElementById('fp').value;
   const f=document.getElementById('ff2').value;
+  const fstatus=document.getElementById('fstatus')?.value||'';
   const isAI=g==='AI Đề xuất';
   let vis=0;
   document.querySelectorAll('#ktbody tr').forEach(tr=>{
     if(tr.classList.contains('group-row')){tr.style.display='';return;}
     const isAIRow=tr.classList.contains('kai-added');
-    const ok=(!g||tr.dataset.grp===g||(isAI&&isAIRow))&&(!p||tr.dataset.pri===p)&&(!f||tr.dataset.freq===f);
+    const no=parseInt(tr.dataset.no);
+    const grpOk=!g||tr.dataset.grp===g||(isAI&&isAIRow);
+    const priOk=!p||tr.dataset.pri===p;
+    const freqOk=!f||tr.dataset.freq===f;
+    const stOk=!fstatus||(kpiStatus[no]||'proposed')===fstatus;
+    const ok=grpOk&&priOk&&freqOk&&stOk;
     tr.style.display=ok?'':'none';
     if(ok)vis++;
   });
   document.getElementById('vis-cnt').textContent=vis;
 }
 
+function toggleStatus(no,btn){
+  const cur=kpiStatus[no]||'proposed';
+  const next=cur==='proposed'?'confirmed':cur==='confirmed'?'rejected':'proposed';
+  kpiStatus[no]=next;
+  const icons={proposed:'⚪',confirmed:'✅',rejected:'❌'};
+  btn.textContent=icons[next];
+  const row=btn.closest('tr');
+  const nameTd=row.querySelector('td:nth-child(4)');
+  if(nameTd){nameTd.style.textDecoration=next==='rejected'?'line-through':'';nameTd.style.color=next==='rejected'?'var(--gray-400)':'';}
+  updStats();
+}
+
 function updStats(){
   const sel=selKPIs.size,hi=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)&&k.pri==='Cao').length;
   const grps=new Set(KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)).map(k=>k.nhom)).size;
+  const confirmedCount=[...selKPIs].filter(no=>(kpiStatus[no]||'proposed')==='confirmed').length;
   document.getElementById('s-total').textContent=KPI_LIB.length;
   document.getElementById('s-sel').textContent=sel;
   document.getElementById('s-ai').textContent=aiAddedNos.size;
   document.getElementById('s-grp').textContent=grps;
+  const confEl=document.getElementById('s-conf');
+  if(confEl)confEl.textContent=confirmedCount;
   document.querySelectorAll('.kpi-check').forEach(cb=>{
     const tr=cb.closest('tr');const no=parseInt(tr?.dataset?.no);
     if(no){cb.checked=selKPIs.has(no);tr.classList.toggle('ksel',selKPIs.has(no));}
@@ -1357,7 +1440,7 @@ function addKPIFromSuggest(idx,it){
   tb.querySelectorAll('.group-row').forEach(r=>{if(r.cells[1]?.textContent==='AI Đề xuất')grRow=r;});
   if(!grRow){
     const gr=document.createElement('tr');gr.className='group-row';
-    gr.innerHTML=`<td></td><td colspan="7" style="font-size:11px">AI Đề xuất</td>`;
+    gr.innerHTML=`<td></td><td colspan="8" style="font-size:11px">AI Đề xuất</td>`;
     tb.appendChild(gr);grRow=gr;
   }
   const tr=document.createElement('tr');
@@ -1371,8 +1454,22 @@ function addKPIFromSuggest(idx,it){
     <td><span class="badge b-${it.freq==='Ngày'?'ngay':it.freq==='Tuần'?'tuan':'thang'}">${it.freq}</span></td>
     <td><span class="badge b-${it.pri==='Cao'?'cao':'tb'}">${it.pri}</span></td>
     <td><span style="font-weight:700;color:var(--teal);font-size:12px">${aiScores[no]}</span></td>
-    <td><span class="badge b-ai">AI</span></td>`;
+    <td><span class="badge b-ai">AI</span></td>
+    <td><button onclick="toggleStatus(${no},this)" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px" title="Click để thay đổi trạng thái">⚪</button></td>`;
   tb.appendChild(tr);
+  // Auto quick-action: offer to explain the newly added KPI
+  setTimeout(()=>{
+    const msgs=document.getElementById('chat-msgs');
+    if(!msgs)return;
+    const offer=document.createElement('div');
+    offer.className='msg msg-ai';
+    offer.innerHTML=`<div class="msg-bubble" style="background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.25)">
+      <span style="font-size:11px;color:var(--teal)">✨ Vừa thêm KPI "<strong>${it.chi}</strong>" — bạn muốn tôi giải thích chi tiết?</span><br>
+      <button onclick="this.closest('.msg').remove();document.getElementById('chat-inp').value='Giải thích KPI ${it.chi.replace(/'/g,"\\'")} — công thức, chiều phân tích và cách đo trong SAP';sendChat()" style="margin-top:6px;padding:5px 12px;border:none;border-radius:6px;background:var(--cyan);color:white;font-size:11px;font-weight:600;cursor:pointer;">Giải thích ngay →</button>
+    </div><div class="msg-time">${getTime()}</div>`;
+    msgs.appendChild(offer);
+    msgs.scrollTop=msgs.scrollHeight;
+  },500);
 }
 
 function addAllSuggested(){
@@ -1393,10 +1490,31 @@ async function refreshSuggest(){
    AI CHAT BOX — real Claude API
 ════════════════════════════════════ */
 function initChat(){
-  chatHistory=[];
+  const stored=sessionStorage.getItem('kpi-chat-history');
   const msgs=document.getElementById('chat-msgs');
   msgs.innerHTML='';
+  if(stored){
+    try{
+      chatHistory=JSON.parse(stored);
+      chatHistory.forEach(m=>{
+        const div=document.createElement('div');
+        div.className=`msg msg-${m.role==='user'?'user':'ai'}`;
+        div.innerHTML=`<div class="msg-bubble">${m.content.replace(/\n/g,'<br>')}</div><div class="msg-time">${getTime()}</div>`;
+        msgs.appendChild(div);
+      });
+      msgs.scrollTop=msgs.scrollHeight;
+      return;
+    }catch{chatHistory=[];}
+  }
+  chatHistory=[];
   addMsg('ai','Xin chào! Tôi là KPI Assistant. Tôi có thể giúp bạn:\n• Bổ sung KPI theo yêu cầu đặc thù\n• Điều chỉnh dashboard layout\n• Giải thích công thức và chiều phân tích\n\nBạn muốn bắt đầu từ đâu?');
+}
+
+function clearChatHistory(){
+  chatHistory=[];
+  sessionStorage.removeItem('kpi-chat-history');
+  document.getElementById('chat-msgs').innerHTML='';
+  addMsg('ai','Đã xóa lịch sử chat. Bắt đầu cuộc trò chuyện mới!');
 }
 
 function addMsg(role,text){
@@ -1437,6 +1555,7 @@ async function sendChat(){
   addTyping();
 
   const selKPIList=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)).map(k=>k.chi).slice(0,20).join(', ');
+  const confirmedKPIList=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)&&kpiStatus[k.no]==='confirmed').map(k=>k.chi).join(', ');
   const ind=curIndustry||'không xác định';
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ');
 
@@ -1446,6 +1565,7 @@ Bối cảnh dự án hiện tại:
 - Ngành khách hàng: ${ind}
 - SAP Modules: ${mods}
 - KPI đã chọn (${selKPIs.size}): ${selKPIList}
+- KPI đã XÁC NHẬN (${confirmedKPIList?confirmedKPIList.split(',').length:0}): ${confirmedKPIList||'Chưa có'}
 - KPI AI đã đề xuất thêm: ${aiAddedNos.size} chỉ tiêu
 
 Nhiệm vụ của bạn:
@@ -1456,6 +1576,7 @@ Nhiệm vụ của bạn:
 5. Tone: chuyên nghiệp nhưng thân thiện`;
 
   chatHistory.push({role:'user',content:txt});
+  sessionStorage.setItem('kpi-chat-history',JSON.stringify(chatHistory));
 
   try{
     const res=await fetch('/api/claude',{
@@ -1472,6 +1593,7 @@ Nhiệm vụ của bạn:
     trackTokens(data.usage);
     const reply=data.content.map(c=>c.text||'').join('').trim();
     chatHistory.push({role:'assistant',content:reply});
+    sessionStorage.setItem('kpi-chat-history',JSON.stringify(chatHistory));
     removeTyping();
     addMsg('ai',reply);
     // auto-extract KPI if AI mentions adding one
@@ -1503,14 +1625,45 @@ function tryExtractKPIFromReply(reply){
 }
 
 /* ─── DASHBOARDS ─── */
+function calcDashKPICount(d){
+  const allKPIs=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no));
+  let count=0;
+  allKPIs.forEach(k=>{
+    const chiLow=k.chi.toLowerCase();
+    const nhomLow=k.nhom.toLowerCase();
+    const dNameLow=d.name.toLowerCase();
+    const matched=d.kpis.some(kn=>{
+      const knLow=kn.toLowerCase();
+      return chiLow.includes(knLow.slice(0,6))||knLow.includes(chiLow.slice(0,6));
+    });
+    const nhomMatch=dNameLow.includes(nhomLow.slice(0,4))||nhomLow.split(' ').some(w=>w.length>3&&dNameLow.includes(w));
+    if(matched||nhomMatch)count++;
+  });
+  return count;
+}
+
 function buildDashes(){
+  const groupCounts={};
+  KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)).forEach(k=>{
+    groupCounts[k.nhom]=(groupCounts[k.nhom]||0)+1;
+  });
+
   Object.keys(DASH_TMPL).forEach(lv=>{
     const cont=document.getElementById(`dc-${lv}`);
     cont.innerHTML='';
-    DASH_TMPL[lv].forEach(d=>{
+    // Compute KPI count per dashboard and sort
+    const dashWithCounts=DASH_TMPL[lv].map(d=>({d,count:calcDashKPICount(d)}));
+    dashWithCounts.sort((a,b)=>b.count-a.count);
+
+    dashWithCounts.forEach(({d,count})=>{
       const div=document.createElement('div');
-      div.className='dc sel';
-      div.innerHTML=`<div class="dc-type">${d.type}</div><div class="dc-name">${d.name}</div><div class="dc-desc">${d.desc}</div><div class="dc-tags">${d.kpis.map(k=>`<span class="dc-tag">${k}</span>`).join('')}</div><div class="dc-preview">${previewSVG(d.type)}</div>`;
+      // Check for inactive (maintenance with 0 maintenance KPIs)
+      const isMaintenanceDash=d.name.toLowerCase().includes('maintenan')||d.type.toLowerCase().includes('maintenan')||d.kpis.some(k=>k.toLowerCase().includes('mtbf')||k.toLowerCase().includes('mttr')||k.toLowerCase().includes('downtime'));
+      const hasNoBaoTri=(groupCounts['Bảo trì']||0)===0;
+      const isInactive=count===0||(isMaintenanceDash&&hasNoBaoTri);
+      div.className='dc sel'+(isInactive?' dc-inactive':'');
+      const badgeHtml=`<div class="dc-kpi-badge">${count} KPI liên quan</div>`;
+      div.innerHTML=`<div class="dc-type">${d.type}</div><div class="dc-name">${d.name}</div><div class="dc-desc">${d.desc}${isInactive&&count===0?'&ensp;<span style="font-size:9px;color:#999;font-weight:600">— Không có KPI</span>':''}</div>${badgeHtml}<div class="dc-tags">${d.kpis.map(k=>`<span class="dc-tag">${k}</span>`).join('')}</div><div class="dc-preview">${previewSVG(d.type)}</div>`;
       div.onclick=()=>div.classList.toggle('sel');
       cont.appendChild(div);
     });
@@ -1543,11 +1696,13 @@ function buildSummary(){
   const name=document.getElementById('c-name').value||'Khách hàng';
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
   const outs=[...selOuts].map(s=>({doc:'KPI Document',dash:'Dashboard Spec',xl:'Excel',pp:'Presentation'}[s])).join(', ');
+  const confirmedCount=[...selKPIs].filter(no=>(kpiStatus[no]||'proposed')==='confirmed').length;
   document.getElementById('sum-tbl').innerHTML=`
     <tr><td>Khách hàng</td><td style="font-weight:600;color:var(--teal)">${name}</td></tr>
     <tr><td>Ngành</td><td>${curIndustry||'Chưa xác định'}</td></tr>
     <tr><td>SAP Modules</td><td>${mods}</td></tr>
     <tr><td>KPI đã chọn</td><td><strong style="color:var(--teal)">${selKPIs.size}</strong> KPI (thư viện + AI)</td></tr>
+    <tr><td>KPI đã xác nhận</td><td><strong style="color:#2e7d32">${confirmedCount}</strong> / ${selKPIs.size}</td></tr>
     <tr><td>KPI AI bổ sung</td><td>${aiAddedNos.size} chỉ tiêu</td></tr>
     <tr><td>Dashboard levels</td><td>C-Level · D-Level · M-Level · Department</td></tr>
     <tr><td>Định dạng xuất</td><td>${outs||'Chưa chọn'}</td></tr>`;
@@ -1630,15 +1785,14 @@ function gatherState(){
     aiAddedNos:[...aiAddedNos],
     aiKPIs:aiKPIs.slice(),
     aiScores:{...aiScores},
+    kpiStatus:{...kpiStatus},
     selOuts:[...selOuts],
     suggestItems:suggestItems.slice(),
   };
 }
 
 function saveDraft(){
-  const state=gatherState();
-  localStorage.setItem('kpi-advisor-draft',JSON.stringify(state));
-  toast('Đã lưu draft vào trình duyệt');
+  saveDraftNamed();
 }
 
 function downloadDraft(){
@@ -1717,6 +1871,7 @@ function loadDraft(){
     aiAddedNos=new Set(s.aiAddedNos||[]);
     aiKPIs=s.aiKPIs||[];
     aiScores=s.aiScores||{};
+    kpiStatus=s.kpiStatus||{};
     selOuts=new Set(s.selOuts||['doc','dash','xl','pp']);
     suggestItems=s.suggestItems||[];
     maxStep=s.maxStep||1;
@@ -1757,14 +1912,16 @@ function clearDraft(){
 
 function checkDraft(){
   const raw=localStorage.getItem('kpi-advisor-draft');
-  if(!raw)return;
-  try{
-    const s=JSON.parse(raw);
-    const dt=new Date(s.savedAt);
-    const name=s.customer?.name||'Phiên trước';
-    document.getElementById('draft-desc').textContent=`${name} — ${dt.toLocaleString('vi-VN')} — Bước ${s.curStep}/4, ${(s.selKPIs||[]).length} KPI`;
-    document.getElementById('draft-banner').style.display='flex';
-  }catch{}
+  if(raw){
+    try{
+      const s=JSON.parse(raw);
+      const dt=new Date(s.savedAt);
+      const name=s.customer?.name||'Phiên trước';
+      document.getElementById('draft-desc').textContent=`${name} — ${dt.toLocaleString('vi-VN')} — Bước ${s.curStep}/4, ${(s.selKPIs||[]).length} KPI`;
+      document.getElementById('draft-banner').style.display='flex';
+    }catch{}
+  }
+  updateDraftBadge();
 }
 
 /* ════════════════════════════════════
@@ -1795,7 +1952,9 @@ async function genOutputs(){
 
   const cname=document.getElementById('c-name').value||'Khách hàng';
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
-  const kpiList=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no));
+  const confirmedKPIs=KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no)&&kpiStatus[k.no]==='confirmed');
+  const kpiList=confirmedKPIs.length>0?confirmedKPIs:KPI_LIB.concat(aiKPIs).filter(k=>selKPIs.has(k.no));
+  const exportNote=confirmedKPIs.length>0?`(${confirmedKPIs.length} KPI đã xác nhận)`:`(${kpiList.length} KPI đã chọn — chưa có xác nhận)`;
 
   if(kpiList.length===0){
     toast('Chưa có KPI nào được chọn — quay lại Bước 2 để chọn KPI');
@@ -1803,6 +1962,8 @@ async function genOutputs(){
     prog.style.display='none';
     return;
   }
+  // Show export note
+  toast('Đang xuất '+exportNote);
 
   let successCount=0;
   for(const fmt of selected){
@@ -1986,33 +2147,98 @@ function genKPIDocumentXLSX(name,mods,kpis){
 }
 
 /* ════════════════════════════════════
-   EXPORT 2: KPI Matrix Excel (compact)
+   EXPORT 2: KPI Matrix Excel (enhanced)
 ════════════════════════════════════ */
 function genExcelXLSX(name,mods,kpis){
   const wb=XLSX.utils.book_new();
-  const h=['STT','Nhóm','Nhóm con','Chỉ tiêu','Tần suất','Ưu tiên','AI Score','Nguồn','SAP Modules','Chart Type đề xuất'];
-  const rows=kpis.map((k,i)=>[
-    i+1,k.nhom,k.sub||'',k.chi,k.freq,k.pri,
-    aiScores[k.no]||'',
-    aiAddedNos.has(k.no)?'AI':'Library',
-    k.mods?k.mods.join(', '):'',
-    assignChartType(k.chi,k.freq).type
-  ]);
-  const ws=XLSX.utils.aoa_to_sheet([h,...rows]);
-  ws['!cols']=[{wch:5},{wch:22},{wch:22},{wch:45},{wch:10},{wch:13},{wch:10},{wch:10},{wch:25},{wch:16}];
-  ws['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:9}})};
-  XLSX.utils.book_append_sheet(wb,ws,'KPI Matrix');
 
-  // Summary sheet
-  const aoa2=[
-    ['TÓM TẮT',''],
-    ['Khách hàng',name],['Ngành',curIndustry],['SAP Modules',mods],
-    ['Tổng KPI',kpis.length],['KPI AI bổ sung',aiAddedNos.size],
+  function getKPILevels(kpi){
+    const lvs=[];
+    Object.entries(DASH_TMPL).forEach(([lv,dashes])=>{
+      const lvNames={c:'C',d:'D',m:'M',dept:'Dept'};
+      dashes.forEach(d=>{
+        if(d.kpis.some(kn=>kn.toLowerCase().includes(kpi.chi.toLowerCase().slice(0,6))||kpi.chi.toLowerCase().includes(kn.toLowerCase().slice(0,6)))){
+          if(!lvs.includes(lvNames[lv]))lvs.push(lvNames[lv]);
+        }
+      });
+    });
+    return lvs.join(', ')||'Tất cả';
+  }
+
+  const statusLabels={confirmed:'Xác nhận',rejected:'Loại bỏ',proposed:'Đề xuất'};
+
+  // Sheet 1: KPI List (enhanced)
+  const h1=['STT','Nhóm','Chỉ tiêu','Công thức tính','Chiều phân tích','T-Code','Tần suất','Ưu tiên','AI Score','Trạng thái','Dashboard Level','Ghi chú'];
+  const r1=kpis.map((k,i)=>[
+    i+1,k.nhom,k.chi,k.formula||'',k.dimension||'',k.tcode||'',k.freq,k.pri,
+    aiScores[k.no]||'',
+    statusLabels[kpiStatus[k.no]||'proposed'],
+    getKPILevels(k),
+    ''
+  ]);
+  const ws1=XLSX.utils.aoa_to_sheet([h1,...r1]);
+  ws1['!cols']=[{wch:5},{wch:22},{wch:40},{wch:45},{wch:35},{wch:25},{wch:10},{wch:13},{wch:10},{wch:12},{wch:18},{wch:20}];
+  ws1['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:r1.length,c:11}})};
+  ws1['!views']=[{state:'frozen',ySplit:1,topLeftCell:'A2'}];
+  XLSX.utils.book_append_sheet(wb,ws1,'KPI List');
+
+  // Sheet 2: Dashboard Matrix (KPI × Level mapping)
+  const lvNames=['C-Level','D-Level','M-Level','Department'];
+  const lvKeys=['c','d','m','dept'];
+  const h2=['KPI','Nhóm',...lvNames];
+  const r2=kpis.map(k=>{
+    const row=[k.chi,k.nhom];
+    lvKeys.forEach(lv=>{
+      const match=DASH_TMPL[lv].find(d=>d.kpis.some(kn=>kn.toLowerCase().includes(k.chi.toLowerCase().slice(0,6))||k.chi.toLowerCase().includes(kn.toLowerCase().slice(0,6))));
+      row.push(match?match.name:'');
+    });
+    return row;
+  });
+  const ws2=XLSX.utils.aoa_to_sheet([h2,...r2]);
+  ws2['!cols']=[{wch:40},{wch:22},{wch:25},{wch:25},{wch:25},{wch:25}];
+  ws2['!views']=[{state:'frozen',ySplit:1,topLeftCell:'A2'}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Dashboard Matrix');
+
+  // Sheet 3: Summary
+  const byGroup={};
+  kpis.forEach(k=>{if(!byGroup[k.nhom])byGroup[k.nhom]=[];byGroup[k.nhom].push(k);});
+  const byFreq={Ngày:0,Tuần:0,Tháng:0};
+  kpis.forEach(k=>{byFreq[k.freq]=(byFreq[k.freq]||0)+1;});
+  const confirmedCountXL=kpis.filter(k=>(kpiStatus[k.no]||'proposed')==='confirmed').length;
+  const aoa3=[
+    ['THỐNG KÊ TỔNG HỢP — KPI ADVISOR'],
+    [],
+    ['Khách hàng',name],
+    ['Ngành',curIndustry||'—'],
+    ['SAP Modules',mods],
     ['Ngày tạo',new Date().toLocaleDateString('vi-VN')],
+    [],
+    ['PHÂN BỔ THEO TRẠNG THÁI',''],
+    ['Xác nhận',confirmedCountXL],
+    ['Đề xuất',kpis.filter(k=>(kpiStatus[k.no]||'proposed')==='proposed').length],
+    ['Loại bỏ',kpis.filter(k=>(kpiStatus[k.no]||'proposed')==='rejected').length],
+    [],
+    ['PHÂN BỔ THEO TẦN SUẤT',''],
+    ['Hàng ngày',byFreq['Ngày']||0],
+    ['Hàng tuần',byFreq['Tuần']||0],
+    ['Hàng tháng',byFreq['Tháng']||0],
+    [],
+    ['PHÂN BỔ THEO NHÓM NGHIỆP VỤ',''],
+    ...Object.entries(byGroup).map(([g,list])=>[g,list.length+' KPI']),
+    [],
+    ['PHÂN BỔ THEO ƯU TIÊN',''],
+    ['Cao',kpis.filter(k=>k.pri==='Cao').length],
+    ['Trung bình',kpis.filter(k=>k.pri==='Trung bình').length],
+    ['Thấp',kpis.filter(k=>k.pri==='Thấp').length],
+    [],
+    ['AI Đề xuất',aiAddedNos.size+' KPI'],
+    ['Thư viện',(kpis.length-[...aiAddedNos].filter(no=>kpis.find(k=>k.no===no)).length)+' KPI'],
   ];
-  const ws2=XLSX.utils.aoa_to_sheet(aoa2);
-  ws2['!cols']=[{wch:20},{wch:40}];
-  XLSX.utils.book_append_sheet(wb,ws2,'Tóm tắt');
+  const ws3=XLSX.utils.aoa_to_sheet(aoa3);
+  ws3['!cols']=[{wch:28},{wch:20}];
+  ws3['!merges']=[{s:{r:0,c:0},e:{r:0,c:1}}];
+  ws3['!views']=[{state:'frozen',ySplit:1,topLeftCell:'A2'}];
+  XLSX.utils.book_append_sheet(wb,ws3,'Summary');
 
   const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
   return new Blob([wbout],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
@@ -2482,8 +2708,188 @@ ${slides}
 </body></html>`;
 }
 
+/* ════════════════════════════════════
+   KPI DETAIL PANEL
+════════════════════════════════════ */
+function openKPIPanel(no){
+  const k=KPI_LIB.concat(aiKPIs).find(x=>x.no===no);
+  if(!k)return;
+  document.getElementById('kdp-name').textContent=k.chi;
+  document.getElementById('kdp-sub').textContent=k.nhom+(k.sub?' › '+k.sub:'');
+  const isSelected=selKPIs.has(no);
+  const btn=document.getElementById('kdp-toggle-btn');
+  btn.textContent=isSelected?'✓ Đang trong danh sách — Bỏ chọn':'+ Thêm vào danh sách';
+  btn.style.background=isSelected?'#e74c3c':'var(--teal)';
+  btn.dataset.no=no;
+  const levels=[];
+  Object.entries(DASH_TMPL).forEach(([lv,dashes])=>{
+    dashes.forEach(d=>{
+      if(d.kpis.some(kn=>kn.toLowerCase().includes(k.chi.toLowerCase().slice(0,6))||k.chi.toLowerCase().includes(kn.toLowerCase().slice(0,6)))){
+        levels.push({lv,name:d.name});
+      }
+    });
+  });
+  const lvLabels={c:'C-Level',d:'D-Level',m:'M-Level',dept:'Department'};
+  const lvColors={c:'var(--teal)',d:'var(--teal-light)',m:'rgba(0,88,112,.5)',dept:'#7a8500'};
+  const scoreVal=aiScores[no]||'—';
+  const isAI=aiAddedNos.has(no);
+  document.getElementById('kdp-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div style="background:var(--gray-50);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:var(--teal)">${scoreVal}</div>
+        <div style="font-size:10px;color:var(--gray-500);margin-top:2px;text-transform:uppercase">AI Score</div>
+      </div>
+      <div style="background:var(--gray-50);border-radius:8px;padding:12px;text-align:center">
+        <div style="font-size:13px;font-weight:700;color:var(--teal)">${k.freq}</div>
+        <div style="font-size:10px;color:var(--gray-500);margin-top:2px;text-transform:uppercase">Tần suất</div>
+      </div>
+    </div>
+    ${k.formula?`<div style="margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:6px">Công thức tính</div>
+      <div style="background:rgba(0,88,112,.04);border:1px solid rgba(0,88,112,.1);border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:var(--gray-900)">${k.formula}</div>
+    </div>`:''}
+    ${k.dimension?`<div style="margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:6px">Chiều phân tích</div>
+      <div style="font-size:12px;line-height:1.6;color:var(--gray-600)">${k.dimension}</div>
+    </div>`:''}
+    ${k.tcode?`<div style="margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:6px">SAP T-Code / Data Source</div>
+      <div style="font-family:monospace;font-size:12px;color:var(--cyan);background:#1a2b35;border-radius:6px;padding:8px 12px;letter-spacing:.5px">${k.tcode}</div>
+    </div>`:''}
+    ${k.mods&&k.mods.length?`<div style="margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:6px">SAP Modules</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">${k.mods.map(m=>`<span style="background:rgba(0,88,112,.1);color:var(--teal);font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px">${m}</span>`).join('')}</div>
+    </div>`:''}
+    <div style="margin-bottom:16px">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:6px">Ưu tiên</div>
+      <span class="badge b-${k.pri==='Cao'?'cao':k.pri==='Trung bình'?'tb':'thap'}">${k.pri}</span>
+      ${isAI?'<span class="badge b-ai" style="margin-left:6px">AI Đề xuất</span>':''}
+    </div>
+    ${levels.length?`<div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);margin-bottom:6px">Dashboard levels phù hợp</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">${levels.map(l=>`<span style="background:${lvColors[l.lv]};color:white;font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px">${lvLabels[l.lv]}</span>`).join('')}</div>
+    </div>`:''}
+  `;
+  document.getElementById('kpi-detail-panel').style.right='0';
+  document.getElementById('kpi-panel-overlay').style.display='block';
+}
+
+function closeKPIPanel(){
+  document.getElementById('kpi-detail-panel').style.right='-420px';
+  document.getElementById('kpi-panel-overlay').style.display='none';
+}
+
+function toggleKPIFromPanel(){
+  const btn=document.getElementById('kdp-toggle-btn');
+  const no=parseInt(btn.dataset.no);
+  const k=KPI_LIB.concat(aiKPIs).find(x=>x.no===no);
+  if(!k)return;
+  const cb=document.querySelector(`#ktbody tr[data-no="${no}"] .kpi-check`);
+  if(selKPIs.has(no)){
+    selKPIs.delete(no);
+    if(cb){cb.checked=false;cb.closest('tr').classList.remove('ksel');}
+    btn.textContent='+ Thêm vào danh sách';
+    btn.style.background='var(--teal)';
+  }else{
+    selKPIs.add(no);
+    if(cb){cb.checked=true;cb.closest('tr').classList.add('ksel');}
+    btn.textContent='✓ Đang trong danh sách — Bỏ chọn';
+    btn.style.background='#e74c3c';
+  }
+  updStats();
+}
+
+/* ════════════════════════════════════
+   MULTI-DRAFT MANAGEMENT
+════════════════════════════════════ */
+const DRAFT_KEY='kpi-advisor-drafts';
+const MAX_DRAFTS=5;
+
+function getAllDrafts(){
+  try{return JSON.parse(localStorage.getItem(DRAFT_KEY)||'[]');}catch{return [];}
+}
+
+function saveDraftNamed(){
+  const state=gatherState();
+  const drafts=getAllDrafts();
+  drafts.unshift(state);
+  if(drafts.length>MAX_DRAFTS)drafts.splice(MAX_DRAFTS);
+  localStorage.setItem(DRAFT_KEY,JSON.stringify(drafts));
+  localStorage.setItem('kpi-advisor-draft',JSON.stringify(state));
+  updateDraftBadge();
+  toast('Đã lưu draft · '+new Date().toLocaleTimeString('vi-VN'));
+}
+
+function updateDraftBadge(){
+  const drafts=getAllDrafts();
+  const badge=document.getElementById('draft-count-badge');
+  if(!badge)return;
+  if(drafts.length>0){badge.style.display='inline';badge.textContent=drafts.length;}
+  else{badge.style.display='none';}
+}
+
+function openDraftList(){
+  const drafts=getAllDrafts();
+  const body=document.getElementById('draft-list-body');
+  if(drafts.length===0){
+    body.innerHTML='<div style="text-align:center;color:var(--gray-500);padding:30px;font-size:13px">Chưa có draft nào được lưu</div>';
+  }else{
+    body.innerHTML=drafts.map((s,i)=>{
+      const dt=new Date(s.savedAt);
+      const name=s.customer?.name||'Không có tên';
+      const industry=s.curIndustry||'—';
+      const kpiCount=(s.selKPIs||[]).length;
+      const timeStr=dt.toLocaleString('vi-VN');
+      return `<div style="border:1.5px solid var(--gray-200);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;color:var(--gray-900);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name}</div>
+          <div style="font-size:11px;color:var(--gray-500);margin-top:2px">${industry} · ${kpiCount} KPI · Bước ${s.curStep||1}/4</div>
+          <div style="font-size:10px;color:var(--gray-400);margin-top:2px">${timeStr}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button onclick="loadDraftByIndex(${i})" class="btn btn-p" style="font-size:11px;padding:6px 12px">Khôi phục</button>
+          <button onclick="deleteDraftByIndex(${i})" style="padding:6px 8px;border:1px solid var(--gray-200);border-radius:var(--r);background:white;cursor:pointer;font-size:12px;color:var(--gray-500);" title="Xóa">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('draft-modal').style.display='flex';
+}
+
+function closeDraftModal(){
+  document.getElementById('draft-modal').style.display='none';
+}
+
+function loadDraftByIndex(i){
+  const drafts=getAllDrafts();
+  if(!drafts[i])return;
+  localStorage.setItem('kpi-advisor-draft',JSON.stringify(drafts[i]));
+  closeDraftModal();
+  loadDraft();
+}
+
+function deleteDraftByIndex(i){
+  const drafts=getAllDrafts();
+  drafts.splice(i,1);
+  localStorage.setItem(DRAFT_KEY,JSON.stringify(drafts));
+  updateDraftBadge();
+  openDraftList();
+}
+
 /* ─── INIT: Check for draft on page load ─── */
 checkDraft();
+
+/* ─── AUTO-SAVE every 30 seconds ─── */
+setInterval(()=>{
+  if(curStep===2||curStep===3){
+    if(selKPIs.size>0){
+      const state=gatherState();
+      localStorage.setItem('kpi-advisor-draft',JSON.stringify(state));
+      const drafts=getAllDrafts();
+      if(drafts.length>0){drafts[0]=state;localStorage.setItem(DRAFT_KEY,JSON.stringify(drafts));}
+    }
+  }
+},30000);
 </script>
 </body>
 </html>
