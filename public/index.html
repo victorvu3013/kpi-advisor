@@ -646,7 +646,7 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
         <div class="token-meter" id="token-meter">
           <div class="tm-title">
             <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            Token Usage — claude-sonnet-4-5
+            Token Usage — claude-sonnet-4-6
           </div>
           <div class="tm-grid">
             <div class="tm-cell"><div class="tm-val" id="tm-in">0</div><div class="tm-lbl">Input</div></div>
@@ -1255,7 +1255,7 @@ async function loadSuggestPanel(){
     const r1=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-5-20250929',
+        model:'claude-sonnet-4-6',
         max_tokens:1800,
         system:SKILL_INDUSTRY_RESEARCH,
         messages:[{role:'user',content:
@@ -1283,7 +1283,7 @@ async function loadSuggestPanel(){
     const r2=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-5-20250929',
+        model:'claude-sonnet-4-6',
         max_tokens:1500,
         system:SKILL_KPI_VALUE_DRIVER,
         messages:[{role:'user',content:
@@ -1583,13 +1583,17 @@ Nhiệm vụ của bạn:
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-5-20250929',
+        model:'claude-sonnet-4-6',
         max_tokens:600,
         system:sysPrompt,
         messages:chatHistory
       })
     });
     const data=await res.json();
+    if(!res.ok){
+      const errMsg=data.error?.message||data.error||`Lỗi API ${res.status}`;
+      throw new Error(errMsg);
+    }
     trackTokens(data.usage);
     const reply=data.content.map(c=>c.text||'').join('').trim();
     chatHistory.push({role:'assistant',content:reply});
@@ -1600,7 +1604,8 @@ Nhiệm vụ của bạn:
     tryExtractKPIFromReply(reply);
   }catch(e){
     removeTyping();
-    addMsg('ai','Xin lỗi, có lỗi kết nối đến AI. Vui lòng thử lại sau giây lát.');
+    const errTxt=e.message||'Không xác định';
+    addMsg('ai',`⚠️ Lỗi kết nối AI:\n${errTxt}\n\nVui lòng thử lại hoặc kiểm tra cấu hình API key trên Vercel.`);
   }
   document.getElementById('chat-send').disabled=false;
 }
@@ -1743,7 +1748,7 @@ Trả lời CHỈ JSON array (không text ngoài):
   try{
     const res=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:2000,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     trackTokens(data.usage);
