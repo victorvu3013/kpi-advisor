@@ -952,7 +952,7 @@ async function loadSuggestPanel(){
     const r1=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:1200,
         system:SKILL_INDUSTRY_RESEARCH,
         messages:[{role:'user',content:
@@ -977,7 +977,7 @@ async function loadSuggestPanel(){
     const r2=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:1100,
         system:SKILL_KPI_VALUE_DRIVER,
         messages:[{role:'user',content:
