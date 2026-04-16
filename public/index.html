@@ -99,6 +99,8 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
 .ic-icon{font-size:22px;margin-bottom:5px;}
 .ic-name{font-size:11px;font-weight:600;}
 .icd{width:7px;height:7px;border-radius:50%;background:var(--gray-200);margin:5px auto 0;transition:background .2s;}
+.ig-lbl{grid-column:1/-1;font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;padding:6px 2px 3px;border-bottom:1px solid var(--gray-100);margin-top:8px;}
+.ig-lbl:first-child{margin-top:0;}
 
 /* PILL BUTTONS */
 .prow{display:flex;gap:6px;flex-wrap:wrap;}
@@ -410,14 +412,39 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
       </div>
       <div class="fgl ff"><label>Ngành nghề</label>
         <div class="ig" id="industry-grid">
+          <div class="ig-lbl">⚙️ Sản xuất &amp; Công nghiệp</div>
           <div class="ic" onclick="selInd(this,'manufacturing')"><div class="ic-icon">🏭</div><div class="ic-name">Sản xuất</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'automotive')"><div class="ic-icon">🚗</div><div class="ic-name">Ô tô &amp; Phụ tùng</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'textile')"><div class="ic-icon">👗</div><div class="ic-name">Dệt may</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'construction')"><div class="ic-icon">🏗️</div><div class="ic-name">Xây dựng</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'chemicals')"><div class="ic-icon">🧪</div><div class="ic-name">Hóa chất</div><div class="icd"></div></div>
+          <div class="ig-lbl">🛒 Thương mại &amp; Phân phối</div>
           <div class="ic" onclick="selInd(this,'trading')"><div class="ic-icon">🛒</div><div class="ic-name">Thương mại</div><div class="icd"></div></div>
-          <div class="ic" onclick="selInd(this,'fmcg')"><div class="ic-icon">📦</div><div class="ic-name">FMCG</div><div class="icd"></div></div>
-          <div class="ic" onclick="selInd(this,'pharma')"><div class="ic-icon">💊</div><div class="ic-name">Dược phẩm</div><div class="icd"></div></div>
-          <div class="ic" onclick="selInd(this,'finance')"><div class="ic-icon">🏦</div><div class="ic-name">Tài chính</div><div class="icd"></div></div>
-          <div class="ic" onclick="selInd(this,'logistics')"><div class="ic-icon">🚛</div><div class="ic-name">Logistics</div><div class="icd"></div></div>
           <div class="ic" onclick="selInd(this,'retail')"><div class="ic-icon">🏪</div><div class="ic-name">Bán lẻ</div><div class="icd"></div></div>
-          <div class="ic" onclick="selInd(this,'other')"><div class="ic-icon">🔧</div><div class="ic-name">Khác</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'ecommerce')"><div class="ic-icon">🛍️</div><div class="ic-name">E-Commerce</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'fmcg')"><div class="ic-icon">📦</div><div class="ic-name">FMCG</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'food_bev')"><div class="ic-icon">🍔</div><div class="ic-name">Thực phẩm &amp; ĐU</div><div class="icd"></div></div>
+          <div class="ig-lbl">🏥 Y tế &amp; Đời sống</div>
+          <div class="ic" onclick="selInd(this,'pharma')"><div class="ic-icon">💊</div><div class="ic-name">Dược phẩm</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'healthcare')"><div class="ic-icon">🏥</div><div class="ic-name">Y tế &amp; Bệnh viện</div><div class="icd"></div></div>
+          <div class="ig-lbl">💰 Tài chính &amp; Bất động sản</div>
+          <div class="ic" onclick="selInd(this,'banking')"><div class="ic-icon">🏦</div><div class="ic-name">Ngân hàng</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'insurance')"><div class="ic-icon">🛡️</div><div class="ic-name">Bảo hiểm</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'realestate')"><div class="ic-icon">🏘️</div><div class="ic-name">Bất động sản</div><div class="icd"></div></div>
+          <div class="ig-lbl">💻 Công nghệ &amp; Viễn thông</div>
+          <div class="ic" onclick="selInd(this,'technology')"><div class="ic-icon">💻</div><div class="ic-name">Công nghệ</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'telecom')"><div class="ic-icon">📡</div><div class="ic-name">Viễn thông</div><div class="icd"></div></div>
+          <div class="ig-lbl">⚡ Năng lượng &amp; Tài nguyên</div>
+          <div class="ic" onclick="selInd(this,'energy')"><div class="ic-icon">⚡</div><div class="ic-name">Năng lượng &amp; Dầu khí</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'utilities')"><div class="ic-icon">🔌</div><div class="ic-name">Điện - Nước - Gas</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'mining')"><div class="ic-icon">⛏️</div><div class="ic-name">Khai khoáng</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'agri')"><div class="ic-icon">🌾</div><div class="ic-name">Nông nghiệp &amp; Thủy sản</div><div class="icd"></div></div>
+          <div class="ig-lbl">✈️ Dịch vụ</div>
+          <div class="ic" onclick="selInd(this,'logistics')"><div class="ic-icon">🚛</div><div class="ic-name">Logistics</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'hospitality')"><div class="ic-icon">🏨</div><div class="ic-name">Du lịch &amp; Khách sạn</div><div class="icd"></div></div>
+          <div class="ic" onclick="selInd(this,'education')"><div class="ic-icon">🎓</div><div class="ic-name">Giáo dục</div><div class="icd"></div></div>
+          <div class="ig-lbl"></div>
+          <div class="ic" onclick="selInd(this,'other')"><div class="ic-icon">🔧</div><div class="ic-name">Đa ngành / Khác</div><div class="icd"></div></div>
         </div>
       </div>
       <div class="fgl"><label>Hệ thống ERP</label>
@@ -1220,13 +1247,31 @@ NGUYÊN TẮC BẤT KHẢ THƯƠNG LƯỢNG
 /* ── Industry slug → Vietnamese label + mô tả đặc thù ── */
 const IND_MAP={
   manufacturing:{label:'Sản xuất',desc:'Sản xuất công nghiệp, lắp ráp, chế biến. Value drivers: hiệu suất dây chuyền (OEE), chất lượng sản phẩm, chi phí sản xuất, quản lý nguyên liệu, bảo trì thiết bị.'},
-  trading:      {label:'Thương mại',desc:'Phân phối, xuất nhập khẩu, bán buôn. Value drivers: vòng quay hàng tồn kho, biên lợi nhuận thương mại, tỷ lệ fill rate, công nợ phải thu.'},
-  fmcg:         {label:'FMCG',desc:'Hàng tiêu dùng nhanh, thực phẩm đồ uống. Value drivers: doanh số theo kênh, độ phủ thị trường, freshness/shelf-life, trade promotion ROI.'},
-  pharma:       {label:'Dược phẩm',desc:'Sản xuất và phân phối dược phẩm. Value drivers: batch compliance, hạn sử dụng, cold chain, regulatory compliance, truy xuất lô hàng.'},
-  finance:      {label:'Tài chính - Ngân hàng',desc:'Ngân hàng, bảo hiểm, tài chính. Value drivers: NIM, NPL ratio, CAR, chi phí huy động, hiệu quả chi nhánh.'},
-  logistics:    {label:'Logistics',desc:'Vận tải, kho bãi, chuỗi cung ứng. Value drivers: on-time delivery, chi phí mỗi chuyến, tỷ lệ lấp đầy xe, thời gian giao hàng.'},
-  retail:       {label:'Bán lẻ',desc:'Chuỗi bán lẻ, siêu thị. Value drivers: same-store-sales, traffic, conversion rate, basket size, inventory shrinkage.'},
-  other:        {label:'Đa ngành',desc:'Tập đoàn đa ngành hoặc ngành khác. Value drivers: hiệu quả vận hành, tối ưu chi phí, quản trị rủi ro, năng suất lao động.'}
+  automotive:   {label:'Ô tô & Phụ tùng',desc:'Sản xuất, lắp ráp ô tô và phụ tùng. Value drivers: takt time, defects per million (DPMO), supplier on-time delivery, warranty claim rate, changeover time, just-in-time supply chain.'},
+  textile:      {label:'Dệt may',desc:'Sản xuất hàng dệt may, may mặc xuất khẩu. Value drivers: sewing efficiency, first quality rate, fabric utilization, on-time shipment, cost of poor quality, lead time đơn hàng.'},
+  construction: {label:'Xây dựng',desc:'Nhà thầu xây dựng, hạ tầng, EPC. Value drivers: Schedule Performance Index (SPI), Cost Performance Index (CPI), safety incidents (TRIR), equipment utilization, gross margin theo dự án.'},
+  chemicals:    {label:'Hóa chất',desc:'Sản xuất hóa chất, vật liệu công nghiệp. Value drivers: process yield, energy intensity, safety events (PSE), waste generation, batch consistency, regulatory compliance.'},
+  trading:      {label:'Thương mại',desc:'Phân phối, xuất nhập khẩu, bán buôn. Value drivers: vòng quay hàng tồn kho, biên lợi nhuận thương mại, fill rate, công nợ phải thu, OTIF.'},
+  retail:       {label:'Bán lẻ',desc:'Chuỗi bán lẻ, siêu thị. Value drivers: same-store-sales, traffic, conversion rate, basket size, inventory shrinkage, doanh thu/m².'},
+  ecommerce:    {label:'E-Commerce',desc:'Thương mại điện tử, marketplace, D2C. Value drivers: GMV, conversion rate, average order value (AOV), fulfillment time, return rate, customer lifetime value.'},
+  fmcg:         {label:'FMCG',desc:'Hàng tiêu dùng nhanh. Value drivers: numeric distribution, weighted distribution, trade promotion ROI, shelf availability, days of supply, doanh số theo kênh.'},
+  food_bev:     {label:'Thực phẩm & Đồ uống',desc:'Sản xuất thực phẩm và đồ uống. Value drivers: food safety compliance, yield per batch, product freshness, days of inventory, energy cost per tonne, waste/shrinkage.'},
+  pharma:       {label:'Dược phẩm',desc:'Sản xuất và phân phối dược phẩm. Value drivers: batch release cycle time, GMP compliance, temperature excursion, lot traceability, yield variance, regulatory submission timeline.'},
+  healthcare:   {label:'Y tế & Bệnh viện',desc:'Bệnh viện, phòng khám, dịch vụ y tế. Value drivers: bed occupancy rate, average length of stay (ALOS), 30-day readmission rate, patient wait time, cost per patient day.'},
+  banking:      {label:'Ngân hàng',desc:'Ngân hàng thương mại, tín dụng. Value drivers: NIM, NPL ratio, CAR, CASA ratio, cost-to-income ratio, LDR, số lượng khách hàng mới, ROA/ROE.'},
+  finance:      {label:'Tài chính',desc:'Công ty tài chính, chứng khoán, quỹ đầu tư. Value drivers: AUM growth, trading volume, advisory fee revenue, risk-adjusted return, operational cost ratio.'},
+  insurance:    {label:'Bảo hiểm',desc:'Bảo hiểm nhân thọ và phi nhân thọ. Value drivers: loss ratio, combined ratio, premium growth, claims settlement time, persistency ratio (nhân thọ).'},
+  realestate:   {label:'Bất động sản',desc:'Phát triển và quản lý bất động sản thương mại, dân dụng. Value drivers: occupancy rate, NOI, days on market, construction cost variance, revenue per m².'},
+  technology:   {label:'Công nghệ & CNTT',desc:'Phần mềm, IT services, SaaS, cloud. Value drivers: MRR/ARR, churn rate, system uptime (SLA), MTTR, CAC/LTV ratio, developer velocity.'},
+  telecom:      {label:'Viễn thông',desc:'Nhà mạng di động, ISP, truyền thông. Value drivers: ARPU, churn rate, network availability, net subscriber additions, EBITDA margin, capex efficiency.'},
+  energy:       {label:'Năng lượng & Dầu khí',desc:'Khai thác, chế biến và phân phối năng lượng, dầu khí. Value drivers: production rate, lifting cost, plant utilization, safety (TRIR), GHG emissions intensity.'},
+  utilities:    {label:'Điện - Nước - Gas',desc:'Điện lực, cấp nước, phân phối gas. Value drivers: SAIDI, non-revenue water/energy loss, outage response time, cost per unit produced, customer complaint resolution.'},
+  mining:       {label:'Khai khoáng',desc:'Khai thác khoáng sản, than, vật liệu xây dựng. Value drivers: ore production rate, cost per tonne, LTIFR safety, equipment availability, ore grade vs reserve.'},
+  agri:         {label:'Nông nghiệp & Thủy sản',desc:'Trồng trọt, chăn nuôi, nuôi trồng thủy sản. Value drivers: yield per hectare, production cost per tonne, post-harvest loss rate, food safety certification, revenue per hectare.'},
+  logistics:    {label:'Logistics',desc:'Vận tải, kho bãi, chuỗi cung ứng 3PL. Value drivers: on-time delivery, vehicle utilization, cost per ton-km, warehouse utilization, damage rate in transit.'},
+  hospitality:  {label:'Du lịch & Khách sạn',desc:'Khách sạn, resort, lữ hành. Value drivers: occupancy rate, RevPAR, ADR, guest satisfaction (NPS), F&B revenue per guest, length of stay.'},
+  education:    {label:'Giáo dục',desc:'Trường học, đại học, trung tâm đào tạo. Value drivers: enrollment rate, graduation/completion rate, student satisfaction (CSAT), cost per student, faculty-to-student ratio.'},
+  other:        {label:'Đa ngành / Khác',desc:'Tập đoàn đa ngành hoặc ngành chưa có trong danh sách. Value drivers: hiệu quả vận hành, tối ưu chi phí, quản trị rủi ro, năng suất lao động, tăng trưởng doanh thu.'}
 };
 
 async function loadSuggestPanel(){
@@ -1323,60 +1368,186 @@ function fallbackSuggest(slug){
   const common=[
     {nhom:"Hiệu suất nhân sự",chi:"Doanh thu / nhân viên",freq:"Tháng",pri:"Trung bình",why:"Năng suất lao động tổng thể"},
     {nhom:"Hiệu suất nhân sự",chi:"Chi phí lương / Doanh thu (%)",freq:"Tháng",pri:"Cao",why:"Kiểm soát tỷ trọng chi phí nhân sự"},
-    {nhom:"Khách hàng",chi:"Customer Satisfaction Score (CSAT)",freq:"Tháng",pri:"Trung bình",why:"Mức độ hài lòng sau giao hàng"},
-    {nhom:"Tăng trưởng",chi:"Tốc độ tăng trưởng doanh thu YoY",freq:"Tháng",pri:"Cao",why:"Chỉ số chiến lược cho C-Level"},
+    {nhom:"Khách hàng",chi:"Customer Satisfaction Score (CSAT)",freq:"Tháng",pri:"Trung bình",why:"Mức độ hài lòng của khách hàng"},
+    {nhom:"Tăng trưởng",chi:"Tốc độ tăng trưởng doanh thu YoY (%)",freq:"Tháng",pri:"Cao",why:"Chỉ số chiến lược cho C-Level"},
     {nhom:"Hiệu quả vốn",chi:"Cash Conversion Cycle (CCC)",freq:"Tháng",pri:"Cao",why:"Hiệu quả chuyển đổi tiền trong chuỗi cung ứng"},
-    {nhom:"Chuỗi cung ứng",chi:"On-Time Delivery Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ giao hàng đúng hạn"},
+    {nhom:"Vận hành",chi:"On-Time Delivery Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ giao hàng đúng hạn"},
   ];
   const byInd={
     manufacturing:[
       {nhom:"Sản xuất",chi:"Overall Equipment Effectiveness (OEE)",freq:"Ngày",pri:"Cao",why:"Hiệu suất thiết bị tổng thể — chuẩn vàng sản xuất"},
       {nhom:"Sản xuất",chi:"First Pass Yield (FPY)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ đạt chất lượng ngay lần đầu"},
       {nhom:"Sản xuất",chi:"Planned vs Actual Production Output (%)",freq:"Ngày",pri:"Cao",why:"Độ bám kế hoạch sản xuất"},
-      {nhom:"Bảo trì",chi:"Mean Time Between Failures (MTBF)",freq:"Tháng",pri:"Trung bình",why:"Độ tin cậy thiết bị"},
-      {nhom:"Chi phí",chi:"Scrap & Rework Cost / Total Production Cost",freq:"Tháng",pri:"Cao",why:"Chi phí lãng phí trong sản xuất"},
+      {nhom:"Bảo trì",chi:"Mean Time Between Failures (MTBF)",freq:"Tháng",pri:"Trung bình",why:"Độ tin cậy thiết bị sản xuất"},
+      {nhom:"Chi phí",chi:"Scrap & Rework Cost / Total Production Cost (%)",freq:"Tháng",pri:"Cao",why:"Chi phí lãng phí trong sản xuất"},
+    ],
+    automotive:[
+      {nhom:"Sản xuất",chi:"Takt Time vs Actual Cycle Time (giây)",freq:"Ngày",pri:"Cao",why:"Nhịp sản xuất thực tế so với nhu cầu thị trường"},
+      {nhom:"Chất lượng",chi:"Defects per Million Opportunities (DPMO)",freq:"Tuần",pri:"Cao",why:"Chuẩn Six Sigma cho ngành ô tô"},
+      {nhom:"Chuỗi cung ứng",chi:"Supplier On-Time Delivery Rate (%)",freq:"Tuần",pri:"Cao",why:"Phụ thuộc chuỗi cung ứng linh kiện JIT"},
+      {nhom:"Bảo hành",chi:"Warranty Claim Rate (%)",freq:"Tháng",pri:"Cao",why:"Chi phí bảo hành phản ánh chất lượng sản phẩm"},
+      {nhom:"Sản xuất",chi:"Changeover Time (phút/lần)",freq:"Tuần",pri:"Trung bình",why:"Thời gian chuyển đổi giữa các model xe"},
+    ],
+    textile:[
+      {nhom:"Sản xuất",chi:"Sewing Efficiency Rate (%)",freq:"Ngày",pri:"Cao",why:"Năng suất chuyền may so với định mức"},
+      {nhom:"Chất lượng",chi:"First Quality Rate — Tỷ lệ hàng đạt chuẩn lần đầu (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ thành phẩm đạt QC ngay lần đầu"},
+      {nhom:"Nguyên liệu",chi:"Fabric Utilization Rate (%)",freq:"Tháng",pri:"Cao",why:"Hiệu quả sử dụng vải, giảm phế phẩm"},
+      {nhom:"Đơn hàng",chi:"On-Time Shipment Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ giao hàng đúng hạn cho buyer xuất khẩu"},
+      {nhom:"Chi phí",chi:"Cost of Poor Quality (COPQ)",freq:"Tháng",pri:"Trung bình",why:"Tổng chi phí hàng lỗi, làm lại, hủy"},
+    ],
+    construction:[
+      {nhom:"Tiến độ",chi:"Schedule Performance Index (SPI)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ tiến độ thực tế vs kế hoạch (Earned Value)"},
+      {nhom:"Chi phí",chi:"Cost Performance Index (CPI)",freq:"Tháng",pri:"Cao",why:"Hiệu quả chi phí thực tế vs ngân sách (EVM)"},
+      {nhom:"An toàn",chi:"Total Recordable Incident Rate (TRIR)",freq:"Tháng",pri:"Cao",why:"Tần suất tai nạn lao động trên công trường"},
+      {nhom:"Thiết bị",chi:"Equipment Utilization Rate (%)",freq:"Tuần",pri:"Trung bình",why:"Tỷ lệ sử dụng máy móc thiết bị thi công"},
+      {nhom:"Tài chính",chi:"Gross Margin per Project (%)",freq:"Tháng",pri:"Cao",why:"Biên lợi nhuận gộp theo từng dự án"},
+    ],
+    chemicals:[
+      {nhom:"Sản xuất",chi:"Process Yield Rate (%)",freq:"Ngày",pri:"Cao",why:"Hiệu suất quy trình phản ứng hóa học"},
+      {nhom:"Năng lượng",chi:"Energy Intensity (GJ/tấn sản phẩm)",freq:"Tháng",pri:"Cao",why:"Tiêu thụ năng lượng trên đơn vị sản phẩm"},
+      {nhom:"An toàn",chi:"Process Safety Events (PSE) Count",freq:"Tháng",pri:"Cao",why:"Sự cố an toàn quy trình — chỉ số OSHA"},
+      {nhom:"Môi trường",chi:"Waste Generation per Tonne Output (kg)",freq:"Tháng",pri:"Trung bình",why:"Chất thải phát sinh trên đơn vị sản xuất"},
+      {nhom:"Chất lượng",chi:"Batch Consistency Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ lô đạt tiêu chuẩn kỹ thuật"},
     ],
     trading:[
       {nhom:"Thương mại",chi:"Gross Margin by Product Category (%)",freq:"Tháng",pri:"Cao",why:"Biên lợi nhuận theo danh mục hàng"},
-      {nhom:"Thương mại",chi:"Fill Rate — Tỷ lệ hoàn thành đơn hàng",freq:"Tuần",pri:"Cao",why:"Khả năng đáp ứng đơn hàng khách"},
-      {nhom:"Tồn kho",chi:"Inventory Turnover Ratio",freq:"Tháng",pri:"Cao",why:"Vòng quay hàng tồn kho theo ngành thương mại"},
+      {nhom:"Thương mại",chi:"Fill Rate — Tỷ lệ hoàn thành đơn hàng (%)",freq:"Tuần",pri:"Cao",why:"Khả năng đáp ứng đơn hàng khách hàng"},
+      {nhom:"Tồn kho",chi:"Inventory Turnover Ratio",freq:"Tháng",pri:"Cao",why:"Vòng quay hàng tồn kho ngành thương mại"},
       {nhom:"Công nợ",chi:"Days Sales Outstanding (DSO)",freq:"Tháng",pri:"Cao",why:"Số ngày thu hồi công nợ bán hàng"},
-      {nhom:"Thương mại",chi:"Tỷ lệ đơn hàng giao đúng & đủ (OTIF)",freq:"Tuần",pri:"Cao",why:"On-Time In-Full — KPI vua ngành phân phối"},
+      {nhom:"Thương mại",chi:"Tỷ lệ đơn hàng giao đúng & đủ (OTIF) (%)",freq:"Tuần",pri:"Cao",why:"On-Time In-Full — KPI vua ngành phân phối"},
+    ],
+    retail:[
+      {nhom:"Bán lẻ",chi:"Same-Store Sales Growth (%)",freq:"Tháng",pri:"Cao",why:"Tăng trưởng doanh số cùng kỳ — loại trừ mở mới"},
+      {nhom:"Bán lẻ",chi:"Sales per Square Meter (VNĐ/m²)",freq:"Tháng",pri:"Cao",why:"Doanh thu trên mỗi m² mặt sàn"},
+      {nhom:"Khách hàng",chi:"Customer Conversion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ khách vào cửa hàng → mua hàng"},
+      {nhom:"Bán lẻ",chi:"Average Transaction Value (ATV)",freq:"Ngày",pri:"Trung bình",why:"Giá trị trung bình mỗi giao dịch"},
+      {nhom:"Tồn kho",chi:"Inventory Shrinkage Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ thất thoát hàng hóa tại điểm bán"},
+    ],
+    ecommerce:[
+      {nhom:"Kinh doanh",chi:"Gross Merchandise Value (GMV)",freq:"Ngày",pri:"Cao",why:"Tổng giá trị hàng hóa giao dịch trên nền tảng"},
+      {nhom:"Chuyển đổi",chi:"Conversion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ khách truy cập → đặt hàng thành công"},
+      {nhom:"Kinh doanh",chi:"Average Order Value (AOV)",freq:"Ngày",pri:"Cao",why:"Giá trị đơn hàng trung bình"},
+      {nhom:"Vận hành",chi:"Order Fulfillment Time (giờ)",freq:"Tuần",pri:"Cao",why:"Thời gian xử lý và xuất kho đơn hàng"},
+      {nhom:"Khách hàng",chi:"Return Rate (%)",freq:"Tuần",pri:"Trung bình",why:"Tỷ lệ hoàn trả hàng — ảnh hưởng trực tiếp biên lợi nhuận"},
     ],
     fmcg:[
-      {nhom:"Thị trường",chi:"Numeric Distribution Coverage (%)",freq:"Tháng",pri:"Cao",why:"Độ phủ điểm bán theo số lượng"},
-      {nhom:"Thị trường",chi:"Weighted Distribution Coverage (%)",freq:"Tháng",pri:"Cao",why:"Độ phủ có trọng số theo doanh số"},
+      {nhom:"Thị trường",chi:"Numeric Distribution Coverage (%)",freq:"Tháng",pri:"Cao",why:"Độ phủ điểm bán theo số lượng outlet"},
+      {nhom:"Thị trường",chi:"Weighted Distribution Coverage (%)",freq:"Tháng",pri:"Cao",why:"Độ phủ có trọng số theo doanh số kênh"},
       {nhom:"Khuyến mãi",chi:"Trade Promotion ROI (%)",freq:"Tháng",pri:"Cao",why:"Hiệu quả đầu tư khuyến mãi thương mại"},
-      {nhom:"Sản phẩm",chi:"Shelf Availability Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ hàng có mặt trên kệ"},
-      {nhom:"Sản phẩm",chi:"Days of Supply — Ngày cung ứng tồn kho",freq:"Tuần",pri:"Trung bình",why:"Phòng ngừa out-of-stock và over-stock"},
+      {nhom:"Sản phẩm",chi:"Shelf Availability Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ hàng có mặt trên kệ — chống OOS"},
+      {nhom:"Tồn kho",chi:"Days of Supply (DOS)",freq:"Tuần",pri:"Trung bình",why:"Số ngày tồn kho — phòng ngừa OOS và overstock"},
+    ],
+    food_bev:[
+      {nhom:"An toàn TP",chi:"Food Safety Non-Conformance Count",freq:"Tuần",pri:"Cao",why:"Số lần vi phạm tiêu chuẩn an toàn thực phẩm"},
+      {nhom:"Sản xuất",chi:"Yield per Batch (%)",freq:"Ngày",pri:"Cao",why:"Hiệu suất thu hồi nguyên liệu trong sản xuất"},
+      {nhom:"Phân phối",chi:"Product Freshness Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ hàng đến điểm bán còn trong hạn sử dụng"},
+      {nhom:"Tồn kho",chi:"Days of Inventory — Ngày tồn kho",freq:"Tuần",pri:"Cao",why:"Kiểm soát tồn kho để giảm hao hụt và waste"},
+      {nhom:"Chi phí",chi:"Energy Cost per Tonne Output (VNĐ/tấn)",freq:"Tháng",pri:"Trung bình",why:"Chi phí năng lượng trên đơn vị sản xuất"},
     ],
     pharma:[
       {nhom:"Tuân thủ",chi:"Batch Release Cycle Time (ngày)",freq:"Tháng",pri:"Cao",why:"Thời gian kiểm định và xuất lô sản phẩm"},
-      {nhom:"Tuân thủ",chi:"Tỷ lệ lô hàng đạt tiêu chuẩn GMP (%)",freq:"Tháng",pri:"Cao",why:"Compliance sản xuất dược phẩm"},
-      {nhom:"Cold Chain",chi:"Temperature Excursion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ vi phạm nhiệt độ bảo quản"},
+      {nhom:"Tuân thủ",chi:"Tỷ lệ lô hàng đạt tiêu chuẩn GMP (%)",freq:"Tháng",pri:"Cao",why:"Compliance sản xuất dược phẩm — bắt buộc pháp lý"},
+      {nhom:"Cold Chain",chi:"Temperature Excursion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ vi phạm nhiệt độ bảo quản dược phẩm"},
       {nhom:"Truy xuất",chi:"Lot Traceability Coverage (%)",freq:"Tháng",pri:"Cao",why:"Khả năng truy xuất nguồn gốc lô dược phẩm"},
-      {nhom:"Sản xuất",chi:"Yield Variance — Sai lệch năng suất lô",freq:"Tháng",pri:"Trung bình",why:"Độ ổn định quy trình sản xuất dược"},
+      {nhom:"Sản xuất",chi:"Yield Variance — Sai lệch năng suất lô (%)",freq:"Tháng",pri:"Trung bình",why:"Độ ổn định quy trình sản xuất dược"},
+    ],
+    healthcare:[
+      {nhom:"Vận hành",chi:"Bed Occupancy Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ lấp đầy giường bệnh — hiệu quả nguồn lực"},
+      {nhom:"Chất lượng",chi:"Average Length of Stay (ALOS — ngày)",freq:"Tháng",pri:"Cao",why:"Thời gian nằm viện trung bình theo chuyên khoa"},
+      {nhom:"Chất lượng",chi:"30-Day Readmission Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ tái nhập viện — chỉ báo chất lượng điều trị"},
+      {nhom:"Dịch vụ",chi:"Patient Wait Time (phút)",freq:"Ngày",pri:"Cao",why:"Thời gian chờ đợi trung bình của bệnh nhân"},
+      {nhom:"Tài chính",chi:"Cost per Patient Day (VNĐ)",freq:"Tháng",pri:"Trung bình",why:"Chi phí vận hành trên mỗi ngày giường bệnh"},
+    ],
+    banking:[
+      {nhom:"Tín dụng",chi:"Non-Performing Loan Ratio — NPL (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ nợ xấu — sức khỏe danh mục tín dụng"},
+      {nhom:"Lợi nhuận",chi:"Net Interest Margin (NIM)",freq:"Tháng",pri:"Cao",why:"Biên lãi thuần — hiệu quả kinh doanh cốt lõi ngân hàng"},
+      {nhom:"Hiệu quả",chi:"Cost-to-Income Ratio (%)",freq:"Tháng",pri:"Cao",why:"Kiểm soát chi phí hoạt động ngân hàng"},
+      {nhom:"An toàn vốn",chi:"Capital Adequacy Ratio (CAR) (%)",freq:"Quý",pri:"Cao",why:"An toàn vốn theo Basel II/III — yêu cầu NHNN"},
+      {nhom:"Tăng trưởng",chi:"CASA Ratio (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ tiền gửi không kỳ hạn — giảm chi phí vốn"},
     ],
     finance:[
-      {nhom:"Tín dụng",chi:"Non-Performing Loan Ratio — NPL (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ nợ xấu — chỉ số sức khỏe tín dụng"},
-      {nhom:"Lợi nhuận",chi:"Net Interest Margin (NIM)",freq:"Tháng",pri:"Cao",why:"Biên lãi thuần — hiệu quả kinh doanh ngân hàng"},
+      {nhom:"Tín dụng",chi:"Non-Performing Loan Ratio — NPL (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ nợ xấu — sức khỏe danh mục tín dụng"},
+      {nhom:"Lợi nhuận",chi:"Net Interest Margin (NIM)",freq:"Tháng",pri:"Cao",why:"Biên lãi thuần — hiệu quả kinh doanh tài chính"},
       {nhom:"Hiệu quả",chi:"Cost-to-Income Ratio (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ chi phí / thu nhập hoạt động"},
       {nhom:"An toàn vốn",chi:"Capital Adequacy Ratio (CAR) (%)",freq:"Quý",pri:"Cao",why:"Tỷ lệ an toàn vốn tối thiểu theo Basel"},
       {nhom:"Khách hàng",chi:"Customer Acquisition Cost (CAC)",freq:"Tháng",pri:"Trung bình",why:"Chi phí thu hút khách hàng mới"},
     ],
+    insurance:[
+      {nhom:"Bồi thường",chi:"Loss Ratio (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ bồi thường / phí bảo hiểm thu — chỉ số cốt lõi"},
+      {nhom:"Hiệu quả",chi:"Combined Ratio (%)",freq:"Tháng",pri:"Cao",why:"Loss ratio + expense ratio — hiệu quả kinh doanh tổng thể"},
+      {nhom:"Tăng trưởng",chi:"Gross Written Premium Growth YoY (%)",freq:"Tháng",pri:"Cao",why:"Tốc độ tăng trưởng phí bảo hiểm"},
+      {nhom:"Dịch vụ",chi:"Claims Settlement Time (ngày)",freq:"Tháng",pri:"Cao",why:"Thời gian giải quyết bồi thường — trải nghiệm khách hàng"},
+      {nhom:"Chất lượng KH",chi:"Persistency Ratio (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ hợp đồng duy trì hiệu lực (đặc biệt nhân thọ)"},
+    ],
+    realestate:[
+      {nhom:"Vận hành",chi:"Occupancy Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ lấp đầy BĐS thương mại / văn phòng / căn hộ"},
+      {nhom:"Tài chính",chi:"Net Operating Income (NOI — VNĐ)",freq:"Tháng",pri:"Cao",why:"Thu nhập hoạt động thuần từ danh mục BĐS"},
+      {nhom:"Kinh doanh",chi:"Days on Market (ngày)",freq:"Tháng",pri:"Cao",why:"Số ngày trung bình để bán / cho thuê BĐS"},
+      {nhom:"Chi phí",chi:"Construction Cost Variance (%)",freq:"Tháng",pri:"Cao",why:"Sai lệch chi phí xây dựng so với ngân sách"},
+      {nhom:"Doanh thu",chi:"Revenue per Square Meter (VNĐ/m²)",freq:"Tháng",pri:"Trung bình",why:"Doanh thu cho thuê trên mỗi m² diện tích"},
+    ],
+    technology:[
+      {nhom:"SaaS",chi:"Monthly Recurring Revenue (MRR — VNĐ)",freq:"Tháng",pri:"Cao",why:"Doanh thu định kỳ hàng tháng — sức khỏe công ty SaaS"},
+      {nhom:"Khách hàng",chi:"Customer Churn Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ khách hàng rời bỏ dịch vụ"},
+      {nhom:"Vận hành",chi:"System Uptime / Availability (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ hệ thống hoạt động ổn định theo SLA"},
+      {nhom:"Hỗ trợ",chi:"Mean Time to Resolve (MTTR — giờ)",freq:"Tuần",pri:"Cao",why:"Thời gian trung bình xử lý sự cố kỹ thuật"},
+      {nhom:"Kinh doanh",chi:"Customer LTV / CAC Ratio",freq:"Tháng",pri:"Cao",why:"Hiệu quả đầu tư thu hút và giữ chân khách hàng"},
+    ],
+    telecom:[
+      {nhom:"Thuê bao",chi:"Average Revenue Per User — ARPU (VNĐ)",freq:"Tháng",pri:"Cao",why:"Doanh thu trung bình mỗi thuê bao — chỉ số cốt lõi"},
+      {nhom:"Thuê bao",chi:"Customer Churn Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ thuê bao rời mạng mỗi tháng"},
+      {nhom:"Mạng lưới",chi:"Network Availability / Uptime (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ uptime mạng di động / internet theo vùng"},
+      {nhom:"Tăng trưởng",chi:"Net Subscriber Additions (thuê bao)",freq:"Tháng",pri:"Cao",why:"Số thuê bao tăng ròng — tăng trưởng thị phần"},
+      {nhom:"Tài chính",chi:"EBITDA Margin (%)",freq:"Tháng",pri:"Cao",why:"Biên EBITDA — hiệu quả vận hành ngành viễn thông"},
+    ],
+    energy:[
+      {nhom:"Sản xuất",chi:"Production Rate (boe/ngày hoặc MW)",freq:"Ngày",pri:"Cao",why:"Sản lượng khai thác / phát điện thực tế vs kế hoạch"},
+      {nhom:"Chi phí",chi:"Lifting Cost per Barrel (USD/boe)",freq:"Tháng",pri:"Cao",why:"Chi phí vận hành khai thác dầu khí trên đơn vị"},
+      {nhom:"An toàn",chi:"Total Recordable Incident Rate (TRIR)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ tai nạn lao động — bắt buộc ngành dầu khí"},
+      {nhom:"Vận hành",chi:"Refinery / Plant Utilization Rate (%)",freq:"Tháng",pri:"Cao",why:"Hiệu suất sử dụng công suất nhà máy lọc dầu / phát điện"},
+      {nhom:"Môi trường",chi:"GHG Emissions Intensity (tCO₂/đơn vị sản phẩm)",freq:"Tháng",pri:"Trung bình",why:"Cường độ phát thải khí nhà kính — ESG reporting"},
+    ],
+    utilities:[
+      {nhom:"Độ tin cậy",chi:"SAIDI (phút/khách hàng/năm)",freq:"Tháng",pri:"Cao",why:"Thời gian mất điện/nước trung bình mỗi khách hàng"},
+      {nhom:"Tổn thất",chi:"Non-Revenue Water/Energy Loss (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ thất thoát điện/nước trong hệ thống phân phối"},
+      {nhom:"Vận hành",chi:"Outage Response Time (giờ)",freq:"Tháng",pri:"Cao",why:"Thời gian phục hồi khi có sự cố mạng lưới"},
+      {nhom:"Chi phí",chi:"Cost per Unit Produced (VNĐ/kWh hoặc m³)",freq:"Tháng",pri:"Cao",why:"Chi phí sản xuất điện/nước trên đơn vị tiêu thụ"},
+      {nhom:"Khách hàng",chi:"Customer Complaint Resolution Rate (%)",freq:"Tháng",pri:"Trung bình",why:"Tỷ lệ giải quyết khiếu nại khách hàng đúng hạn"},
+    ],
+    mining:[
+      {nhom:"Khai thác",chi:"Ore Production Rate (tấn/ngày)",freq:"Ngày",pri:"Cao",why:"Sản lượng khai thác thực tế so với kế hoạch mỏ"},
+      {nhom:"Chi phí",chi:"Cost per Tonne Mined (USD/tấn)",freq:"Tháng",pri:"Cao",why:"Chi phí khai thác trên đơn vị sản lượng — C1 cost"},
+      {nhom:"An toàn",chi:"Lost Time Injury Frequency Rate (LTIFR)",freq:"Tháng",pri:"Cao",why:"Tần suất tai nạn lao động mất thời gian làm việc"},
+      {nhom:"Thiết bị",chi:"Heavy Equipment Availability (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ sẵn sàng của thiết bị khai thác hạng nặng"},
+      {nhom:"Chất lượng",chi:"Ore Grade vs Reserve Grade Estimate",freq:"Tháng",pri:"Trung bình",why:"Hàm lượng khoáng chất thực tế so với dự báo trữ lượng"},
+    ],
+    agri:[
+      {nhom:"Sản xuất",chi:"Crop Yield per Hectare (tấn/ha)",freq:"Tháng",pri:"Cao",why:"Năng suất trồng trọt / nuôi trồng trên đơn vị diện tích"},
+      {nhom:"Chi phí",chi:"Production Cost per Tonne (VNĐ/tấn)",freq:"Tháng",pri:"Cao",why:"Giá thành sản xuất nông sản so với thị trường"},
+      {nhom:"Chất lượng",chi:"Post-Harvest Loss Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ hao hụt sau thu hoạch — giảm food waste"},
+      {nhom:"Chứng nhận",chi:"Food Safety Certification Compliance (%)",freq:"Tháng",pri:"Cao",why:"Tuân thủ VietGAP, GlobalGAP, HACCP — yêu cầu xuất khẩu"},
+      {nhom:"Tài chính",chi:"Revenue per Hectare (VNĐ/ha)",freq:"Tháng",pri:"Trung bình",why:"Doanh thu đạt được trên mỗi đơn vị diện tích canh tác"},
+    ],
     logistics:[
       {nhom:"Vận tải",chi:"On-Time Delivery Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ giao hàng đúng giờ — KPI cốt lõi logistics"},
-      {nhom:"Vận tải",chi:"Vehicle Utilization Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ lấp đầy phương tiện vận tải"},
-      {nhom:"Chi phí",chi:"Cost per Ton-Kilometer",freq:"Tháng",pri:"Cao",why:"Chi phí vận chuyển trên đơn vị hàng hóa"},
-      {nhom:"Kho vận",chi:"Warehouse Space Utilization (%)",freq:"Tuần",pri:"Trung bình",why:"Hiệu quả sử dụng diện tích kho"},
-      {nhom:"Chất lượng",chi:"Damage Rate in Transit (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ hàng hỏng trong vận chuyển"},
+      {nhom:"Vận tải",chi:"Vehicle Utilization Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ lấp đầy trọng tải phương tiện vận tải"},
+      {nhom:"Chi phí",chi:"Cost per Ton-Kilometer (VNĐ/tấn.km)",freq:"Tháng",pri:"Cao",why:"Chi phí vận chuyển trên đơn vị hàng hóa và quãng đường"},
+      {nhom:"Kho vận",chi:"Warehouse Space Utilization (%)",freq:"Tuần",pri:"Trung bình",why:"Hiệu quả sử dụng diện tích kho bãi"},
+      {nhom:"Chất lượng",chi:"Damage Rate in Transit (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ hàng hỏng trong quá trình vận chuyển"},
     ],
-    retail:[
-      {nhom:"Bán lẻ",chi:"Same-Store Sales Growth (%)",freq:"Tháng",pri:"Cao",why:"Tăng trưởng doanh số cùng kỳ — loại trừ mở mới"},
-      {nhom:"Bán lẻ",chi:"Sales per Square Meter",freq:"Tháng",pri:"Cao",why:"Doanh thu trên mỗi m² mặt sàn"},
-      {nhom:"Khách hàng",chi:"Customer Conversion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ khách vào cửa hàng → mua hàng"},
-      {nhom:"Bán lẻ",chi:"Average Transaction Value (ATV)",freq:"Ngày",pri:"Trung bình",why:"Giá trị trung bình mỗi giao dịch"},
-      {nhom:"Tồn kho",chi:"Inventory Shrinkage Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ thất thoát hàng hóa tại điểm bán"},
+    hospitality:[
+      {nhom:"Phòng",chi:"Occupancy Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ lấp đầy phòng — KPI vua ngành khách sạn"},
+      {nhom:"Doanh thu",chi:"RevPAR — Revenue per Available Room (USD)",freq:"Ngày",pri:"Cao",why:"Doanh thu trên mỗi phòng có thể bán — chuẩn ngành"},
+      {nhom:"Phòng",chi:"Average Daily Rate — ADR (USD)",freq:"Ngày",pri:"Cao",why:"Giá phòng bình quân ngày thực tế"},
+      {nhom:"Dịch vụ",chi:"Guest Satisfaction Score (NPS / CSAT)",freq:"Tháng",pri:"Cao",why:"Trải nghiệm tổng thể của khách lưu trú"},
+      {nhom:"F&B",chi:"F&B Revenue per Guest (VNĐ)",freq:"Tháng",pri:"Trung bình",why:"Doanh thu ăn uống trên mỗi khách — upsell potential"},
+    ],
+    education:[
+      {nhom:"Học vụ",chi:"Enrollment Rate vs Target (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ nhập học so với chỉ tiêu tuyển sinh"},
+      {nhom:"Chất lượng",chi:"Graduation / Course Completion Rate (%)",freq:"Năm",pri:"Cao",why:"Tỷ lệ học viên hoàn thành chương trình đào tạo"},
+      {nhom:"Chất lượng",chi:"Student Satisfaction Score (CSAT)",freq:"Tháng",pri:"Cao",why:"Mức độ hài lòng của học viên với chương trình"},
+      {nhom:"Tài chính",chi:"Cost per Student per Year (VNĐ)",freq:"Tháng",pri:"Cao",why:"Chi phí đào tạo trung bình trên mỗi học viên / năm"},
+      {nhom:"Giảng viên",chi:"Faculty-to-Student Ratio",freq:"Tháng",pri:"Trung bình",why:"Tỷ lệ giảng viên / học viên — chỉ báo chất lượng"},
     ],
   };
   return [...(byInd[slug]||[]),...common].slice(0,10);
