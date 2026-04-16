@@ -123,6 +123,22 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
 .asp-add-all{width:100%;padding:9px;border:none;background:rgba(0,88,112,.07);color:var(--teal);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;border-radius:0 0 var(--rl) var(--rl);transition:background .2s;}
 .asp-add-all:hover{background:rgba(0,88,112,.12);}
 
+/* ─── TOKEN METER ─── */
+.token-meter{background:white;border-radius:var(--rl);box-shadow:var(--s1);padding:10px 14px;border-left:3px solid var(--teal);font-size:11px;}
+.tm-title{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--teal);margin-bottom:8px;font-size:11px;}
+.tm-title svg{width:13px;height:13px;stroke:var(--teal);fill:none;stroke-width:2;}
+.tm-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
+.tm-cell{background:var(--gray-50);border-radius:6px;padding:6px 8px;text-align:center;}
+.tm-val{font-size:13px;font-weight:700;color:var(--teal);line-height:1;}
+.tm-val.cost{color:#2e7d32;}
+.tm-lbl{font-size:9px;color:var(--gray-500);margin-top:2px;font-weight:500;text-transform:uppercase;letter-spacing:.3px;}
+.tm-bar-wrap{margin-top:8px;background:var(--gray-100);border-radius:4px;height:4px;overflow:hidden;}
+.tm-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--cyan));transition:width .4s ease;}
+.tm-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+.tm-calls{font-size:10px;color:var(--gray-500);}
+.tm-reset{font-size:10px;color:var(--gray-400);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;}
+.tm-reset:hover{color:var(--teal);}
+
 /* ─── AI CHAT BOX ─── */
 .chat-box{background:white;border-radius:var(--rl);border-top:4px solid var(--cyan);box-shadow:var(--s2);display:flex;flex-direction:column;height:440px;}
 .cb-header{display:flex;align-items:center;gap:8px;padding:13px 16px 11px;border-bottom:1px solid var(--gray-100);flex-shrink:0;}
@@ -544,6 +560,24 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
           </div>
         </div>
 
+        <!-- TOKEN METER -->
+        <div class="token-meter" id="token-meter">
+          <div class="tm-title">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Token Usage — claude-sonnet-4-6
+          </div>
+          <div class="tm-grid">
+            <div class="tm-cell"><div class="tm-val" id="tm-in">0</div><div class="tm-lbl">Input</div></div>
+            <div class="tm-cell"><div class="tm-val" id="tm-out">0</div><div class="tm-lbl">Output</div></div>
+            <div class="tm-cell"><div class="tm-val cost" id="tm-cost">$0.00</div><div class="tm-lbl">Est. Cost</div></div>
+          </div>
+          <div class="tm-bar-wrap"><div class="tm-bar" id="tm-bar" style="width:0%"></div></div>
+          <div class="tm-footer">
+            <span class="tm-calls" id="tm-calls">0 API calls · 0 tokens tổng</span>
+            <button class="tm-reset" onclick="resetTokens()">Reset</button>
+          </div>
+        </div>
+
       </div><!-- end sidebar -->
     </div><!-- end step2-layout -->
   </div><!-- end kpi-main -->
@@ -696,6 +730,38 @@ let selOuts = new Set(['doc','dash','xl','pp']);
 let curIndustry = '', chatHistory = [];
 let aiScores = {};
 let suggestItems = [];   // items shown in suggest panel
+
+/* ─── TOKEN COUNTER ─── */
+// Pricing: claude-sonnet-4-6 → $3/1M input, $15/1M output
+const TOKEN_PRICE={in:3/1e6, out:15/1e6};
+let tokenUsage={input:0,output:0,calls:0};
+
+function trackTokens(usage){
+  if(!usage)return;
+  tokenUsage.input +=(usage.input_tokens||0);
+  tokenUsage.output+=(usage.output_tokens||0);
+  tokenUsage.calls++;
+  updateTokenMeter();
+}
+
+function updateTokenMeter(){
+  const total=tokenUsage.input+tokenUsage.output;
+  const cost=tokenUsage.input*TOKEN_PRICE.in + tokenUsage.output*TOKEN_PRICE.out;
+  // bar: scale to 100k tokens max
+  const pct=Math.min(100,Math.round(total/1e5*100));
+  const fmt=n=>n>=1000?(n/1000).toFixed(1)+'k':n.toString();
+  document.getElementById('tm-in').textContent=fmt(tokenUsage.input);
+  document.getElementById('tm-out').textContent=fmt(tokenUsage.output);
+  document.getElementById('tm-cost').textContent='$'+cost.toFixed(4);
+  document.getElementById('tm-bar').style.width=pct+'%';
+  document.getElementById('tm-calls').textContent=tokenUsage.calls+' API call'+(tokenUsage.calls!==1?'s':'')+' · '+fmt(total)+' tokens tổng';
+}
+
+function resetTokens(){
+  tokenUsage={input:0,output:0,calls:0};
+  updateTokenMeter();
+  toast('Đã reset token counter');
+}
 let curStep = 1;         // track current wizard step
 let maxStep = 1;         // highest step reached
 
@@ -983,6 +1049,7 @@ async function loadSuggestPanel(){
       })
     });
     const d1=await r1.json();
+    trackTokens(d1.usage);
     industryContext=d1.content.map(c=>c.text||'').join('').slice(0,2500);
   }catch(e){
     industryContext='Ngành '+indLabel+': '+indDesc;
@@ -1013,6 +1080,7 @@ async function loadSuggestPanel(){
       })
     });
     const d2=await r2.json();
+    trackTokens(d2.usage);
     const txt=d2.content.map(c=>c.text||'').join('');
     let items=[];
     try{
@@ -1261,6 +1329,7 @@ Nhiệm vụ của bạn:
       })
     });
     const data=await res.json();
+    trackTokens(data.usage);
     const reply=data.content.map(c=>c.text||'').join('').trim();
     chatHistory.push({role:'assistant',content:reply});
     removeTyping();
@@ -1382,6 +1451,7 @@ Trả lời CHỈ JSON array (không text ngoài):
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
+    trackTokens(data.usage);
     const txt=data.content.map(c=>c.text||'').join('');
     let items=[];
     try{
