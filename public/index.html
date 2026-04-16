@@ -932,8 +932,23 @@ NGUYÊN TẮC BẤT KHẢ THƯƠNG LƯỢNG
 
 ĐẦU RA: Danh sách KPI bổ sung theo định dạng JSON được yêu cầu, mỗi KPI kèm nhóm nghiệp vụ, tên ngắn gọn, tần suất đo, ưu tiên và lý do business rõ ràng.`;
 
+/* ── Industry slug → Vietnamese label + mô tả đặc thù ── */
+const IND_MAP={
+  manufacturing:{label:'Sản xuất',desc:'Sản xuất công nghiệp, lắp ráp, chế biến. Value drivers: hiệu suất dây chuyền (OEE), chất lượng sản phẩm, chi phí sản xuất, quản lý nguyên liệu, bảo trì thiết bị.'},
+  trading:      {label:'Thương mại',desc:'Phân phối, xuất nhập khẩu, bán buôn. Value drivers: vòng quay hàng tồn kho, biên lợi nhuận thương mại, tỷ lệ fill rate, công nợ phải thu.'},
+  fmcg:         {label:'FMCG',desc:'Hàng tiêu dùng nhanh, thực phẩm đồ uống. Value drivers: doanh số theo kênh, độ phủ thị trường, freshness/shelf-life, trade promotion ROI.'},
+  pharma:       {label:'Dược phẩm',desc:'Sản xuất và phân phối dược phẩm. Value drivers: batch compliance, hạn sử dụng, cold chain, regulatory compliance, truy xuất lô hàng.'},
+  finance:      {label:'Tài chính - Ngân hàng',desc:'Ngân hàng, bảo hiểm, tài chính. Value drivers: NIM, NPL ratio, CAR, chi phí huy động, hiệu quả chi nhánh.'},
+  logistics:    {label:'Logistics',desc:'Vận tải, kho bãi, chuỗi cung ứng. Value drivers: on-time delivery, chi phí mỗi chuyến, tỷ lệ lấp đầy xe, thời gian giao hàng.'},
+  retail:       {label:'Bán lẻ',desc:'Chuỗi bán lẻ, siêu thị. Value drivers: same-store-sales, traffic, conversion rate, basket size, inventory shrinkage.'},
+  other:        {label:'Đa ngành',desc:'Tập đoàn đa ngành hoặc ngành khác. Value drivers: hiệu quả vận hành, tối ưu chi phí, quản trị rủi ro, năng suất lao động.'}
+};
+
 async function loadSuggestPanel(){
-  const ind=curIndustry||'Sản xuất';
+  const slug=curIndustry||'manufacturing';
+  const indInfo=IND_MAP[slug]||IND_MAP['other'];
+  const indLabel=indInfo.label;
+  const indDesc=indInfo.desc;
   const objs=Array.from(document.querySelectorAll('#objectives .sel')).map(b=>b.textContent).join(', ')||'Chưa xác định';
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
   const existingKPIs=KPI_LIB.map(k=>k.chi).join(' | ');
@@ -946,48 +961,54 @@ async function loadSuggestPanel(){
   }
 
   /* ── Bước 1: industry_research skill ── */
-  setLoading(1,'Đang nghiên cứu đặc thù ngành <em>'+ind+'</em>...');
+  setLoading(1,'Đang nghiên cứu đặc thù ngành <em>'+indLabel+'</em>...');
   let industryContext='';
   try{
     const r1=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-6',
-        max_tokens:1200,
+        max_tokens:1800,
         system:SKILL_INDUSTRY_RESEARCH,
         messages:[{role:'user',content:
-          'Phân tích nhanh đặc thù ngành phục vụ thiết kế KPI SAP:\n'
-          +'- Ngành: '+ind+'\n'
-          +'- Mục tiêu phân tích: '+objs+'\n'
-          +'- SAP Modules: '+mods+'\n\n'
-          +'Tập trung trả lời 10 câu hỏi bắt buộc. Súc tích, dùng nhãn bằng chứng. '
-          +'Kết thúc bằng "Triggering KPI & Value Driver Skill because industry foundation is now sufficient for KPI architecture."'
+          'Phân tích đặc thù ngành để thiết kế KPI SAP S/4HANA:\n'
+          +'- Ngành: '+indLabel+'\n'
+          +'- Đặc điểm ngành: '+indDesc+'\n'
+          +'- Mục tiêu kinh doanh: '+objs+'\n'
+          +'- SAP Modules triển khai: '+mods+'\n\n'
+          +'Yêu cầu: Liệt kê súc tích (1) chuỗi giá trị chính, (2) top 5 value drivers đặc thù ngành, '
+          +'(3) điểm yếu vận hành phổ biến, (4) KPI gaps thường thiếu trong template chuẩn. '
+          +'Dùng nhãn bằng chứng [F/B/I]. Kết thúc bằng: "Triggering KPI & Value Driver Skill."'
         }]
       })
     });
     const d1=await r1.json();
-    industryContext=d1.content.map(c=>c.text||'').join('').slice(0,1200);
+    industryContext=d1.content.map(c=>c.text||'').join('').slice(0,2500);
   }catch(e){
-    industryContext='[A] Ngành '+ind+': value drivers chính là hiệu quả quy trình, tối ưu chi phí vận hành và khả năng truy xuất dữ liệu theo thời gian thực.';
+    industryContext='Ngành '+indLabel+': '+indDesc;
   }
 
   /* ── Bước 2: kpi_value_driver skill ── */
-  setLoading(2,'Đang xây dựng đề xuất KPI bổ sung...');
+  setLoading(2,'Đang xây dựng bộ KPI đặc thù ngành '+indLabel+'...');
   try{
     const r2=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-6',
-        max_tokens:1100,
+        max_tokens:2500,
         system:SKILL_KPI_VALUE_DRIVER,
         messages:[{role:'user',content:
-          '## Kết quả Industry Research (Bước 1)\n'+industryContext
-          +'\n\n## KPI Template hiện có (KHÔNG lặp lại)\n'+existingKPIs
-          +'\n\n## Yêu cầu\n'
-          +'Đề xuất 6–8 KPI BỔ SUNG ngoài template, phù hợp đặc thù ngành '+ind
-          +' và mục tiêu "'+objs+'". Chỉ KPI chưa có trong template.\n\n'
-          +'Trả lời CHỈ JSON, không có text bên ngoài:\n'
-          +'[{"nhom":"Tên nhóm nghiệp vụ","chi":"Tên KPI ngắn gọn","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình","why":"Lý do business 1 dòng"}]'
+          '## Industry Research Context\n'+industryContext
+          +'\n\n## KPI đã có trong template (KHÔNG lặp lại bất kỳ KPI nào dưới đây)\n'+existingKPIs
+          +'\n\n## Yêu cầu output\n'
+          +'Đề xuất **12–15 KPI BỔ SUNG** đặc thù ngành '+indLabel+'.\n'
+          +'Điều kiện:\n'
+          +'- Mỗi KPI phải KHÁC HOÀN TOÀN với template đã có\n'
+          +'- Phản ánh đặc thù riêng của ngành '+indLabel+' (không phải KPI chung chung)\n'
+          +'- Liên kết với SAP modules: '+mods+'\n'
+          +'- Phù hợp mục tiêu: '+objs+'\n\n'
+          +'Trả lời CHỈ JSON array, không text ngoài:\n'
+          +'[{"nhom":"Nhóm nghiệp vụ đặc thù ngành","chi":"Tên KPI cụ thể","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình|Thấp","why":"Lý do đặc thù ngành trong 1 dòng"}]'
         }]
       })
     });
@@ -995,30 +1016,79 @@ async function loadSuggestPanel(){
     const txt=d2.content.map(c=>c.text||'').join('');
     let items=[];
     try{
-      const m=txt.replace(/```json|```/g,'').match(/\[[\s\S]*\]/);
+      const m=txt.replace(/```json[\s\S]*?```/g,s=>s).replace(/```json|```/g,'').match(/\[[\s\S]*\]/);
       items=JSON.parse(m?m[0]:txt.trim());
-    }catch{items=fallbackSuggest(ind);}
+      if(!Array.isArray(items)||!items.length)throw new Error('empty');
+    }catch{items=fallbackSuggest(slug);}
     suggestItems=items;
     renderSuggestPanel(items);
   }catch(e){
-    suggestItems=fallbackSuggest(ind);
+    suggestItems=fallbackSuggest(slug);
     renderSuggestPanel(suggestItems);
   }
 }
 
-function fallbackSuggest(ind){
-  const base=[
-    {nhom:"Hiệu suất nhân sự",chi:"Doanh thu / nhân viên",freq:"Tháng",pri:"Trung bình",why:"Đo lường năng suất lao động tổng thể"},
+function fallbackSuggest(slug){
+  const common=[
+    {nhom:"Hiệu suất nhân sự",chi:"Doanh thu / nhân viên",freq:"Tháng",pri:"Trung bình",why:"Năng suất lao động tổng thể"},
     {nhom:"Hiệu suất nhân sự",chi:"Chi phí lương / Doanh thu (%)",freq:"Tháng",pri:"Cao",why:"Kiểm soát tỷ trọng chi phí nhân sự"},
-    {nhom:"Khách hàng",chi:"Customer Satisfaction Score (CSAT)",freq:"Tháng",pri:"Trung bình",why:"Đo lường mức độ hài lòng sau giao hàng"},
-    {nhom:"Tăng trưởng",chi:"Tốc độ tăng trưởng doanh thu YoY",freq:"Tháng",pri:"Cao",why:"Chỉ số chiến lược quan trọng cho C-Level"},
-    {nhom:"Hiệu quả vốn",chi:"Cash Conversion Cycle (CCC)",freq:"Tháng",pri:"Cao",why:"Đo lường hiệu quả chuyển đổi tiền trong chuỗi cung ứng"},
-    {nhom:"Chuỗi cung ứng",chi:"On-Time Delivery Rate (%)",freq:"Tuần",pri:"Cao",why:"Đo lường tỷ lệ giao hàng đúng hạn cho khách hàng"},
+    {nhom:"Khách hàng",chi:"Customer Satisfaction Score (CSAT)",freq:"Tháng",pri:"Trung bình",why:"Mức độ hài lòng sau giao hàng"},
+    {nhom:"Tăng trưởng",chi:"Tốc độ tăng trưởng doanh thu YoY",freq:"Tháng",pri:"Cao",why:"Chỉ số chiến lược cho C-Level"},
+    {nhom:"Hiệu quả vốn",chi:"Cash Conversion Cycle (CCC)",freq:"Tháng",pri:"Cao",why:"Hiệu quả chuyển đổi tiền trong chuỗi cung ứng"},
+    {nhom:"Chuỗi cung ứng",chi:"On-Time Delivery Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ giao hàng đúng hạn"},
   ];
-  if(ind==='manufacturing'||ind==='pharma'){
-    base.push({nhom:"Sản xuất nâng cao",chi:"First Pass Yield (FPY) — Tỷ lệ đạt ngay lần đầu",freq:"Ngày",pri:"Cao",why:"Chỉ số chất lượng quan trọng trong sản xuất"});
-  }
-  return base;
+  const byInd={
+    manufacturing:[
+      {nhom:"Sản xuất",chi:"Overall Equipment Effectiveness (OEE)",freq:"Ngày",pri:"Cao",why:"Hiệu suất thiết bị tổng thể — chuẩn vàng sản xuất"},
+      {nhom:"Sản xuất",chi:"First Pass Yield (FPY)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ đạt chất lượng ngay lần đầu"},
+      {nhom:"Sản xuất",chi:"Planned vs Actual Production Output (%)",freq:"Ngày",pri:"Cao",why:"Độ bám kế hoạch sản xuất"},
+      {nhom:"Bảo trì",chi:"Mean Time Between Failures (MTBF)",freq:"Tháng",pri:"Trung bình",why:"Độ tin cậy thiết bị"},
+      {nhom:"Chi phí",chi:"Scrap & Rework Cost / Total Production Cost",freq:"Tháng",pri:"Cao",why:"Chi phí lãng phí trong sản xuất"},
+    ],
+    trading:[
+      {nhom:"Thương mại",chi:"Gross Margin by Product Category (%)",freq:"Tháng",pri:"Cao",why:"Biên lợi nhuận theo danh mục hàng"},
+      {nhom:"Thương mại",chi:"Fill Rate — Tỷ lệ hoàn thành đơn hàng",freq:"Tuần",pri:"Cao",why:"Khả năng đáp ứng đơn hàng khách"},
+      {nhom:"Tồn kho",chi:"Inventory Turnover Ratio",freq:"Tháng",pri:"Cao",why:"Vòng quay hàng tồn kho theo ngành thương mại"},
+      {nhom:"Công nợ",chi:"Days Sales Outstanding (DSO)",freq:"Tháng",pri:"Cao",why:"Số ngày thu hồi công nợ bán hàng"},
+      {nhom:"Thương mại",chi:"Tỷ lệ đơn hàng giao đúng & đủ (OTIF)",freq:"Tuần",pri:"Cao",why:"On-Time In-Full — KPI vua ngành phân phối"},
+    ],
+    fmcg:[
+      {nhom:"Thị trường",chi:"Numeric Distribution Coverage (%)",freq:"Tháng",pri:"Cao",why:"Độ phủ điểm bán theo số lượng"},
+      {nhom:"Thị trường",chi:"Weighted Distribution Coverage (%)",freq:"Tháng",pri:"Cao",why:"Độ phủ có trọng số theo doanh số"},
+      {nhom:"Khuyến mãi",chi:"Trade Promotion ROI (%)",freq:"Tháng",pri:"Cao",why:"Hiệu quả đầu tư khuyến mãi thương mại"},
+      {nhom:"Sản phẩm",chi:"Shelf Availability Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ hàng có mặt trên kệ"},
+      {nhom:"Sản phẩm",chi:"Days of Supply — Ngày cung ứng tồn kho",freq:"Tuần",pri:"Trung bình",why:"Phòng ngừa out-of-stock và over-stock"},
+    ],
+    pharma:[
+      {nhom:"Tuân thủ",chi:"Batch Release Cycle Time (ngày)",freq:"Tháng",pri:"Cao",why:"Thời gian kiểm định và xuất lô sản phẩm"},
+      {nhom:"Tuân thủ",chi:"Tỷ lệ lô hàng đạt tiêu chuẩn GMP (%)",freq:"Tháng",pri:"Cao",why:"Compliance sản xuất dược phẩm"},
+      {nhom:"Cold Chain",chi:"Temperature Excursion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ vi phạm nhiệt độ bảo quản"},
+      {nhom:"Truy xuất",chi:"Lot Traceability Coverage (%)",freq:"Tháng",pri:"Cao",why:"Khả năng truy xuất nguồn gốc lô dược phẩm"},
+      {nhom:"Sản xuất",chi:"Yield Variance — Sai lệch năng suất lô",freq:"Tháng",pri:"Trung bình",why:"Độ ổn định quy trình sản xuất dược"},
+    ],
+    finance:[
+      {nhom:"Tín dụng",chi:"Non-Performing Loan Ratio — NPL (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ nợ xấu — chỉ số sức khỏe tín dụng"},
+      {nhom:"Lợi nhuận",chi:"Net Interest Margin (NIM)",freq:"Tháng",pri:"Cao",why:"Biên lãi thuần — hiệu quả kinh doanh ngân hàng"},
+      {nhom:"Hiệu quả",chi:"Cost-to-Income Ratio (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ chi phí / thu nhập hoạt động"},
+      {nhom:"An toàn vốn",chi:"Capital Adequacy Ratio (CAR) (%)",freq:"Quý",pri:"Cao",why:"Tỷ lệ an toàn vốn tối thiểu theo Basel"},
+      {nhom:"Khách hàng",chi:"Customer Acquisition Cost (CAC)",freq:"Tháng",pri:"Trung bình",why:"Chi phí thu hút khách hàng mới"},
+    ],
+    logistics:[
+      {nhom:"Vận tải",chi:"On-Time Delivery Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ giao hàng đúng giờ — KPI cốt lõi logistics"},
+      {nhom:"Vận tải",chi:"Vehicle Utilization Rate (%)",freq:"Tuần",pri:"Cao",why:"Tỷ lệ lấp đầy phương tiện vận tải"},
+      {nhom:"Chi phí",chi:"Cost per Ton-Kilometer",freq:"Tháng",pri:"Cao",why:"Chi phí vận chuyển trên đơn vị hàng hóa"},
+      {nhom:"Kho vận",chi:"Warehouse Space Utilization (%)",freq:"Tuần",pri:"Trung bình",why:"Hiệu quả sử dụng diện tích kho"},
+      {nhom:"Chất lượng",chi:"Damage Rate in Transit (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ hàng hỏng trong vận chuyển"},
+    ],
+    retail:[
+      {nhom:"Bán lẻ",chi:"Same-Store Sales Growth (%)",freq:"Tháng",pri:"Cao",why:"Tăng trưởng doanh số cùng kỳ — loại trừ mở mới"},
+      {nhom:"Bán lẻ",chi:"Sales per Square Meter",freq:"Tháng",pri:"Cao",why:"Doanh thu trên mỗi m² mặt sàn"},
+      {nhom:"Khách hàng",chi:"Customer Conversion Rate (%)",freq:"Ngày",pri:"Cao",why:"Tỷ lệ khách vào cửa hàng → mua hàng"},
+      {nhom:"Bán lẻ",chi:"Average Transaction Value (ATV)",freq:"Ngày",pri:"Trung bình",why:"Giá trị trung bình mỗi giao dịch"},
+      {nhom:"Tồn kho",chi:"Inventory Shrinkage Rate (%)",freq:"Tháng",pri:"Cao",why:"Tỷ lệ thất thoát hàng hóa tại điểm bán"},
+    ],
+  };
+  return [...(byInd[slug]||[]),...common].slice(0,10);
 }
 
 function renderSuggestPanel(items){
@@ -1184,7 +1254,7 @@ Nhiệm vụ của bạn:
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-sonnet-4-6',
         max_tokens:600,
         system:sysPrompt,
         messages:chatHistory
@@ -1291,27 +1361,34 @@ async function searchIndustryKPI(){
   body.innerHTML='<div class="asp-loading"><div class="asp-spinner"></div><div style="font-size:11px;color:var(--gray-500)">Đang tìm KPI cho ngành '+q+'...</div></div>';
 
   const mods=Array.from(document.querySelectorAll('#sap-mods .sel')).map(b=>b.textContent).join(', ')||'Chưa chọn';
-  const prompt=`Bạn là chuyên gia SAP Analytics & Business Intelligence với 15 năm kinh nghiệm.
+  const existingKPIs=KPI_LIB.map(k=>k.chi).join(' | ');
+  const prompt=`Bạn là chuyên gia SAP Analytics & KPI Architecture với 15 năm kinh nghiệm doanh nghiệp Việt Nam.
 
-Hãy đề xuất 6–8 KPI quan trọng nhất cho ngành "${q}" trong bối cảnh doanh nghiệp Việt Nam triển khai SAP (modules: ${mods}).
+Ngành tìm kiếm: "${q}"
+SAP Modules: ${mods}
+KPI template hiện có (KHÔNG lặp lại): ${existingKPIs}
 
-Yêu cầu:
-- KPI phải thực tế, đo lường được từ hệ thống SAP
-- Phù hợp đặc thù ngành "${q}"
-- Mỗi KPI có lý do ngắn gọn tại sao quan trọng
+Yêu cầu: Đề xuất 10–12 KPI ĐẶC THÙ ngành "${q}" — KHÁC HOÀN TOÀN với template. Mỗi KPI phải:
+- Phản ánh nghiệp vụ đặc trưng của ngành "${q}"
+- Đo lường được từ SAP với modules: ${mods}
+- Có tên tiếng Việt rõ ràng (kèm tên kỹ thuật nếu cần)
 
-Trả lời ĐÚNG JSON (KHÔNG có text ngoài):
-[{"nhom":"Tên nhóm","chi":"Tên chỉ tiêu","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình","why":"Lý do 1 dòng"}]`;
+Trả lời CHỈ JSON array (không text ngoài):
+[{"nhom":"Nhóm nghiệp vụ đặc thù ngành","chi":"Tên KPI cụ thể","freq":"Ngày|Tuần|Tháng","pri":"Cao|Trung bình|Thấp","why":"Lý do đặc thù ngành trong 1 dòng"}]`;
 
   try{
     const res=await fetch('/api/claude',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     const txt=data.content.map(c=>c.text||'').join('');
     let items=[];
-    try{items=JSON.parse(txt.replace(/```json|```/g,'').trim());}catch{items=fallbackSuggest(q);}
+    try{
+      const m=txt.replace(/```json|```/g,'').match(/\[[\s\S]*\]/);
+      items=JSON.parse(m?m[0]:txt.trim());
+      if(!Array.isArray(items)||!items.length)throw new Error('empty');
+    }catch{items=fallbackSuggest(curIndustry);}
     suggestItems=items;
     renderSuggestPanel(items);
     toast(`Đã tìm ${items.length} KPI cho ngành ${q}`);
