@@ -9,10 +9,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.claudekey;
   if (!apiKey) {
-    console.error('[claude-proxy] ANTHROPIC_API_KEY is not set');
-    return res.status(500).json({ error: 'API key not configured — set ANTHROPIC_API_KEY in Vercel Environment Variables' });
+    console.error('[claude-proxy] claudekey is not set');
+    return res.status(500).json({ error: 'API key not configured — set claudekey in Vercel Environment Variables' });
   }
 
   try {
