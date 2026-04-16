@@ -56,6 +56,25 @@ nav{background:var(--white);border-bottom:3px solid var(--teal);padding:0 28px;d
 button.pb.ai-mod{position:relative;}
 button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;background:var(--cyan);color:#fff;font-size:7px;font-weight:700;border-radius:4px;padding:1px 3px;line-height:1.2;}
 
+/* ─── KPI TOOLTIP ─── */
+.chi-wrap{position:relative;display:inline-block;width:100%;}
+.chi-wrap:hover .kpi-tip{opacity:1;pointer-events:auto;transform:translateY(0);}
+.kpi-tip{
+  position:absolute;left:0;top:calc(100% + 4px);z-index:999;
+  background:#1a2b35;color:#fff;border-radius:8px;
+  padding:10px 13px;min-width:260px;max-width:340px;
+  font-size:11px;line-height:1.6;
+  opacity:0;pointer-events:none;
+  transform:translateY(-4px);transition:opacity .18s,transform .18s;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);
+}
+.kpi-tip::before{content:'';position:absolute;top:-5px;left:14px;
+  border:5px solid transparent;border-bottom-color:#1a2b35;border-top:none;}
+.tip-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:4px;}
+.tip-row:last-child{margin-bottom:0;}
+.tip-label{color:#C5D500;font-weight:700;font-size:10px;flex-shrink:0;min-width:70px;}
+.tip-val{color:rgba(255,255,255,0.88);}
+
 /* PAGE HEADER */
 .ph{margin-bottom:22px;}
 .ph h1{font-size:24px;font-weight:700;color:var(--teal);line-height:1.2;}
@@ -680,54 +699,107 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
 <script>
 /* ─── KPI LIBRARY ─── */
 const KPI_LIB = [
-  {no:1,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Các khoản mục CĐKT so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:2,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Cơ cấu CĐKT theo thời gian, vs kỳ trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:3,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kế hoạch / ước thực hiện",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:4,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kỳ trước / cùng kỳ năm trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:5,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Doanh thu theo kênh / ngành hàng / vùng miền",freq:"Tháng",pri:"Cao",mods:["FI","SD"]},
-  {no:6,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Giá vốn theo kênh bán hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"]},
-  {no:7,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Lãi gộp theo kênh / ngành hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"]},
-  {no:19,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Gross Margin / Tỷ lệ lợi nhuận gộp",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:20,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Tỷ lệ EBIT / Doanh thu",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:21,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROS — Tỷ suất sinh lời trên doanh thu",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"]},
-  {no:22,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROE — Sinh lời trên vốn chủ sở hữu",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:23,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROA — Sinh lời trên tổng tài sản",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"]},
-  {no:24,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Current Ratio — Khả năng thanh toán hiện thời",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:25,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Quick Ratio — Khả năng thanh toán nhanh",freq:"Tháng",pri:"Cao",mods:["FI-GL"]},
-  {no:27,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Số dư tiền vay ngân hàng",freq:"Tuần",pri:"Cao",mods:["Treasury"]},
-  {no:28,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Hạn mức vay ngân hàng còn lại",freq:"Tuần",pri:"Cao",mods:["Treasury"]},
-  {no:32,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Số dư tiền đầu / cuối ngày",freq:"Ngày",pri:"Cao",mods:["FI-GL"]},
-  {no:33,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Dự báo dự thu / dự chi",freq:"Ngày",pri:"Cao",mods:["FI-GL"]},
-  {no:36,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Cơ cấu công nợ phải thu (trong hạn / quá hạn)",freq:"Tuần",pri:"Cao",mods:["FI-AR"]},
-  {no:37,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Tuổi nợ phải thu theo khoảng thời gian",freq:"Tuần",pri:"Cao",mods:["FI-AR"]},
-  {no:39,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"DSO — Kỳ thu tiền bình quân",freq:"Tháng",pri:"Cao",mods:["FI-AR","SD"]},
-  {no:40,nhom:"Giá thành",sub:"Chi phí sản xuất",chi:"Chi phí sản xuất so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"]},
-  {no:41,nhom:"Giá thành",sub:"Cấu trúc giá thành",chi:"Cấu trúc giá thành vs kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"]},
-  {no:43,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kế hoạch / ước thực hiện",freq:"Ngày",pri:"Cao",mods:["SD","FI"]},
-  {no:44,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kỳ trước / cùng kỳ / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"]},
-  {no:45,nhom:"Kinh doanh",sub:"Sản lượng",chi:"Sản lượng bán vs kế hoạch / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"]},
-  {no:48,nhom:"Kinh doanh",sub:"Lợi nhuận gộp",chi:"Lợi nhuận gộp theo kênh / sản phẩm",freq:"Tháng",pri:"Cao",mods:["SD","FI"]},
-  {no:49,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô đạt chất lượng đầu vào (Accepted)",freq:"Ngày",pri:"Cao",mods:["QM"]},
-  {no:50,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô bị từ chối (Rejected)",freq:"Ngày",pri:"Cao",mods:["QM"]},
-  {no:53,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ hàng đạt CL trong sản xuất (Passed)",freq:"Ngày",pri:"Cao",mods:["QM","PP"]},
-  {no:56,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ chi phí thiệt hại do chất lượng",freq:"Ngày",pri:"Cao",mods:["QM","FI-CO"]},
-  {no:61,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Tỷ lệ hàng trả lại theo nguyên nhân",freq:"Tuần",pri:"Trung bình",mods:["QM","SD"]},
-  {no:63,nhom:"Bảo trì",sub:"Downtime",chi:"MTBF — Thời gian trung bình giữa 2 lần hỏng",freq:"Tháng",pri:"Cao",mods:["PM"]},
-  {no:64,nhom:"Bảo trì",sub:"Downtime",chi:"MTTR — Thời gian trung bình để sửa chữa",freq:"Tháng",pri:"Cao",mods:["PM"]},
-  {no:65,nhom:"Bảo trì",sub:"Downtime",chi:"Thời gian & số lần dừng máy đột xuất",freq:"Tháng",pri:"Cao",mods:["PM"]},
-  {no:69,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí bảo trì vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["PM","FI"]},
-  {no:73,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng tồn kho đầu / cuối kỳ",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:74,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng nhập kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:75,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng xuất kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:80,nhom:"Tồn kho",sub:"Tuổi HTK theo HSD",chi:"Tuổi hàng tồn kho theo hạn sử dụng",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:82,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị mua hàng theo vendor / nhóm hàng",freq:"Tuần",pri:"Cao",mods:["MM"]},
-  {no:83,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị đặt hàng chưa giao",freq:"Ngày",pri:"Cao",mods:["MM"]},
-  {no:85,nhom:"Mua hàng",sub:"Leadtime",chi:"Lead time mua hàng theo vendor / sản phẩm",freq:"Tháng",pri:"Cao",mods:["MM"]},
-  {no:86,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm vs kế hoạch",freq:"Ngày",pri:"Cao",mods:["PP"]},
-  {no:87,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm theo thời gian / loại",freq:"Ngày",pri:"Cao",mods:["PP"]},
-  {no:88,nhom:"Sản xuất",sub:"Tiêu hao SX",chi:"Tỷ lệ tiêu hao hoạt chất vs định mức",freq:"Tháng",pri:"Cao",mods:["PP"]},
-  {no:90,nhom:"Sản xuất",sub:"Năng suất SX",chi:"Công suất máy thực tế vs tối đa",freq:"Tuần",pri:"Cao",mods:["PP"]},
-  {no:91,nhom:"Sản xuất",sub:"Năng suất SX",chi:"OEE — Hiệu quả thiết bị tổng thể",freq:"Tháng",pri:"Cao",mods:["PP","PM"]},
+  /* ── TÀI CHÍNH - QUẢN TRỊ ── */
+  {no:1,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Các khoản mục CĐKT so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Giá trị TK thực tế / Giá trị TK kế hoạch × 100%",dimension:"Loại tài sản, Thời gian, Đơn vị",tcode:"FS10N, F.01, S_ALR_87012284"},
+  {no:2,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Cơ cấu CĐKT theo thời gian, vs kỳ trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Giá trị từng mục / Tổng tài sản × 100%",dimension:"Kỳ báo cáo, Nhóm tài khoản",tcode:"F.01, S_ALR_87012284"},
+  {no:3,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kế hoạch / ước thực hiện",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"LNST thực tế / LNST kế hoạch × 100%",dimension:"Công ty, Kỳ báo cáo, Kịch bản",tcode:"S_ALR_87012293, KE30"},
+  {no:4,nhom:"Tài chính - Quản trị",sub:"PL theo thông tư",chi:"Kết quả KD vs kỳ trước / cùng kỳ năm trước",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"(LNST kỳ này − LNST kỳ trước) / LNST kỳ trước × 100%",dimension:"Năm, Quý, Tháng",tcode:"S_ALR_87012293, GR55"},
+  {no:5,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Doanh thu theo kênh / ngành hàng / vùng miền",freq:"Tháng",pri:"Cao",mods:["FI","SD"],formula:"Σ Doanh thu thuần theo phân khúc",dimension:"Kênh bán hàng, Vùng miền, Nhóm hàng",tcode:"VF45, KE30, S_ALR_87012186"},
+  {no:6,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Giá vốn theo kênh bán hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"],formula:"Σ Giá vốn hàng bán theo kênh",dimension:"Kênh bán hàng, Nhóm sản phẩm",tcode:"KE30, KKBC, S_ALR_87012293"},
+  {no:7,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Lãi gộp theo kênh / ngành hàng",freq:"Tháng",pri:"Cao",mods:["FI-CO","SD"],formula:"Doanh thu thuần − Giá vốn hàng bán",dimension:"Kênh bán hàng, Ngành hàng, Khách hàng",tcode:"KE30, KEAB, S_ALR_87012293"},
+  {no:8,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Chi phí bán hàng & Marketing vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["FI-CO","SD"],formula:"Chi phí BH thực tế / Chi phí BH kế hoạch × 100%",dimension:"Kênh, Khu vực, Nhóm chi phí",tcode:"KSB1, S_ALR_87013611, KOB1"},
+  {no:9,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"Chi phí QLDN vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["FI-CO"],formula:"Chi phí QLDN thực tế / Kế hoạch × 100%",dimension:"Phòng ban, Nhóm chi phí, Kỳ",tcode:"KSB1, S_ALR_87013611, KSBL"},
+  {no:10,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"EBITDA / Biên EBITDA (%)",freq:"Tháng",pri:"Cao",mods:["FI-GL","FI-CO"],formula:"EBIT + Khấu hao + Phân bổ; Biên = EBITDA / DT thuần",dimension:"Công ty, Segment, Kỳ",tcode:"S_ALR_87012293, FAGLL03, KE30"},
+  {no:11,nhom:"Tài chính - Quản trị",sub:"PL quản trị",chi:"LNST / Net Profit After Tax",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Lợi nhuận trước thuế − Thuế TNDN",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012293, F.01"},
+  {no:12,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Tổng tài sản ngắn hạn vs dài hạn",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"TSNH / Tổng TS; TSDH / Tổng TS (cơ cấu %)",dimension:"Loại tài sản, Công ty, Kỳ",tcode:"F.01, FS10N, S_ALR_87012284"},
+  {no:13,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Tỷ lệ nợ / Tổng tài sản (Debt Ratio)",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Tổng nợ phải trả / Tổng tài sản × 100%",dimension:"Công ty, Kỳ báo cáo",tcode:"F.01, S_ALR_87012284"},
+  {no:14,nhom:"Tài chính - Quản trị",sub:"Cân đối kế toán (BS)",chi:"Debt/Equity Ratio — Tỷ số nợ / VCSH",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Tổng nợ phải trả / Vốn chủ sở hữu",dimension:"Công ty, Kỳ báo cáo",tcode:"F.01, S_ALR_87012284"},
+  {no:15,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROCE — Return on Capital Employed",freq:"Tháng",pri:"Trung bình",mods:["FI-GL","FI-CO"],formula:"EBIT / (Tổng TS − Nợ ngắn hạn) × 100%",dimension:"Công ty, Segment, Năm",tcode:"S_ALR_87012293, KE30"},
+  {no:16,nhom:"Tài chính - Quản trị",sub:"Chỉ số hiệu quả",chi:"Asset Turnover Ratio",freq:"Tháng",pri:"Thấp",mods:["FI-GL"],formula:"Doanh thu thuần / Tổng tài sản bình quân",dimension:"Công ty, Năm",tcode:"F.01, S_ALR_87012284"},
+  {no:17,nhom:"Tài chính - Quản trị",sub:"Chỉ số hiệu quả",chi:"Inventory Turnover Ratio",freq:"Tháng",pri:"Trung bình",mods:["FI-GL","MM"],formula:"Giá vốn hàng bán / Tồn kho bình quân",dimension:"Nhóm vật tư, Kho, Kỳ",tcode:"MB52, S_ALR_87012293"},
+  {no:18,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Cash Ratio — Tỷ lệ tiền mặt",freq:"Tháng",pri:"Trung bình",mods:["FI-GL","Treasury"],formula:"Tiền & Tương đương tiền / Nợ ngắn hạn",dimension:"Công ty, Kỳ báo cáo",tcode:"FF7B, F.01"},
+  {no:19,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Gross Margin / Tỷ lệ lợi nhuận gộp",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"(Doanh thu thuần − Giá vốn) / Doanh thu thuần × 100%",dimension:"Sản phẩm, Kênh, Kỳ",tcode:"S_ALR_87012293, KE30"},
+  {no:20,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"Tỷ lệ EBIT / Doanh thu",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"EBIT / Doanh thu thuần × 100%",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012293, KE30"},
+  {no:21,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROS — Tỷ suất sinh lời trên doanh thu",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"LNST / Doanh thu thuần × 100%",dimension:"Công ty, Segment, Năm",tcode:"S_ALR_87012293"},
+  {no:22,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROE — Sinh lời trên vốn chủ sở hữu",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"LNST / VCSH bình quân × 100%",dimension:"Công ty, Năm",tcode:"F.01, S_ALR_87012293"},
+  {no:23,nhom:"Tài chính - Quản trị",sub:"Chỉ số sinh lời",chi:"ROA — Sinh lời trên tổng tài sản",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"LNST / Tổng tài sản bình quân × 100%",dimension:"Công ty, Năm",tcode:"F.01, S_ALR_87012293"},
+  {no:24,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Current Ratio — Khả năng thanh toán hiện thời",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"Tài sản ngắn hạn / Nợ ngắn hạn",dimension:"Công ty, Kỳ báo cáo",tcode:"F.01, S_ALR_87012284"},
+  {no:25,nhom:"Tài chính - Quản trị",sub:"Chỉ số thanh toán",chi:"Quick Ratio — Khả năng thanh toán nhanh",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"(TSNH − Tồn kho − Trả trước) / Nợ ngắn hạn",dimension:"Công ty, Kỳ báo cáo",tcode:"F.01, S_ALR_87012284"},
+  /* ── DÒNG TIỀN ── */
+  {no:26,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Chi phí lãi vay kỳ này vs kế hoạch",freq:"Tháng",pri:"Cao",mods:["Treasury","FI-GL"],formula:"Σ Lãi vay thực tế / Kế hoạch lãi vay × 100%",dimension:"Ngân hàng, Loại vay, Kỳ",tcode:"F.51, FAGLL03, TR11"},
+  {no:27,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Số dư tiền vay ngân hàng",freq:"Tuần",pri:"Cao",mods:["Treasury"],formula:"Σ Dư nợ vay theo từng hợp đồng tín dụng",dimension:"Ngân hàng, Loại tiền, Kỳ hạn",tcode:"F.51, FBL3N, TR11"},
+  {no:28,nhom:"Dòng tiền",sub:"Dư nợ vay",chi:"Hạn mức vay ngân hàng còn lại",freq:"Tuần",pri:"Cao",mods:["Treasury"],formula:"Hạn mức tín dụng − Dư nợ đã sử dụng",dimension:"Ngân hàng, Loại tín dụng",tcode:"TR11, FBL3N"},
+  {no:29,nhom:"Dòng tiền",sub:"Dòng tiền hoạt động",chi:"OCF — Operating Cash Flow",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"LNST + Khấu hao ± Thay đổi vốn lưu động",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012271, FAGLB03"},
+  {no:30,nhom:"Dòng tiền",sub:"Dòng tiền đầu tư",chi:"Investing Cash Flow — Dòng tiền đầu tư",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"Thu đầu tư − Chi đầu tư TSCĐ & góp vốn",dimension:"Dự án, Loại đầu tư, Kỳ",tcode:"S_ALR_87012271, AS03"},
+  {no:31,nhom:"Dòng tiền",sub:"Dòng tiền tài chính",chi:"Financing Cash Flow — Dòng tiền tài chính",freq:"Tháng",pri:"Trung bình",mods:["FI-GL"],formula:"Thu tài chính (vay) − Chi tài chính (trả nợ, cổ tức)",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012271, FBL3N"},
+  {no:32,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Số dư tiền đầu / cuối ngày",freq:"Ngày",pri:"Cao",mods:["FI-GL"],formula:"Số dư đầu ngày ± Phát sinh thu chi trong ngày",dimension:"Tài khoản ngân hàng, Loại tiền",tcode:"FF7B, FF7A, FAGLB03"},
+  {no:33,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Dự báo dự thu / dự chi",freq:"Ngày",pri:"Cao",mods:["FI-GL"],formula:"Σ Dự thu (AR đến hạn) + Σ Dự chi (AP đến hạn)",dimension:"Ngày, Tài khoản ngân hàng, Khách hàng",tcode:"FF7B, FBL5N, FBL1N"},
+  {no:34,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Sai lệch dự báo vs thực tế dòng tiền",freq:"Tháng",pri:"Trung bình",mods:["FI-GL","Treasury"],formula:"(Dự báo − Thực tế) / Thực tế × 100%",dimension:"Kỳ, Loại dòng tiền",tcode:"FF7B, FAGLB03"},
+  {no:35,nhom:"Dòng tiền",sub:"Dự báo dòng tiền",chi:"Free Cash Flow (FCF)",freq:"Tháng",pri:"Cao",mods:["FI-GL"],formula:"OCF − CAPEX (Chi đầu tư TSCĐ)",dimension:"Công ty, Kỳ báo cáo",tcode:"S_ALR_87012271, AS03"},
+  /* ── CÔNG NỢ ── */
+  {no:36,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Cơ cấu công nợ phải thu (trong hạn / quá hạn)",freq:"Tuần",pri:"Cao",mods:["FI-AR"],formula:"Số dư AR quá hạn / Tổng AR × 100%",dimension:"Khách hàng, Nhóm tuổi nợ, Khu vực",tcode:"FBL5N, S_ALR_87012178"},
+  {no:37,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"Tuổi nợ phải thu theo khoảng thời gian",freq:"Tuần",pri:"Cao",mods:["FI-AR"],formula:"Phân loại AR theo bucket: <30d, 30-60d, 60-90d, >90d",dimension:"Khách hàng, Khu vực, Kỳ",tcode:"S_ALR_87012178, FBL5N"},
+  {no:38,nhom:"Công nợ",sub:"Công nợ phải trả",chi:"Cơ cấu công nợ phải trả (trong hạn / quá hạn)",freq:"Tuần",pri:"Cao",mods:["FI-AP"],formula:"Số dư AP quá hạn / Tổng AP × 100%",dimension:"Nhà cung cấp, Nhóm tuổi nợ, Kỳ",tcode:"FBL1N, S_ALR_87012083"},
+  {no:39,nhom:"Công nợ",sub:"Công nợ phải thu",chi:"DSO — Kỳ thu tiền bình quân",freq:"Tháng",pri:"Cao",mods:["FI-AR","SD"],formula:"(Số dư AR bình quân / Doanh thu) × Số ngày kỳ",dimension:"Khách hàng, Kênh bán, Kỳ",tcode:"FBL5N, VF45, S_ALR_87012178"},
+  /* ── GIÁ THÀNH ── */
+  {no:40,nhom:"Giá thành",sub:"Chi phí sản xuất",chi:"Chi phí sản xuất so với kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"],formula:"Chi phí SX thực tế / Kế hoạch × 100%",dimension:"Nhà máy, Dây chuyền, Nhóm chi phí",tcode:"KOB1, KKBC, S_ALR_87013611"},
+  {no:41,nhom:"Giá thành",sub:"Cấu trúc giá thành",chi:"Cấu trúc giá thành vs kế hoạch",freq:"Tháng",pri:"Cao",mods:["FI-CO"],formula:"% từng thành phần (NVL, NC, SXC) / Tổng giá thành",dimension:"Sản phẩm, Nhà máy, Kỳ",tcode:"CKM3, KKBC, KOB1"},
+  {no:42,nhom:"Giá thành",sub:"Biến động giá thành",chi:"Biến động giá thành thực tế vs standard cost",freq:"Tháng",pri:"Cao",mods:["FI-CO"],formula:"Giá thành thực tế − Standard cost; Variance %",dimension:"Sản phẩm, Nguyên nhân biến động, Kỳ",tcode:"CKM3, KE30, KKBC"},
+  /* ── KINH DOANH ── */
+  {no:43,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kế hoạch / ước thực hiện",freq:"Ngày",pri:"Cao",mods:["SD","FI"],formula:"Doanh thu thực tế / Kế hoạch × 100%",dimension:"Kênh, Vùng miền, Nhóm hàng, Ngày",tcode:"VF45, S_ALR_87012186, KE30"},
+  {no:44,nhom:"Kinh doanh",sub:"Doanh thu",chi:"Doanh thu vs kỳ trước / cùng kỳ / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"],formula:"(DT kỳ này − DT kỳ trước) / DT kỳ trước × 100%",dimension:"Kênh, Sản phẩm, Kỳ",tcode:"VF45, S_ALR_87012186"},
+  {no:45,nhom:"Kinh doanh",sub:"Sản lượng",chi:"Sản lượng bán vs kế hoạch / lũy kế",freq:"Ngày",pri:"Cao",mods:["SD"],formula:"SL thực tế / KH × 100%; SL lũy kế YTD",dimension:"Sản phẩm, Kênh, Vùng miền",tcode:"VA05, VF45, MB52"},
+  {no:46,nhom:"Kinh doanh",sub:"Đơn hàng",chi:"Đơn hàng mới vs kế hoạch",freq:"Ngày",pri:"Cao",mods:["SD"],formula:"Số lượng / Giá trị SO mới / Kế hoạch × 100%",dimension:"Kênh, Khách hàng, Nhóm hàng",tcode:"VA05, VA45, S_ALR_87014388"},
+  {no:47,nhom:"Kinh doanh",sub:"Đơn hàng",chi:"Số lượng khách hàng mới / tái mua",freq:"Tháng",pri:"Trung bình",mods:["SD","CX"],formula:"Đếm KH có SO đầu tiên / KH có SO lặp lại trong kỳ",dimension:"Kênh, Vùng miền, Nhóm hàng",tcode:"VA05, XD03"},
+  {no:48,nhom:"Kinh doanh",sub:"Lợi nhuận gộp",chi:"Lợi nhuận gộp theo kênh / sản phẩm",freq:"Tháng",pri:"Cao",mods:["SD","FI"],formula:"Doanh thu − Giá vốn hàng bán theo phân khúc",dimension:"Kênh, Sản phẩm, Khách hàng",tcode:"KE30, VF45, S_ALR_87012186"},
+  /* ── CHẤT LƯỢNG ── */
+  {no:49,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô đạt chất lượng đầu vào (Accepted)",freq:"Ngày",pri:"Cao",mods:["QM"],formula:"Số lô Accepted / Tổng lô kiểm tra × 100%",dimension:"Nhà cung cấp, Nhóm vật liệu, Nhà máy",tcode:"QA32, QA33, MCXD"},
+  {no:50,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Tỷ lệ lô bị từ chối (Rejected)",freq:"Ngày",pri:"Cao",mods:["QM"],formula:"Số lô Rejected / Tổng lô kiểm tra × 100%",dimension:"Nhà cung cấp, Vật liệu, Nguyên nhân",tcode:"QA32, QA33, QM01"},
+  {no:51,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Số lô cần kiểm tra lại / tái kiểm định",freq:"Tuần",pri:"Trung bình",mods:["QM","MM"],formula:"Đếm Inspection Lot có usage decision = Retest",dimension:"Nhà cung cấp, Vật liệu, Nhà máy",tcode:"QA32, QM53, QE01"},
+  {no:52,nhom:"Chất lượng",sub:"Chất lượng đầu vào",chi:"Supplier Quality Performance Rate (%)",freq:"Tháng",pri:"Trung bình",mods:["QM","MM"],formula:"Số lô đạt / Tổng lô cung cấp theo vendor × 100%",dimension:"Nhà cung cấp, Nhóm hàng, Kỳ",tcode:"QA33, MCXD, ME2M"},
+  {no:53,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ hàng đạt CL trong sản xuất (Passed)",freq:"Ngày",pri:"Cao",mods:["QM","PP"],formula:"SL đạt chất lượng / Tổng SL kiểm tra × 100%",dimension:"Dây chuyền, Ca SX, Nhóm sản phẩm",tcode:"QA32, CO03, QE51N"},
+  {no:54,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ NG / Scrap trong sản xuất (%)",freq:"Ngày",pri:"Cao",mods:["QM","PP"],formula:"SL NG (Scrap) / Tổng SL sản xuất × 100%",dimension:"Dây chuyền, Ca, Sản phẩm, Nguyên nhân",tcode:"QM01, CO03, COOIS"},
+  {no:55,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ hàng cần rework / tái chế (%)",freq:"Ngày",pri:"Cao",mods:["QM","PP"],formula:"SL Rework / Tổng SL × 100%",dimension:"Dây chuyền, Công đoạn, Nguyên nhân",tcode:"QM01, CO03, QE51N"},
+  {no:56,nhom:"Chất lượng",sub:"Chất lượng SX",chi:"Tỷ lệ chi phí thiệt hại do chất lượng",freq:"Ngày",pri:"Cao",mods:["QM","FI-CO"],formula:"Chi phí chất lượng (scrap+rework+warranty) / Doanh thu",dimension:"Nhà máy, Dây chuyền, Nguyên nhân",tcode:"QM01, KOB1, CO03"},
+  {no:57,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Số khiếu nại khách hàng trong kỳ",freq:"Tuần",pri:"Cao",mods:["QM","SD"],formula:"Đếm Complaint / Quality Notification type Q3",dimension:"Khách hàng, Sản phẩm, Vùng miền",tcode:"QM01, QM02, VA05"},
+  {no:58,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Thời gian xử lý khiếu nại trung bình (ngày)",freq:"Tháng",pri:"Trung bình",mods:["QM"],formula:"Σ (Ngày đóng − Ngày mở) / Số khiếu nại",dimension:"Loại khiếu nại, Khách hàng, Kỳ",tcode:"QM01, QM02, QM09"},
+  {no:59,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Customer Complaint Resolution Rate (%)",freq:"Tháng",pri:"Trung bình",mods:["QM"],formula:"Số khiếu nại đã đóng / Tổng khiếu nại phát sinh × 100%",dimension:"Loại khiếu nại, Khách hàng",tcode:"QM01, QM09"},
+  {no:60,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Tổng chi phí chất lượng / Cost of Quality (COQ)",freq:"Tháng",pri:"Cao",mods:["QM","FI-CO"],formula:"Phòng ngừa + Thẩm định + Lỗi nội bộ + Lỗi ngoại",dimension:"Nhà máy, Nhóm chi phí CL, Kỳ",tcode:"QM01, KOB1, S_ALR_87013611"},
+  {no:61,nhom:"Chất lượng",sub:"Chất lượng đầu ra",chi:"Tỷ lệ hàng trả lại theo nguyên nhân",freq:"Tuần",pri:"Trung bình",mods:["QM","SD"],formula:"SL hàng trả lại / SL giao hàng × 100%",dimension:"Khách hàng, Sản phẩm, Nguyên nhân",tcode:"VL09, QM01, S_ALR_87012186"},
+  {no:62,nhom:"Chất lượng",sub:"Audit & Tuân thủ",chi:"Tỷ lệ audit nội bộ đạt / không đạt (%)",freq:"Tháng",pri:"Trung bình",mods:["QM"],formula:"Số điểm đánh giá đạt / Tổng điểm audit × 100%",dimension:"Bộ phận, Tiêu chí audit, Kỳ",tcode:"QM01, QM03"},
+  /* ── BẢO TRÌ ── */
+  {no:63,nhom:"Bảo trì",sub:"Downtime",chi:"MTBF — Thời gian trung bình giữa 2 lần hỏng",freq:"Tháng",pri:"Cao",mods:["PM"],formula:"Tổng thời gian hoạt động / Số lần hỏng hóc",dimension:"Thiết bị, Nhóm máy, Nhà máy",tcode:"IW39, IW33, S_ALR_87012993"},
+  {no:64,nhom:"Bảo trì",sub:"Downtime",chi:"MTTR — Thời gian trung bình để sửa chữa",freq:"Tháng",pri:"Cao",mods:["PM"],formula:"Tổng thời gian sửa chữa / Số lần hỏng hóc",dimension:"Thiết bị, Loại sự cố, Kỹ thuật viên",tcode:"IW39, IW33, S_ALR_87012993"},
+  {no:65,nhom:"Bảo trì",sub:"Downtime",chi:"Thời gian & số lần dừng máy đột xuất",freq:"Tháng",pri:"Cao",mods:["PM"],formula:"Σ Thời gian downtime không lập kế hoạch / Tổng TG",dimension:"Thiết bị, Ca SX, Nguyên nhân",tcode:"IW39, PM01, COOIS"},
+  {no:66,nhom:"Bảo trì",sub:"Kế hoạch bảo trì",chi:"Tỷ lệ bảo trì phòng ngừa / tổng công việc BT (%)",freq:"Tháng",pri:"Cao",mods:["PM"],formula:"Số WO Preventive / Tổng WO × 100%",dimension:"Nhà máy, Nhóm thiết bị, Kỳ",tcode:"IW39, IW38, IP24"},
+  {no:67,nhom:"Bảo trì",sub:"Kế hoạch bảo trì",chi:"Số lệnh công tác BT hoàn thành vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["PM"],formula:"WO completed / WO planned × 100%",dimension:"Nhà máy, Loại BT, Nhóm thiết bị",tcode:"IW39, IW38, IP24"},
+  {no:68,nhom:"Bảo trì",sub:"Kế hoạch bảo trì",chi:"Tỷ lệ sẵn sàng thiết bị / Availability Rate (%)",freq:"Tuần",pri:"Cao",mods:["PM","PP"],formula:"(TG lên lịch − TG downtime) / TG lên lịch × 100%",dimension:"Thiết bị, Nhà máy, Ca SX",tcode:"IW39, COOIS, S_ALR_87012993"},
+  {no:69,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí bảo trì vs kế hoạch",freq:"Tháng",pri:"Trung bình",mods:["PM","FI"],formula:"CP BT thực tế / Kế hoạch × 100%",dimension:"Nhà máy, Nhóm chi phí, Loại BT",tcode:"IW39, KOB1, S_ALR_87013611"},
+  {no:70,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí phụ tùng / Spare Parts Cost",freq:"Tháng",pri:"Trung bình",mods:["PM","MM"],formula:"Σ Giá trị phụ tùng xuất kho cho BT trong kỳ",dimension:"Nhóm thiết bị, Loại phụ tùng, Nhà máy",tcode:"IW39, MB52, MIGO"},
+  {no:71,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Chi phí thuê ngoài bảo trì (Subcontract)",freq:"Tháng",pri:"Thấp",mods:["PM","FI-CO"],formula:"Σ CP dịch vụ BT thuê ngoài trong kỳ",dimension:"Nhà thầu, Loại dịch vụ, Nhà máy",tcode:"IW39, KOB1, ME2M"},
+  {no:72,nhom:"Bảo trì",sub:"Chi phí bảo trì",chi:"Maintenance Cost per Production Output",freq:"Tháng",pri:"Trung bình",mods:["PM","FI-CO"],formula:"Tổng CP bảo trì / Sản lượng thực tế",dimension:"Nhà máy, Dây chuyền, Kỳ",tcode:"IW39, CO03, KOB1"},
+  /* ── TỒN KHO ── */
+  {no:73,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng tồn kho đầu / cuối kỳ",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Tồn đầu kỳ ± Nhập − Xuất = Tồn cuối kỳ",dimension:"Kho, Vật liệu, Nhóm hàng",tcode:"MB52, MB5L, MMBE"},
+  {no:74,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng nhập kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Σ SL nhập kho theo Movement Type (101, 201, 311...)",dimension:"Kho, Loại nhập, Vật liệu",tcode:"MB51, MIGO, MB52"},
+  {no:75,nhom:"Tồn kho",sub:"Xuất nhập tồn",chi:"Số lượng xuất kho theo mục đích",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Σ SL xuất kho theo Movement Type (201, 261, 411...)",dimension:"Kho, Loại xuất, Vật liệu",tcode:"MB51, MIGO, COOIS"},
+  {no:76,nhom:"Tồn kho",sub:"Giá trị tồn kho",chi:"Giá trị tồn kho theo nhóm vật liệu",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Σ SL tồn × Giá trị đơn vị theo nhóm vật liệu",dimension:"Kho, Nhóm vật liệu, Nhà máy",tcode:"MB52, MMBE, MB5L"},
+  {no:77,nhom:"Tồn kho",sub:"Vòng quay tồn kho",chi:"Vòng quay hàng tồn kho / Inventory Turnover",freq:"Tháng",pri:"Cao",mods:["MM"],formula:"Giá vốn hàng bán / Giá trị tồn kho bình quân",dimension:"Nhóm vật liệu, Kho, Kỳ",tcode:"MB52, S_ALR_87012293"},
+  {no:78,nhom:"Tồn kho",sub:"Phân tích tồn kho",chi:"Tỷ lệ hàng chậm luân chuyển / Slow-Moving (%)",freq:"Tháng",pri:"Trung bình",mods:["MM"],formula:"Giá trị HTK không xuất kho >90d / Tổng HTK × 100%",dimension:"Nhóm vật liệu, Kho, Ngưỡng ngày",tcode:"MB52, MB5L, S_ALR_87012172"},
+  {no:79,nhom:"Tồn kho",sub:"Phân tích tồn kho",chi:"Độ chính xác kiểm kê kho / Inventory Accuracy (%)",freq:"Tháng",pri:"Trung bình",mods:["MM","WM"],formula:"(1 − |Sai lệch| / Tổng SL kiểm kê) × 100%",dimension:"Kho, Nhóm vật liệu, Đợt kiểm kê",tcode:"MI07, MI20, MI04"},
+  {no:80,nhom:"Tồn kho",sub:"Tuổi HTK theo HSD",chi:"Tuổi hàng tồn kho theo hạn sử dụng",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Phân loại HTK theo: còn >6th, 3-6th, 1-3th, <1th HSD",dimension:"Nhóm hàng, Kho, Nhà sản xuất",tcode:"MB52, MMBE, MCHB"},
+  /* ── MUA HÀNG ── */
+  {no:81,nhom:"Mua hàng",sub:"Hiệu suất mua hàng",chi:"Tỷ lệ đơn hàng mua đúng hạn / On-Time PO (%)",freq:"Tuần",pri:"Cao",mods:["MM","Ariba"],formula:"Số PO giao đúng hạn / Tổng PO cần giao × 100%",dimension:"Nhà cung cấp, Nhóm hàng, Kỳ",tcode:"ME2M, ME80FN, ML81N"},
+  {no:82,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị mua hàng theo vendor / nhóm hàng",freq:"Tuần",pri:"Cao",mods:["MM"],formula:"Σ Giá trị GR / Invoice theo nhà cung cấp",dimension:"Nhà cung cấp, Nhóm hàng, Kỳ",tcode:"ME2M, ME80FN, MIR6"},
+  {no:83,nhom:"Mua hàng",sub:"Giá trị mua hàng",chi:"Giá trị đặt hàng chưa giao",freq:"Ngày",pri:"Cao",mods:["MM"],formula:"Σ Giá trị PO open (đã đặt chưa nhận hàng)",dimension:"Nhà cung cấp, Nhóm hàng, Kho",tcode:"ME2M, ME80FN, MB51"},
+  {no:84,nhom:"Mua hàng",sub:"Đánh giá vendor",chi:"Vendor Performance Score / Điểm đánh giá NCC",freq:"Tháng",pri:"Trung bình",mods:["MM","Ariba"],formula:"Tổng điểm theo tiêu chí: chất lượng, đúng hạn, giá",dimension:"Nhà cung cấp, Tiêu chí, Kỳ",tcode:"ME61, ME62, LX01"},
+  {no:85,nhom:"Mua hàng",sub:"Leadtime",chi:"Lead time mua hàng theo vendor / sản phẩm",freq:"Tháng",pri:"Cao",mods:["MM"],formula:"Ngày nhận hàng − Ngày đặt hàng (bình quân)",dimension:"Nhà cung cấp, Nhóm hàng, Kỳ",tcode:"ME2M, ME80FN, ME11"},
+  /* ── SẢN XUẤT ── */
+  {no:86,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm vs kế hoạch",freq:"Ngày",pri:"Cao",mods:["PP"],formula:"SL thực tế / Kế hoạch MPS × 100%",dimension:"Sản phẩm, Dây chuyền, Ca SX",tcode:"COOIS, MCP3, CO03"},
+  {no:87,nhom:"Sản xuất",sub:"Sản lượng SX",chi:"Sản lượng thành phẩm theo thời gian / loại",freq:"Ngày",pri:"Cao",mods:["PP"],formula:"Σ SL GI/GR confirmed theo Production Order",dimension:"Sản phẩm, Ca, Ngày, Dây chuyền",tcode:"COOIS, CO03, MCP3"},
+  {no:88,nhom:"Sản xuất",sub:"Tiêu hao SX",chi:"Tỷ lệ tiêu hao hoạt chất vs định mức",freq:"Tháng",pri:"Cao",mods:["PP"],formula:"Tiêu hao thực tế / Định mức BOM × 100%",dimension:"Nguyên liệu, Sản phẩm, Dây chuyền",tcode:"COOIS, CO03, CKM3"},
+  {no:89,nhom:"Sản xuất",sub:"WIP & Dở dang",chi:"WIP — Giá trị sản phẩm dở dang",freq:"Tuần",pri:"Trung bình",mods:["PP","FI-CO"],formula:"Σ Giá trị WIP theo Production Order đang chạy",dimension:"Dây chuyền, Sản phẩm, Nhà máy",tcode:"COOIS, CO88, CKM3"},
+  {no:90,nhom:"Sản xuất",sub:"Năng suất SX",chi:"Công suất máy thực tế vs tối đa",freq:"Tuần",pri:"Cao",mods:["PP"],formula:"TG SX thực tế / TG có thể SX tối đa × 100%",dimension:"Máy, Dây chuyền, Ca SX",tcode:"COOIS, CM01, CM05"},
+  {no:91,nhom:"Sản xuất",sub:"Năng suất SX",chi:"OEE — Hiệu quả thiết bị tổng thể",freq:"Tháng",pri:"Cao",mods:["PP","PM"],formula:"Availability × Performance × Quality Rate",dimension:"Thiết bị, Dây chuyền, Nhà máy, Ca",tcode:"COOIS, IW39, QA32"},
 ];
 
 const DASH_TMPL = {
@@ -926,7 +998,10 @@ function renderTable(data){
       <td><input type="checkbox" class="kpi-check" ${selKPIs.has(k.no)?'checked':''} onchange="togKPI(this,${k.no},this.closest('tr'))"></td>
       <td style="color:var(--gray-400);font-size:10px">${k.no}</td>
       <td style="font-size:11px;color:var(--teal);font-weight:600">${k.sub}</td>
-      <td style="font-weight:500;font-size:12px">${k.chi}</td>
+      <td style="font-weight:500;font-size:12px">
+        <div class="chi-wrap">${k.chi}${(k.formula||k.dimension||k.tcode)?`<div class="kpi-tip">${k.formula?`<div class="tip-row"><span class="tip-label">Công thức</span><span class="tip-val">${k.formula}</span></div>`:''}${k.dimension?`<div class="tip-row"><span class="tip-label">Phân tích</span><span class="tip-val">${k.dimension}</span></div>`:''}${k.tcode?`<div class="tip-row"><span class="tip-label">T-Code</span><span class="tip-val" style="font-family:monospace;color:#00D4FF">${k.tcode}</span></div>`:''}</div>`:''}
+        </div>
+      </td>
       <td><span class="badge b-${k.freq==='Ngày'?'ngay':k.freq==='Tuần'?'tuan':'thang'}">${k.freq}</span></td>
       <td><span class="badge b-${k.pri==='Cao'?'cao':k.pri==='Trung bình'?'tb':'thap'}">${k.pri}</span></td>
       <td><span style="font-weight:700;color:${scCol};font-size:12px">${sc}</span></td>
