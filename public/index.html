@@ -107,6 +107,9 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
 .s1-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;}
 .s1-right{position:sticky;top:74px;display:flex;flex-direction:column;gap:14px;}
 .s1-right .abar{margin-top:4px;padding-top:14px;}
+/* Industry grid scroll container */
+.ig-wrap{max-height:440px;overflow-y:auto;overflow-x:hidden;border:1px solid var(--gray-200);border-radius:var(--r);padding:10px 10px 4px;margin-top:6px;}
+.ig-wrap .ig{margin-top:0;}
 
 /* PILL BUTTONS */
 .prow{display:flex;gap:6px;flex-wrap:wrap;}
@@ -435,7 +438,7 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
       <!-- LEFT: Industry grid -->
       <div class="fgl">
         <label>Ngành nghề</label>
-        <div class="ig" id="industry-grid">
+        <div class="ig-wrap"><div class="ig" id="industry-grid">
           <div class="ig-lbl">⚙️ Sản xuất &amp; Công nghiệp</div>
           <div class="ic" onclick="selInd(this,'manufacturing')"><div class="ic-icon">🏭</div><div class="ic-name">Sản xuất</div><div class="icd"></div></div>
           <div class="ic" onclick="selInd(this,'automotive')"><div class="ic-icon">🚗</div><div class="ic-name">Ô tô &amp; Phụ tùng</div><div class="icd"></div></div>
@@ -469,7 +472,7 @@ button.pb.ai-mod::after{content:"AI";position:absolute;top:-4px;right:-4px;backg
           <div class="ic" onclick="selInd(this,'education')"><div class="ic-icon">🎓</div><div class="ic-name">Giáo dục</div><div class="icd"></div></div>
           <div class="ig-lbl"></div>
           <div class="ic" onclick="selInd(this,'other')"><div class="ic-icon">🔧</div><div class="ic-name">Đa ngành / Khác</div><div class="icd"></div></div>
-        </div>
+        </div></div><!-- /.ig /.ig-wrap -->
       </div>
       <!-- RIGHT: Modules + Objectives + Notes + CTA -->
       <div class="s1-right">
@@ -2462,469 +2465,666 @@ function genDashboardSpec(name,kpis){
 
   /* ── chart data ── */
   function barVals(n,base){return[0,1,2,3,4,5].map((_,i)=>Math.round((base||60)*(0.72+H(n,i+20)%30/100)));}
+  function planVals(n,base){return[0,1,2,3,4,5].map((_,i)=>Math.round((base||60)*(0.80+H(n,i+40)%20/100)));}
   function lineVals(n,base){return[0,1,2,3,4,5,6,7,8,9,10,11].map((_,i)=>Math.round((base||60)*(0.68+H(n,i+30)%36/100)));}
+  function linePlanVals(n,base){return[0,1,2,3,4,5,6,7,8,9,10,11].map((_,i)=>Math.round((base||60)*(0.82+H(n,i+60)%16/100)));}
   function sparkVals(n){let v=50;return[0,1,2,3,4,5,6,7].map((_,i)=>{v+=((H(n,i+5)%18)-8);v=Math.max(10,Math.min(90,v));return Math.round(v);});}
+  function dailyVals(n,tgt){return Array.from({length:30},(_,i)=>Math.round((tgt||60)*(0.65+H(n,i+70)%40/100)));}
+  function hbarVals(n,count){return Array.from({length:count},(_,i)=>Math.round(20+H(n,i+90)%70));}
 
-  /* ── match KPIs ── */
-  function matchKPIs(keywords){
-    return keywords.map(kw=>{
+  /* ── classify ── */
+  function classifyKPIs(lst){
+    const T1G=['Tài chính - Quản trị','Kinh doanh','Dòng tiền'];
+    const tier1=lst.filter(k=>k.pri==='Cao'&&T1G.includes(k.nhom)).slice(0,4);
+    const t1s=new Set(tier1.map(k=>k.no));
+    const tier2=lst.filter(k=>!t1s.has(k.no)&&(k.pri==='Cao'||k.pri==='Trung bình')).slice(0,6);
+    const t2s=new Set(tier2.map(k=>k.no));
+    const tier3=lst.filter(k=>!t1s.has(k.no)&&!t2s.has(k.no));
+    return{tier1,tier2,tier3};
+  }
+
+  /* ── RAG + progress ── */
+  function ragStatus(mk){
+    const tp=parseFloat(mk.tp);
+    if(tp>=3)return{label:'Đạt',bg:'#dcfce7',color:'#166534'};
+    if(tp>=-2)return{label:'Cảnh báo',bg:'#fef9c3',color:'#854d0e'};
+    return{label:'Thấp',bg:'#fee2e2',color:'#991b1b'};
+  }
+  function progressColor(pct){if(pct>=80)return'#22c55e';if(pct>=60)return'#f59e0b';return'#ef4444';}
+
+  /* ── match KPIs for dash ── */
+  function matchKPIsForDash(d,allKPIs){
+    return d.kpis.map(kw=>{
       const lk=kw.toLowerCase();
-      const found=kpis.find(k=>k.chi.toLowerCase().includes(lk)||lk.includes(k.chi.toLowerCase().slice(0,8)));
-      const item=found||{chi:kw,freq:'Tháng',mods:[],pri:'Trung bình'};
-      return{name:item.chi,freq:item.freq,mods:item.mods||[],mk:mock(item.chi)};
+      const found=allKPIs.find(k=>k.chi.toLowerCase().includes(lk)||lk.includes(k.chi.toLowerCase().slice(0,8)));
+      return found||{chi:kw,freq:'Tháng',mods:[],pri:'Trung bình',nhom:'',no:-1};
     });
   }
 
-  /* ── data ── */
+  /* ── insight title ── */
+  function insightTitle(d,dashKPIs){
+    const m=dashKPIs[0]?mock(dashKPIs[0].chi):null;
+    if(!m)return d.name;
+    const pct=Math.abs(parseFloat(m.tp));
+    const up=parseFloat(m.tp)>=0;
+    const kn=dashKPIs[0].chi.split('(')[0].trim().split(' ').slice(0,4).join(' ');
+    if(pct>5)return kn+' '+(up?'tăng':'giảm')+' '+pct+'% so kỳ trước';
+    return d.name+' — '+(up?'Đạt':'Chưa đạt')+' mục tiêu';
+  }
+
+  /* ── t-codes by module ── */
+  function tCodes(modArr){
+    const MAP={FI:['FBL5N','F-28','FB50'],CO:['KOB1','KSB1','CJI3'],MM:['MB52','ME23N','MIGO'],SD:['VA05','VF05','SD70'],PP:['COOIS','MD04','CO03'],PM:['IW38','IW65','IW39'],QM:['QM03','QA33','QM50']};
+    const codes=[];(modArr||[]).forEach(m=>{const tc=MAP[m];if(tc)codes.push(...tc.slice(0,2));});
+    return codes.slice(0,4).join(' · ')||'FB01 · ME23N · CO03';
+  }
+
   const MONTHS6=['T7','T8','T9','T10','T11','T12'];
   const MONTHS12=['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
-  const GCOLS=['#005870','#C5D500','#00D4FF','#7fc4d6','#a8c400','#3d8ea5'];
+  const BCOLS=['#005870','#C5D500','#00D4FF','#7fc4d6','#a8c400'];
   const allGroups=[...new Set(kpis.map(k=>k.nhom))].filter(Boolean);
   const groupCounts=allGroups.map(g=>kpis.filter(k=>k.nhom===g).length);
   const hiCount=kpis.filter(k=>k.pri==='Cao').length;
   const aiCount=[...aiAddedNos].filter(no=>kpis.find(k=>k.no===no)).length;
 
   const LV_META={
-    c:{label:'C-Level',color:'#005870',sub:'CEO · CFO · COO'},
-    d:{label:'D-Level',color:'#007a9e',sub:'Director · VP'},
-    m:{label:'M-Level',color:'#0097b2',sub:'Manager'},
-    dept:{label:'Department',color:'#1a6b3a',sub:'Chuyên viên'},
+    c:{label:'C-Level',color:'#005870',sub:'CEO · CFO · COO',icon:'📊'},
+    d:{label:'D-Level',color:'#007a9e',sub:'Director · VP',icon:'📈'},
+    m:{label:'M-Level',color:'#0097b2',sub:'Manager · Trưởng phòng',icon:'⚙️'},
+    dept:{label:'Department',color:'#1b5e20',sub:'Chuyên viên · Team Lead',icon:'📋'},
   };
 
-  const allDashes=[];
-  Object.entries(DASH_TMPL).forEach(([lv,dashes])=>dashes.forEach((d,di)=>allDashes.push({lv,d,di})));
-
-  let cidN=0;
-  const cid=()=>'ch'+(cidN++);
-
   const slides=[];
-  const chartInits=[];
 
-  /* ════ SLIDE 1: COVER ════ */
+  /* ════ SLIDE 0: COVER ════ */
   const lvBadges=Object.entries(LV_META).map(([,m])=>
-    `<span class="cover-badge" style="border-color:${m.color};color:${m.color}">${m.label}</span>`
+    \`<span class="cvbadge" style="border-color:\${m.color};color:\${m.color}">\${m.label}</span>\`
   ).join('');
-  slides.push(`<div class="slide slide-cover active" id="slide-0">
-  <div class="cover-bg">
-    <div class="cover-eyebrow">Citek<span style="color:#C5D500">'</span>&nbsp;·&nbsp;KPI Advisor</div>
-    <h1 class="cover-title">KPI Dashboard<br>Specification</h1>
-    <div class="cover-sub">${name}</div>
-    <div class="cover-meta">
-      <span>${dt}</span><span class="cover-sep">·</span>
-      <span>${kpis.length} KPI</span><span class="cover-sep">·</span>
-      <span>${allDashes.length} Dashboards</span><span class="cover-sep">·</span>
-      <span>${allGroups.length} Nhóm</span>
+  const allDashCount=Object.values(DASH_TMPL).reduce((s,a)=>s+a.length,0);
+  slides.push(\`<div class="slide slide-cover">
+<div class="cv-bg">
+  <div class="cv-eyebrow">Citek<span style="color:#C5D500">'</span>&nbsp;·&nbsp;KPI Advisor</div>
+  <h1 class="cv-title">KPI Dashboard<br>Specification</h1>
+  <div class="cv-company">\${name}</div>
+  <div class="cv-meta"><span>\${dt}</span><span class="cv-sep">·</span><span>\${kpis.length} KPI</span><span class="cv-sep">·</span><span>\${allDashCount} Dashboards</span><span class="cv-sep">·</span><span>\${allGroups.length} Nhóm</span></div>
+  <div class="cv-badges">\${lvBadges}</div>
+  <div class="cv-note">⚠ Số liệu minh họa · Không phản ánh dữ liệu thực tế</div>
+</div></div>\`);
+
+  /* ════ SLIDE 1: KPI OVERVIEW ════ */
+  const sortedGroups=[...allGroups].sort((a,b)=>kpis.filter(k=>k.nhom===b).length-kpis.filter(k=>k.nhom===a).length);
+  const sortedCounts=sortedGroups.map(g=>kpis.filter(k=>k.nhom===g).length);
+  const gcArr=BCOLS.slice(0,sortedGroups.length).concat(Array(Math.max(0,sortedGroups.length-BCOLS.length)).fill('#005870'));
+  const ovCfg=JSON.stringify({type:'bar',data:{labels:sortedGroups,datasets:[{data:sortedCounts,backgroundColor:gcArr,borderRadius:5,borderSkipped:false}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{titleFont:{family:'Montserrat',size:11},bodyFont:{family:'Montserrat',size:11}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{family:'Montserrat',size:10},color:'#666'}},
+              y:{grid:{display:false},ticks:{font:{family:'Montserrat',size:10},color:'#333'}}}}});
+  const ovMeta=[{v:kpis.length,l:'Tổng KPI',c:'#005870'},{v:hiCount,l:'Ưu tiên Cao',c:'#C5D500'},{v:aiCount,l:'AI bổ sung',c:'#00D4FF'},{v:allGroups.length,l:'Nhóm nghiệp vụ',c:'#005870'}];
+  slides.push(\`<div class="slide">
+<div class="sl-hdr" style="background:#005870">
+  <div class="hdr-logo">Citek<span>'</span></div>
+  <div class="hdr-title">Tổng quan bộ KPI đề xuất<small>Phân bổ theo nhóm nghiệp vụ &amp; mức ưu tiên</small></div>
+  <div class="hdr-right">\${name}&nbsp;·&nbsp;\${dt}</div>
+</div>
+<div class="ov-body">
+  <div class="ov-strip">\${ovMeta.map(c=>\`<div class="ov-card" style="border-top-color:\${c.c}"><div class="ov-num" style="color:\${c.c}">\${c.v}</div><div class="ov-lbl">\${c.l}</div></div>\`).join('')}</div>
+  <div class="ov-chart-wrap"><canvas data-chart='\${ovCfg}'></canvas></div>
+</div>
+<div class="sl-foot">Slide 2 · KPI Overview · \${dt} · Dữ liệu minh họa</div>
+</div>\`);
+
+  /* ════ LEVEL DIVIDER ════ */
+  function renderDivider(lv){
+    const m=LV_META[lv];const cnt=DASH_TMPL[lv].length;
+    return \`<div class="slide slide-div" style="background:linear-gradient(135deg,\${m.color} 0%,\${m.color}cc 100%)">
+<div class="div-inner">
+  <div class="div-icon">\${m.icon}</div>
+  <div class="div-level">\${m.label}</div>
+  <div class="div-sub">\${m.sub}</div>
+  <div class="div-count">\${cnt} Dashboard\${cnt>1?'s':''}</div>
+</div></div>\`;
+  }
+
+  /* ════ PATTERN A: COMMAND CENTER (C-Level) ════ */
+  function renderCommandCenter(d,dashKPIs,tier1,tier2,tier3,lIdx,dIdx){
+    const meta=LV_META.c;
+    const cards=tier1.length?tier1:dashKPIs.slice(0,4);
+    while(cards.length<2&&dashKPIs.length)cards.push(dashKPIs[cards.length%dashKPIs.length]);
+    const main=cards[0]||dashKPIs[0]||{chi:d.kpis[0]||'KPI',freq:'Tháng',mods:[],nhom:''};
+    const title=insightTitle(d,cards.length?cards:dashKPIs);
+    const lv12=lineVals(main.chi);
+    const lv12p=linePlanVals(main.chi);
+    const doughLabels=allGroups.slice(0,5);
+    const doughData=doughLabels.map(g=>kpis.filter(k=>k.nhom===g).length+1);
+    const doughCols=BCOLS.slice(0,doughLabels.length);
+
+    const cardHtml=cards.map((k,i)=>{
+      const km=mock(k.chi);const rag=ragStatus(km);const sv=sparkVals(k.chi);
+      const spCfg=JSON.stringify({type:'line',data:{labels:['','','','','','','',''],datasets:[{data:sv,borderColor:km.up?'#22c55e':'#ef4444',borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:km.up?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)'}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
+      return \`<div class="cc-card" style="border-top:3px solid \${BCOLS[i]||BCOLS[0]}">
+  <div class="cc-name">\${k.chi}</div>
+  <div class="cc-value" style="color:\${BCOLS[i]||BCOLS[0]}">\${km.val}<span class="cc-unit"> \${km.unit}</span></div>
+  <span class="cc-rag" style="background:\${rag.bg};color:\${rag.color}">\${rag.label}</span>
+  <div class="cc-spark"><canvas data-chart='\${spCfg}'></canvas></div>
+  <div class="cc-delta">\${km.up?'▲':'▼'} \${Math.abs(km.tp)}% vs kỳ trước</div>
+</div>\`;
+    }).join('');
+
+    const lineCfg=JSON.stringify({type:'bar',data:{labels:MONTHS12,datasets:[
+      {type:'line',label:'Kế hoạch',data:lv12p,borderColor:'#C5D500',borderWidth:2,borderDash:[4,4],pointRadius:2,fill:false,tension:0.4,order:1},
+      {type:'bar',label:'Thực tế',data:lv12,backgroundColor:'rgba(0,88,112,0.75)',borderRadius:4,order:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{titleFont:{family:'Montserrat',size:10},bodyFont:{family:'Montserrat',size:10}}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'Montserrat',size:9},color:'#999'}},
+              y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{family:'Montserrat',size:9},color:'#999'}}}}});
+
+    const dnCfg=JSON.stringify({type:'doughnut',data:{labels:doughLabels,datasets:[{data:doughData,backgroundColor:doughCols,borderWidth:2,borderColor:'#fff'}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{titleFont:{family:'Montserrat',size:10},bodyFont:{family:'Montserrat',size:10}}}}});
+
+    const tableRows=(tier1.concat(tier2)).slice(0,5).map(k=>{
+      const km=mock(k.chi);const pct=70+H(k.chi,22)%29;const ok=pct>=95;
+      const trend=km.up?'<span style="color:#22c55e">▲</span>':'<span style="color:#ef4444">▼</span>';
+      return \`<tr style="\${ok?'':'background:#fef2f2'}">
+    <td style="padding:6px 10px;color:#334155;font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\${k.chi}</td>
+    <td style="padding:6px 10px;text-align:right;font-weight:700">\${km.val} \${km.unit}</td>
+    <td style="padding:6px 10px;text-align:right;color:\${ok?'#166534':'#c62828'};font-weight:600">\${ok?'✓':'✗'} \${pct}%</td>
+    <td style="padding:6px 10px;text-align:right;color:\${km.uy?'#166534':'#c62828'}">\${km.uy?'▲':'▼'} \${Math.abs(km.ty)}%</td>
+    <td style="padding:6px 10px;text-align:center">\${trend}</td>
+  </tr>\`;
+    }).join('');
+
+    const doughLegend=doughLabels.map((l,i)=>\`<span style="display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#555;margin-right:8px"><span style="width:8px;height:8px;border-radius:2px;background:\${doughCols[i]};display:inline-block"></span>\${l}</span>\`).join('');
+
+    return \`<div class="slide">
+<div class="sl-hdr" style="background:\${meta.color}">
+  <div class="hdr-logo">Citek<span>'</span></div>
+  <div class="hdr-title">\${title}<small>C-Level · Executive Dashboard · \${d.type}</small></div>
+  <div class="hdr-right"><span class="lv-pill" style="background:rgba(255,255,255,.2);color:white">\${meta.sub}</span></div>
+</div>
+<div class="cc-body">
+  <div class="cc-signal">\${cardHtml}</div>
+  <div class="cc-analysis">
+    <div class="cc-chart-card">
+      <div class="cc-chart-legend"><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;margin-right:12px"><span style="width:12px;height:3px;background:#005870;display:inline-block"></span>Thực tế</span><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px"><span style="width:12px;height:0;border-top:2px dashed #C5D500;display:inline-block"></span>Kế hoạch</span></div>
+      <div class="cc-chart-wrap"><canvas data-chart='\${lineCfg}'></canvas></div>
     </div>
-    <div class="cover-badges">${lvBadges}</div>
-    <div class="cover-hint">Dùng ← → hoặc phím mũi tên để điều hướng</div>
-  </div>
-</div>`);
-
-  /* ════ SLIDE 2: KPI OVERVIEW ════ */
-  const ovId=cid();
-  const metricHtml=[
-    {val:kpis.length,lbl:'Tổng KPI',accent:'#005870'},
-    {val:hiCount,lbl:'Ưu tiên Cao',accent:'#C5D500'},
-    {val:aiCount,lbl:'AI bổ sung',accent:'#00D4FF'},
-    {val:allGroups.length,lbl:'Nhóm nghiệp vụ',accent:'#005870'},
-  ].map(c=>`<div class="ov-card" style="border-top-color:${c.accent}">
-    <div class="ov-val" style="color:${c.accent}">${c.val}</div>
-    <div class="ov-lbl">${c.lbl}</div>
-  </div>`).join('');
-
-  slides.push(`<div class="slide" id="slide-1">
-  <div class="slide-header" style="background:#005870">
-    <div class="sh-logo">Citek<span>'</span></div>
-    <div class="sh-title">Tổng quan bộ KPI đề xuất<small>Phân bổ theo nhóm nghiệp vụ &amp; mức độ ưu tiên</small></div>
-    <div class="sh-right">${name}&nbsp;·&nbsp;${dt}</div>
-  </div>
-  <div class="ov-body">
-    <div class="ov-cards">${metricHtml}</div>
-    <div class="ov-chart-section">
-      <div class="ov-chart-title">Phân bổ KPI theo nhóm nghiệp vụ</div>
-      <div class="ov-chart-sub">Số KPI đã chọn trên tổng ${kpis.length} chỉ tiêu · Xếp theo số lượng giảm dần</div>
-      <div class="ov-chart-wrap"><canvas id="${ovId}"></canvas></div>
-    </div>
-  </div>
-</div>`);
-
-  const gcArr=GCOLS.slice(0,allGroups.length).concat(Array(Math.max(0,allGroups.length-GCOLS.length)).fill('#005870'));
-  chartInits.push(`(function(){var el=document.getElementById("${ovId}");if(!el)return;
-new Chart(el,{type:"bar",data:{labels:${JSON.stringify(allGroups)},datasets:[{data:${JSON.stringify(groupCounts)},backgroundColor:${JSON.stringify(gcArr)},borderRadius:6,borderSkipped:false}]},
-options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:11},bodyFont:{family:"Montserrat",size:11}}},
-scales:{x:{grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{family:"Montserrat",size:10},color:"#666"}},y:{grid:{display:false},ticks:{font:{family:"Montserrat",size:10},color:"#333"}}}}});})();`);
-
-  /* ════ DASHBOARD SLIDES — 3 PATTERNS ════ */
-  const PAT_DEFAULT={c:'A',d:'B',m:'B',dept:'C'};
-  let lastPat='',lastPatCnt=0;
-
-  allDashes.forEach(({lv,d},idx)=>{
-    let pat=PAT_DEFAULT[lv]||'B';
-    if(pat===lastPat&&lastPatCnt>=2){pat=['A','B','C'].find(p=>p!==lastPat)||'A';}
-    pat===lastPat?lastPatCnt++:(lastPat=pat,lastPatCnt=1);
-
-    const meta=LV_META[lv];
-    const matched=matchKPIs(d.kpis);
-    const m0=matched[0]||{name:d.kpis[0]||'KPI',mk:mock(d.kpis[0]||'KPI'),freq:'Tháng',mods:[]};
-    const sIdx=slides.length;
-
-    /* ── PATTERN A: COMMAND CENTER ── */
-    if(pat==='A'){
-      const mainId=cid();
-      const cards4=matched.slice(0,4);
-      const spIds=cards4.map(()=>cid());
-      const ACOLS=[meta.color,'#C5D500','#00D4FF','#7fc4d6'];
-
-      const cardHtml=cards4.map((m,k)=>`<div class="pa-card" style="border-top-color:${ACOLS[k]}">
-        <div class="pa-card-label">${m.name}</div>
-        <div class="pa-card-value" style="color:${k===0?meta.color:'#222'}">${m.mk.val} <span class="pa-unit">${m.mk.unit}</span></div>
-        <div class="pa-card-row">
-          <span class="kbadge ${m.mk.up?'badge-up':'badge-dn'}">${m.mk.up?'▲':'▼'} ${Math.abs(m.mk.tp)}%</span>
-          <canvas id="${spIds[k]}" class="spark-cv"></canvas>
-        </div>
-        <div class="pa-freq">${m.freq}</div>
-      </div>`).join('');
-
-      const lv12=lineVals(m0.name);
-      const lv12p=lv12.map((v,i)=>Math.round(v*(0.82+H(m0.name,i+99)%18/100)));
-
-      slides.push(`<div class="slide" id="slide-${sIdx}">
-  <div class="slide-header" style="background:${meta.color}">
-    <div class="sh-logo">Citek<span>'</span></div>
-    <div class="sh-title">${d.name}<small>${meta.label}&nbsp;·&nbsp;${d.type}</small></div>
-    <div class="sh-right"><span class="lv-pill" style="background:rgba(255,255,255,.2)">${meta.sub}</span></div>
-  </div>
-  <div class="pa-body">
-    <div class="pa-cards">${cardHtml}</div>
-    <div class="pa-bottom">
-      <div class="pa-chart-card">
-        <div class="pcc-title">${m0.name}&nbsp;—&nbsp;Xu hướng 12 tháng</div>
-        <div class="pcc-sub">Kỳ này vs Cùng kỳ năm trước&nbsp;·&nbsp;${m0.mk.unit}</div>
-        <div class="pcc-legend"><span class="lg-dot" style="background:${meta.color}"></span>Kỳ này&emsp;<span class="lg-dot" style="background:#C5D500"></span>Cùng kỳ&emsp;<span class="lg-line"></span>Trend</div>
-        <div class="pcc-wrap"><canvas id="${mainId}"></canvas></div>
-      </div>
-      <div class="pa-info-card">
-        <div class="pic-desc">${d.desc}</div>
-        <div class="pic-tags">${d.kpis.map(k=>`<span class="kpi-tag">${k}</span>`).join('')}</div>
-        <div class="pic-mods">SAP: ${(m0.mods||[]).join(', ')||mods.split(',').slice(0,2).join(', ')}</div>
-      </div>
-    </div>
-  </div>
-</div>`);
-
-      chartInits.push(`(function(){var el=document.getElementById("${mainId}");if(!el)return;
-new Chart(el,{type:"bar",data:{labels:${JSON.stringify(MONTHS12)},datasets:[
-{type:"bar",label:"Ky nay",data:${JSON.stringify(lv12)},backgroundColor:"${meta.color}",borderRadius:4,order:2},
-{type:"bar",label:"Cung ky",data:${JSON.stringify(lv12p)},backgroundColor:"rgba(197,213,0,0.75)",borderRadius:4,order:3},
-{type:"line",label:"Trend",data:${JSON.stringify(lv12)},borderColor:"#00D4FF",borderWidth:2,pointRadius:2,fill:false,tension:0.4,order:1}
-]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:10},bodyFont:{family:"Montserrat",size:10}}},
-scales:{x:{grid:{display:false},ticks:{font:{family:"Montserrat",size:9},color:"#999"}},y:{grid:{color:"rgba(0,0,0,0.04)"},ticks:{font:{family:"Montserrat",size:9},color:"#999"}}}}});})();`);
-
-      spIds.forEach((sid,k)=>{
-        if(!cards4[k])return;
-        const sv=sparkVals(cards4[k].name);const up=cards4[k].mk.up;
-        chartInits.push(`(function(){var el=document.getElementById("${sid}");if(!el)return;
-new Chart(el,{type:"line",data:{labels:["","","","","","","",""],datasets:[{data:${JSON.stringify(sv)},borderColor:"${up?'#2e7d32':'#c62828'}",borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:"${up?'rgba(46,125,50,0.1)':'rgba(198,40,40,0.1)'}"}]},
-options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});})();`);
-      });
-
-    /* ── PATTERN B: ANALYSIS SPLIT ── */
-    }else if(pat==='B'){
-      const mainId=cid();
-      const bv=barVals(m0.name);
-      const bvp=bv.map((v,i)=>Math.round(v*(0.78+H(m0.name,i+50)%22/100)));
-
-      const kpiListHtml=matched.slice(0,6).map((m,k)=>{
-        const pct=30+H(m.name,k+7)%60;
-        const bc=k===0?meta.color:k===1?'#C5D500':'#00D4FF';
-        return `<div class="pb-row">
-          <div class="pb-name">${m.name}</div>
-          <div class="pb-bar-wrap"><div class="pb-bar" style="width:${pct}%;background:${bc}"></div></div>
-          <div class="pb-val">${m.mk.val}<span class="pb-unit">${m.mk.unit}</span></div>
-          <span class="kbadge ${m.mk.up?'badge-up':'badge-dn'}" style="font-size:9px">${m.mk.up?'▲':'▼'}${Math.abs(m.mk.tp)}%</span>
-        </div>`;
-      }).join('');
-
-      const footMods=[...new Set(matched.flatMap(m=>m.mods||[]))].slice(0,4).join(' · ')||mods.split(',').slice(0,3).join(' · ');
-
-      slides.push(`<div class="slide" id="slide-${sIdx}">
-  <div class="slide-header" style="background:${meta.color}">
-    <div class="sh-logo">Citek<span>'</span></div>
-    <div class="sh-title"><span class="lv-pill" style="background:rgba(255,255,255,.2);margin-right:8px">${meta.label}</span>${d.name}<small>${d.type}</small></div>
-    <div class="sh-right">${name}&nbsp;·&nbsp;${dt}</div>
-  </div>
-  <div class="pb-body">
-    <div class="pb-left">
-      <div class="pb-section-hd">Chỉ tiêu KPI chính</div>
-      <div class="pb-list">${kpiListHtml}</div>
-      <div class="pb-desc">${d.desc}</div>
-    </div>
-    <div class="pb-right">
-      <div class="pb-chart-title">${m0.name}&nbsp;—&nbsp;So sánh kỳ</div>
-      <div class="pb-chart-sub">Tần suất: ${m0.freq}&nbsp;·&nbsp;${m0.mk.unit}</div>
-      <div class="pb-legend"><span class="lg-dot" style="background:${meta.color}"></span>Kỳ này&emsp;<span class="lg-dot" style="background:#C5D500"></span>Kỳ trước</div>
-      <div class="pb-wrap"><canvas id="${mainId}"></canvas></div>
-      <div class="pb-foot-mods">SAP: ${footMods}</div>
+    <div class="cc-donut-card">
+      <div class="cc-donut-title">Cơ cấu KPI theo nhóm</div>
+      <div class="cc-donut-wrap"><canvas data-chart='\${dnCfg}'></canvas></div>
+      <div class="cc-donut-legend">\${doughLegend}</div>
     </div>
   </div>
-</div>`);
+  <div class="cc-detail">
+    <table class="cc-table">
+      <thead><tr style="background:#005870;color:white"><th style="padding:7px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase">Chỉ tiêu</th><th style="padding:7px 10px;text-align:right;font-size:10px;font-weight:600">Thực tế</th><th style="padding:7px 10px;text-align:right;font-size:10px;font-weight:600">vs KH</th><th style="padding:7px 10px;text-align:right;font-size:10px;font-weight:600">vs CK</th><th style="padding:7px 10px;text-align:center;font-size:10px;font-weight:600">XH</th></tr></thead>
+      <tbody>\${tableRows}</tbody>
+    </table>
+  </div>
+</div>
+<div class="sl-foot">\${d.name} · C-Level · \${dt} · SAP: \${(main.mods||[]).join(', ')||mods.split(',').slice(0,2).join(', ')} · Dữ liệu minh họa</div>
+</div>\`;
+  }
 
-      chartInits.push(`(function(){var el=document.getElementById("${mainId}");if(!el)return;
-new Chart(el,{type:"bar",data:{labels:${JSON.stringify(MONTHS6)},datasets:[
-{label:"Ky nay",data:${JSON.stringify(bv)},backgroundColor:"${meta.color}",borderRadius:5,order:1},
-{label:"Ky truoc",data:${JSON.stringify(bvp)},backgroundColor:"rgba(197,213,0,0.7)",borderRadius:5,order:2}
-]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{titleFont:{family:"Montserrat",size:10},bodyFont:{family:"Montserrat",size:10}}},
-scales:{x:{grid:{display:false},ticks:{font:{family:"Montserrat",size:10},color:"#999"}},y:{grid:{color:"rgba(0,0,0,0.05)"},ticks:{font:{family:"Montserrat",size:10},color:"#999"}}}}});})();`);
+  /* ════ PATTERN B: DEEP ANALYSIS (D-Level) ════ */
+  function renderDeepAnalysis(d,dashKPIs,tier1,tier2,tier3,lIdx,dIdx){
+    const meta=LV_META.d;
+    const cards=(tier1.concat(tier2)).slice(0,3);
+    while(cards.length<3&&dashKPIs.length)cards.push(dashKPIs[cards.length%dashKPIs.length]||cards[0]);
+    const main=dashKPIs[0]||cards[0]||{chi:d.kpis[0]||'KPI',freq:'Tháng',mods:[],nhom:''};
+    const title=insightTitle(d,dashKPIs);
+    const bv=barVals(main.chi);const pv=planVals(main.chi);
+    const hbDims=['Kênh A','Kênh B','Kênh C','Kênh D','Kênh E'];
+    const hbVals=hbarVals(main.chi,5);
+    const allKpiMods=[...new Set(dashKPIs.flatMap(k=>k.mods||[]))];
 
-    /* ── PATTERN C: DETAIL GRID ── */
+    const groupedCfg=JSON.stringify({type:'bar',data:{labels:MONTHS6,datasets:[
+      {label:'Thực tế',data:bv,backgroundColor:'rgba(0,88,112,0.8)',borderRadius:4,order:1},
+      {label:'Kế hoạch',data:pv,backgroundColor:'transparent',borderColor:'#C5D500',borderWidth:2,type:'bar',borderRadius:4,order:2}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{titleFont:{family:'Montserrat',size:10},bodyFont:{family:'Montserrat',size:10}}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'Montserrat',size:9},color:'#999'}},
+              y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{family:'Montserrat',size:9},color:'#999'}}}}});
+
+    const hbarCols=hbVals.map(v=>v>=60?'rgba(0,88,112,0.85)':v>=40?'rgba(0,151,178,0.75)':'rgba(0,212,255,0.65)');
+    const hbarCfg=JSON.stringify({type:'bar',data:{labels:hbDims,datasets:[{data:hbVals,backgroundColor:hbarCols,borderRadius:3,borderSkipped:false}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{enabled:false}},
+        scales:{x:{display:false},y:{grid:{display:false},ticks:{font:{family:'Montserrat',size:9},color:'#555'}}}}});
+
+    const cardHtml=cards.map((k,i)=>{
+      const km=mock(k.chi);const pct=70+H(k.chi,i+11)%25;const okPct=pct>=85;
+      return \`<div class="da-card" style="border-top:3px solid \${BCOLS[i]}">
+  <div class="da-cname">\${k.chi}</div>
+  <div class="da-cval" style="color:\${BCOLS[i]}">\${km.val}<span class="da-cunit"> \${km.unit}</span></div>
+  <div class="da-variance">
+    <span style="color:\${okPct?'#166534':'#c62828'};font-size:14px;font-weight:600">\${okPct?'+':'-'}\${Math.abs(pct-80)}%</span>
+    <span class="da-vlbl">vs KH</span>
+  </div>
+  <div class="da-variance2"><span style="color:\${km.uy?'#166534':'#c62828'};font-size:11px">\${km.uy?'▲':'▼'} \${Math.abs(km.ty)}% vs CK</span></div>
+</div>\`;
+    }).join('');
+
+    const miniCards=(tier2.concat(tier3)).slice(0,4).map(k=>{
+      const km=mock(k.chi);
+      return \`<div class="da-mini"><div class="da-mname">\${k.chi}</div><div class="da-mval">\${km.val} <span style="font-size:9px;color:#888">\${km.unit}</span></div></div>\`;
+    }).join('');
+
+    const tableRows=(tier1.concat(tier2)).slice(0,6).map(k=>{
+      const km=mock(k.chi);const pct=70+H(k.chi,22)%29;const ok=pct>=95;
+      return \`<tr style="\${ok?'':'background:#fef9f0'}">
+    <td style="padding:5px 10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#334155">\${k.chi}</td>
+    <td style="padding:5px 10px;text-align:right;font-weight:700">\${km.val}</td>
+    <td style="padding:5px 10px;text-align:right;color:#888">\${Math.round((parseFloat(km.val)||50)*(100/pct)).toLocaleString('vi-VN')}</td>
+    <td style="padding:5px 10px;text-align:right;color:\${ok?'#166534':'#c62828'};font-weight:600">\${pct}%</td>
+    <td style="padding:5px 10px;text-align:right;color:\${km.uy?'#166534':'#c62828'}">\${km.uy?'▲':'▼'}\${Math.abs(km.ty)}%</td>
+    <td style="padding:5px 10px;color:#94a3b8;font-size:10px">\${k.nhom||'—'}</td>
+  </tr>\`;
+    }).join('');
+
+    return \`<div class="slide">
+<div class="da-hdr">
+  <div><span class="lv-pill" style="background:#e0f0f7;color:\${meta.color}">\${meta.label}</span></div>
+  <div class="da-hdr-title">\${title}</div>
+  <div class="da-hdr-pills"><span class="da-pill">vs Kế hoạch</span><span class="da-pill">vs Cùng kỳ</span></div>
+</div>
+<div class="da-body">
+  <div class="da-signal">\${cardHtml}</div>
+  <div class="da-analysis">
+    <div class="da-chart-main">
+      <div class="da-chart-title">\${main.chi} — Thực tế vs Kế hoạch</div>
+      <div class="da-legend"><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;margin-right:10px"><span style="width:10px;height:10px;background:rgba(0,88,112,0.8);display:inline-block;border-radius:2px"></span>Thực tế</span><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px"><span style="width:10px;height:10px;border:2px solid #C5D500;display:inline-block;border-radius:2px"></span>Kế hoạch</span></div>
+      <div class="da-chart-wrap"><canvas data-chart='\${groupedCfg}'></canvas></div>
+    </div>
+    <div class="da-right">
+      <div class="da-hbar-wrap"><canvas data-chart='\${hbarCfg}'></canvas></div>
+      <div class="da-mini-grid">\${miniCards}</div>
+    </div>
+  </div>
+  <div class="da-detail">
+    <table class="da-table">
+      <thead><tr style="background:#f0f7fa;color:#005870"><th style="padding:6px 10px;text-align:left;font-size:10px;text-transform:uppercase;font-weight:700">Chỉ tiêu</th><th style="padding:6px 10px;text-align:right;font-size:10px;text-transform:uppercase;font-weight:700">Thực tế</th><th style="padding:6px 10px;text-align:right;font-size:10px;text-transform:uppercase;font-weight:700">Kế hoạch</th><th style="padding:6px 10px;text-align:right;font-size:10px;text-transform:uppercase;font-weight:700">% Đạt</th><th style="padding:6px 10px;text-align:right;font-size:10px;text-transform:uppercase;font-weight:700">vs CK</th><th style="padding:6px 10px;font-size:10px;text-transform:uppercase;font-weight:700">Nhóm</th></tr></thead>
+      <tbody>\${tableRows}</tbody>
+    </table>
+    <div style="font-size:10px;color:#94a3b8;margin-top:4px">T-Codes: \${tCodes(allKpiMods)} · \${dt} · Dữ liệu minh họa</div>
+  </div>
+</div></div>\`;
+  }
+
+  /* ════ PATTERN C: OPERATIONAL MONITOR (M-Level) ════ */
+  function renderOperationalMonitor(d,dashKPIs,tier1,tier2,tier3,lIdx,dIdx){
+    const meta=LV_META.m;
+    const allT=(tier1.concat(tier2,tier3));
+    const cards6=allT.slice(0,6);
+    while(cards6.length<6&&dashKPIs.length)cards6.push(dashKPIs[cards6.length%Math.max(1,dashKPIs.length)]||cards6[0]);
+    const main=dashKPIs[0]||cards6[0]||{chi:d.kpis[0]||'KPI',freq:'Ngày',mods:[],nhom:''};
+    const target=60+H(main.chi,99)%30;
+    const daily=dailyVals(main.chi,target);
+    const dailyColors=daily.map(v=>v>=target?'rgba(34,197,94,0.75)':'rgba(239,68,68,0.7)');
+    const title=insightTitle(d,dashKPIs);
+
+    const dailyCfg=JSON.stringify({type:'bar',data:{labels:Array.from({length:30},(_,i)=>String(i+1)),datasets:[
+      {data:daily,backgroundColor:dailyColors,borderRadius:2,barThickness:6},
+      {type:'line',data:Array(30).fill(target),borderColor:'#C5D500',borderWidth:1.5,borderDash:[4,4],pointRadius:0,fill:false,order:0}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{titleFont:{family:'Montserrat',size:9},bodyFont:{family:'Montserrat',size:9}}},
+      scales:{x:{grid:{display:false},ticks:{font:{family:'Montserrat',size:8},color:'#aaa',maxTicksLimit:10}},
+              y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Montserrat',size:8},color:'#999'}}}}});
+
+    const cardHtml=cards6.map((k,i)=>{
+      const km=mock(k.chi);const pct=50+H(k.chi,i+3)%45;const pc=progressColor(pct);
+      const sv=sparkVals(k.chi);const spColor=pc;
+      const spBg=pct>=80?'rgba(34,197,94,0.1)':pct>=60?'rgba(245,158,11,0.1)':'rgba(239,68,68,0.1)';
+      const spCfg=JSON.stringify({type:'line',data:{labels:['','','','','','','',''],datasets:[{data:sv,borderColor:spColor,borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:spBg}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
+      return \`<div class="om-card">
+  <div class="om-card-top">
+    <div class="om-cname">\${k.chi}</div>
+    <span class="om-freq">\${k.freq||'Ngày'}</span>
+  </div>
+  <div class="om-cval">\${km.val}<span class="om-cunit"> \${km.unit}</span></div>
+  <div class="om-spark"><canvas data-chart='\${spCfg}'></canvas></div>
+  <div class="om-prog-wrap"><div class="om-prog" style="width:\${pct}%;background:\${pc}"></div></div>
+  <div class="om-prog-lbl" style="color:\${pc}">\${pct}% vs target</div>
+</div>\`;
+    }).join('');
+
+    const alerts=cards6.filter(k=>parseFloat(mock(k.chi).tp)<-2).slice(0,4);
+    const alertHtml=alerts.length?alerts.map(k=>{
+      const km=mock(k.chi);
+      return \`<div class="om-alert-row"><span class="om-alert-dot" style="background:#ef4444"></span><span class="om-alert-name">\${k.chi}</span><span class="om-alert-val" style="color:#ef4444">▼ \${Math.abs(km.tp)}%</span></div>\`;
+    }).join(''):\`<div class="om-alert-ok">✓ Tất cả KPI trong ngưỡng</div>\`;
+
+    const tableRows=cards6.slice(0,6).map((k,i)=>{
+      const km=mock(k.chi);const bg=i%2===0?'#fafafa':'white';
+      const hd=Math.round(parseFloat(km.val.replace(/\D/g,''))||50);
+      return \`<tr style="background:\${bg}"><td style="padding:5px 10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\${k.chi}</td><td style="padding:5px 10px;text-align:right;font-weight:700">\${km.val} \${km.unit}</td><td style="padding:5px 10px;text-align:right">\${(hd*0.95).toFixed(1)}</td><td style="padding:5px 10px;text-align:right">\${(hd*3.1).toFixed(0)}</td><td style="padding:5px 10px;text-align:center"><span style="background:#eef2f4;padding:2px 7px;border-radius:8px;font-size:9px">\${k.freq||'Ngày'}</span></td></tr>\`;
+    }).join('');
+
+    return \`<div class="slide">
+<div class="om-hdr">
+  <div class="om-hdr-left"><span class="om-icon">\${meta.icon}</span><span class="om-hdr-name">\${d.name}</span></div>
+  <div class="om-hdr-right"><span style="font-size:10px;color:#64748b">Cập nhật: hôm nay</span>&nbsp;<span class="lv-pill" style="background:#e0f0f4;color:\${meta.color}">\${meta.label}</span></div>
+</div>
+<div class="om-body">
+  <div class="om-signal">\${cardHtml}</div>
+  <div class="om-analysis">
+    <div class="om-daily-card">
+      <div class="om-daily-title">\${main.chi} — 30 ngày gần nhất <span style="font-size:9px;color:#94a3b8">🟩 ≥ target · 🟥 &lt; target</span></div>
+      <div class="om-daily-wrap"><canvas data-chart='\${dailyCfg}'></canvas></div>
+    </div>
+    <div class="om-alert-card">
+      <div class="om-alert-title">⚠ Cần chú ý</div>
+      \${alertHtml}
+    </div>
+  </div>
+  <div class="om-detail">
+    <table class="om-table">
+      <thead><tr style="background:#f0f7fa;color:#005870"><th style="padding:6px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase">Chỉ tiêu</th><th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase">Hôm nay</th><th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase">Tuần này</th><th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase">Tháng này</th><th style="padding:6px 10px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase">Tần suất</th></tr></thead>
+      <tbody>\${tableRows}</tbody>
+    </table>
+  </div>
+</div>
+<div class="sl-foot">\${d.name} · M-Level · \${dt} · Dữ liệu minh họa</div>
+</div>\`;
+  }
+
+  /* ════ PATTERN D: TRANSACTION LOG (Dept) ════ */
+  function renderTransactionLog(d,dashKPIs,tier1,tier2,tier3,lIdx,dIdx){
+    const meta=LV_META.dept;
+    const main=dashKPIs[0]||{chi:d.kpis[0]||'KPI',freq:'Ngày',mods:[],nhom:''};
+    const title=insightTitle(d,dashKPIs);
+    const isAging=main.nhom==='Công nợ'||main.chi.toLowerCase().includes('công nợ')||main.chi.toLowerCase().includes('aging');
+    const isInv=main.nhom==='Tồn kho'||main.chi.toLowerCase().includes('tồn kho');
+    const total=1200+H(main.chi,1)%3800;
+    const overdue=Math.round(total*(0.03+H(main.chi,2)%8/100));
+    const today=Math.round(total*(0.06+H(main.chi,3)%9/100));
+    const week=Math.round(total*(0.18+H(main.chi,4)%15/100));
+
+    let chartCfg;
+    if(isAging){
+      const buckets=['<30 ngày','30–60','61–90','91–120','>120 ngày'];
+      const vals=[45,25,15,9,6].map((v,i)=>Math.round(v*(0.8+H(main.chi,i+20)%20/100)));
+      chartCfg=JSON.stringify({type:'bar',data:{labels:buckets,datasets:[{data:vals,backgroundColor:['#22c55e','#84cc16','#f59e0b','#f97316','#ef4444'],borderRadius:4,borderSkipped:false}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},
+          scales:{x:{display:false},y:{grid:{display:false},ticks:{font:{family:'Montserrat',size:9},color:'#555'}}}}});
+    }else if(isInv){
+      const bv2=barVals(main.chi);const pv2=planVals(main.chi);
+      chartCfg=JSON.stringify({type:'bar',data:{labels:MONTHS6,datasets:[{label:'Nhập',data:bv2,backgroundColor:'rgba(0,88,112,0.8)',borderRadius:3},{label:'Tồn',data:pv2,backgroundColor:'rgba(197,213,0,0.7)',borderRadius:3}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},
+          scales:{x:{grid:{display:false},ticks:{font:{family:'Montserrat',size:9},color:'#999'}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Montserrat',size:9},color:'#999'}}}}});
     }else{
-      const cols3=matched.slice(0,3);
-      const chIds=cols3.map(()=>cid());
-      const CCOLS=[meta.color,'#C5D500','#00D4FF'];
-
-      const colsHtml=cols3.map((m,k)=>`<div class="pc-col" style="border-top:4px solid ${CCOLS[k]}">
-        <div class="pc-label" style="color:${CCOLS[k]}">${m.name}</div>
-        <div class="pc-val" style="color:${k===0?meta.color:'#222'}">${m.mk.val}</div>
-        <div class="pc-unit">${m.mk.unit}&nbsp;·&nbsp;${m.freq}</div>
-        <div class="pc-spark"><canvas id="${chIds[k]}"></canvas></div>
-        <div class="pc-badges">
-          <span class="kbadge ${m.mk.up?'badge-up':'badge-dn'}">${m.mk.up?'▲':'▼'} ${Math.abs(m.mk.tp)}% vs kỳ trước</span>
-          <span style="font-size:10px;color:${m.mk.uy?'#2e7d32':'#c62828'};margin-left:6px">${m.mk.uy?'▲':'▼'} ${Math.abs(m.mk.ty)}% YoY</span>
-        </div>
-      </div>`).join('');
-
-      const remHtml=matched.slice(3).map(m=>`<div class="pc-rem-row">
-        <span class="pc-rem-name">${m.name}</span>
-        <strong class="pc-rem-val">${m.mk.val} ${m.mk.unit}</strong>
-      </div>`).join('')||'<div style="color:#bbb;font-size:11px;font-style:italic">Tất cả KPI chính đã hiển thị</div>';
-
-      slides.push(`<div class="slide" id="slide-${sIdx}">
-  <div class="slide-header" style="background:${meta.color}">
-    <div class="sh-logo">Citek<span>'</span></div>
-    <div class="sh-title">${d.name}<small>${meta.label}&nbsp;·&nbsp;${d.type}</small></div>
-    <div class="sh-right">${name}&nbsp;·&nbsp;${dt}</div>
-  </div>
-  <div class="pc-body">
-    <div class="pc-grid">${colsHtml}</div>
-    <div class="pc-bottom">
-      <div class="pc-insight">
-        <div class="pc-ins-label">💡 Insight chính</div>
-        <div class="pc-ins-text">${m0.name} đạt <strong>${m0.mk.val} ${m0.mk.unit}</strong> — ${m0.mk.up?'tăng trưởng tích cực':'cần chú ý cải thiện'} so với kỳ trước. ${d.desc}</div>
-      </div>
-      <div class="pc-remaining">
-        <div class="pc-rem-hd">KPI bổ sung</div>
-        ${remHtml}
-      </div>
-      <div class="pc-mods">
-        <div class="pc-rem-hd">SAP Modules</div>
-        ${mods.split(',').slice(0,5).map(m=>`<span class="mod-badge">${m.trim()}</span>`).join('')}
-      </div>
-    </div>
-  </div>
-</div>`);
-
-      chIds.forEach((chid,k)=>{
-        if(!cols3[k])return;
-        const bv2=barVals(cols3[k].name);const up=cols3[k].mk.up;
-        chartInits.push(`(function(){var el=document.getElementById("${chid}");if(!el)return;
-new Chart(el,{type:"bar",data:{labels:["T9","T10","T11","T12","T1","T2"],datasets:[{data:${JSON.stringify(bv2)},backgroundColor:"${up?meta.color:'#c62828'}",borderRadius:4}]},
-options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});})();`);
-      });
+      const bv3=barVals(main.chi);const avg=bv3.reduce((a,b)=>a+b,0)/bv3.length;
+      chartCfg=JSON.stringify({type:'bar',data:{labels:MONTHS6,datasets:[{data:bv3,backgroundColor:bv3.map(v=>v>=avg?'rgba(0,88,112,0.8)':'rgba(239,68,68,0.65)'),borderRadius:3}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},
+          scales:{x:{grid:{display:false},ticks:{font:{family:'Montserrat',size:9},color:'#999'}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Montserrat',size:9},color:'#999'}}}}});
     }
-  });
 
-  /* ════ LAST SLIDE: RECOMMENDATION ════ */
+    const statuses=['Đạt','Đạt','Cảnh báo','Thấp','Đạt','Quá hạn','Đạt','Cảnh báo','Đạt','Thấp'];
+    const statusColors={Đạt:{bg:'#f0fdf4',color:'#166534'},Cảnh báo:{bg:'#fffbeb',color:'#92400e'},Thấp:{bg:'#fef2f2',color:'#c62828'},Quá hạn:{bg:'#fef2f2',color:'#c62828'}};
+    const actions=['Xem chi tiết','Xử lý','Xem chi tiết','Escalate','Xem chi tiết','Xử lý','Xem chi tiết','Escalate','Xem chi tiết','Xử lý'];
+
+    const tableRows=Array.from({length:10},(_,i)=>{
+      const k=dashKPIs[i%Math.max(1,dashKPIs.length)]||{chi:d.kpis[0]||'KPI',unit:'—'};
+      const km=mock(k.chi+(i+''));
+      const st=statuses[i];const sc=statusColors[st]||statusColors['Đạt'];
+      return \`<tr style="background:\${sc.bg}">
+    <td style="padding:6px 10px;font-weight:600;color:#334155;font-size:11px;font-family:monospace">\${String(1000+i+H(k.chi,i)).slice(-4)}</td>
+    <td style="padding:6px 10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">\${k.chi}</td>
+    <td style="padding:6px 10px;text-align:right;font-family:monospace;font-size:11px">\${km.val} \${km.unit}</td>
+    <td style="padding:6px 10px;text-align:center"><span style="background:\${sc.bg};color:\${sc.color};border:1px solid \${sc.color}40;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">\${st}</span></td>
+    <td style="padding:6px 10px;text-align:center"><span style="border:1px solid #94a3b8;color:#334155;padding:2px 8px;border-radius:10px;font-size:9px;cursor:pointer">\${actions[i]}</span></td>
+  </tr>\`;
+    }).join('');
+
+    return \`<div class="slide">
+<div class="tl-hdr">
+  <div class="tl-hdr-left"><span class="tl-icon">\${meta.icon}</span><span class="tl-hdr-name">\${d.name}</span></div>
+  <div class="tl-hdr-right"><span class="lv-pill" style="border:1.5px solid \${meta.color};color:\${meta.color};background:transparent">\${meta.label}</span>&nbsp;<button class="tl-filter-btn">⊟ Lọc</button></div>
+</div>
+<div class="tl-body">
+  <div class="tl-signal">
+    <div class="tl-badges">
+      <span class="tl-badge">📊 Tổng: \${total.toLocaleString('vi-VN')} records</span>
+      <span class="tl-badge" style="border-color:#f97316;color:#c2410c">⚠ Quá hạn: \${overdue}</span>
+      <span class="tl-badge" style="border-color:#22c55e;color:#166534">✓ Hôm nay: \${today}</span>
+      <span class="tl-badge">📅 Tuần này: \${week}</span>
+    </div>
+  </div>
+  <div class="tl-analysis"><canvas data-chart='\${chartCfg}' style="height:104px!important"></canvas></div>
+  <div class="tl-detail">
+    <div class="tl-table-wrap">
+      <table class="tl-table">
+        <thead style="position:sticky;top:0;z-index:10"><tr style="background:#005870;color:white"><th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase">Mã</th><th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase">Chỉ tiêu</th><th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase">Giá trị</th><th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase">Trạng thái</th><th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase">Thao tác</th></tr></thead>
+        <tbody>\${tableRows}</tbody>
+      </table>
+    </div>
+    <div style="font-size:10px;color:#94a3b8;text-align:center;padding:4px">Hiển thị dữ liệu minh họa · Không phản ánh tình hình thực tế của doanh nghiệp</div>
+  </div>
+</div></div>\`;
+  }
+
+  /* ════ BUILD ALL SLIDES ════ */
+  function renderLevel(lv,dashes){
+    slides.push(renderDivider(lv));
+    const renderer={c:renderCommandCenter,d:renderDeepAnalysis,m:renderOperationalMonitor,dept:renderTransactionLog}[lv]||renderCommandCenter;
+    dashes.forEach((d,dIdx)=>{
+      const dashKPIs=matchKPIsForDash(d,kpis);
+      const {tier1,tier2,tier3}=classifyKPIs(dashKPIs.length?dashKPIs:kpis.slice(0,4));
+      slides.push(renderer(d,dashKPIs,tier1,tier2,tier3,0,dIdx));
+    });
+  }
+  Object.entries(DASH_TMPL).forEach(([lv,dashes])=>renderLevel(lv,dashes));
+
+  /* ════ RECOMMENDATION SLIDE ════ */
   const hiKpis=kpis.filter(k=>k.pri==='Cao').slice(0,4);
-  const quickWins=hiKpis.map(k=>`<li>${k.chi}</li>`).join('')||'<li>Xây dựng bộ KPI cơ bản cho C-Level dashboard</li><li>Cấu hình SAP module liên quan</li>';
-  const coreImpl=[
-    'Rollout từ C-Level → D-Level → M-Level → Department',
-    'Cấu hình dữ liệu SAP: '+mods.split(',').slice(0,2).join(', '),
-    'Training người dùng theo từng cấp quản lý',
-    'Thiết lập quy trình review KPI định kỳ',
-  ].map(t=>`<li>${t}</li>`).join('');
-  const advanced=[
-    'Tích hợp AI/ML forecast với SAC Analytics',
-    'Cross-system KPI: CX/CRM + ERP + HR',
-    'Real-time streaming dashboard với BTP',
-    'Predictive maintenance với PM/EAM + AI',
-  ].map(t=>`<li>${t}</li>`).join('');
-
-  slides.push(`<div class="slide" id="slide-${slides.length}">
-  <div class="slide-header" style="background:#1a3a44">
-    <div class="sh-logo">Citek<span>'</span></div>
-    <div class="sh-title">Khuyến nghị triển khai<small>Lộ trình theo thứ tự ưu tiên</small></div>
-    <div class="sh-right">${name}&nbsp;·&nbsp;${dt}</div>
+  const quickWins=hiKpis.map(k=>\`<li>\${k.chi}</li>\`).join('')||'<li>Cấu hình C-Level dashboard với KPI tài chính</li><li>Setup SAP module liên quan</li>';
+  const coreImpl=['Rollout từ C-Level → D-Level → M-Level → Department','Cấu hình nguồn dữ liệu SAP: '+mods.split(',').slice(0,2).join(', '),'Training người dùng theo từng cấp quản lý','Thiết lập quy trình review KPI định kỳ'].map(t=>\`<li>\${t}</li>\`).join('');
+  const advanced=['Tích hợp SAP Analytics Cloud (SAC) cho AI Forecasting','Cross-system KPI: CX/CRM + ERP + HR một điểm nhìn','Real-time streaming dashboard với BTP Event Mesh','Predictive maintenance với PM/EAM + Machine Learning'].map(t=>\`<li>\${t}</li>\`).join('');
+  slides.push(\`<div class="slide">
+<div class="sl-hdr" style="background:#1a3a44">
+  <div class="hdr-logo">Citek<span>'</span></div>
+  <div class="hdr-title">Khuyến nghị triển khai<small>Lộ trình theo thứ tự ưu tiên</small></div>
+  <div class="hdr-right">\${name}&nbsp;·&nbsp;\${dt}</div>
+</div>
+<div class="rec-body">
+  <div class="rec-col" style="border-top:4px solid #C5D500">
+    <div class="rec-hd" style="color:#7a8500">⚡ Quick Wins</div>
+    <div class="rec-sub">Tuần 1–4 · Ưu tiên cao nhất</div>
+    <ul class="rec-list" style="--ac:#C5D500">\${quickWins}</ul>
   </div>
-  <div class="rec-body">
-    <div class="rec-col" style="border-top:4px solid #C5D500">
-      <div class="rec-hd" style="color:#7a8500">⚡ Quick Wins</div>
-      <div class="rec-sub">Tuần 1–4 · Ưu tiên cao nhất</div>
-      <ul class="rec-list" style="--accent:#C5D500">${quickWins}</ul>
-    </div>
-    <div class="rec-col rec-main" style="border-top:4px solid #005870">
-      <div class="rec-hd" style="color:#005870">🏗 Core Implementation</div>
-      <div class="rec-sub">Tháng 1–3 · Nền tảng vận hành</div>
-      <ul class="rec-list" style="--accent:#005870">${coreImpl}</ul>
-    </div>
-    <div class="rec-col" style="border-top:4px solid #00D4FF">
-      <div class="rec-hd" style="color:#0080a0">📊 Advanced Analytics</div>
-      <div class="rec-sub">Tháng 4–6 · Tối ưu hóa &amp; AI</div>
-      <ul class="rec-list" style="--accent:#00D4FF">${advanced}</ul>
-    </div>
+  <div class="rec-col rec-main" style="border-top:4px solid #005870">
+    <div class="rec-hd" style="color:#005870">🏗 Core Implementation</div>
+    <div class="rec-sub">Tháng 1–3 · Nền tảng vận hành</div>
+    <ul class="rec-list" style="--ac:#005870">\${coreImpl}</ul>
   </div>
-  <div class="rec-footer">
-    <span>⚠️ Số liệu trong tài liệu này là <strong>mock data minh họa</strong> — không phản ánh dữ liệu thực của khách hàng</span>
-    <span>Prepared by <strong>Citek'</strong> · KPI Advisor AI Platform · ${dt}</span>
+  <div class="rec-col" style="border-top:4px solid #00D4FF">
+    <div class="rec-hd" style="color:#0080a0">📊 Advanced Analytics</div>
+    <div class="rec-sub">Tháng 4–6 · Tối ưu hóa &amp; AI</div>
+    <ul class="rec-list" style="--ac:#00D4FF">\${advanced}</ul>
   </div>
-</div>`);
+</div>
+<div class="rec-footer">
+  <span>⚠ Số liệu trong tài liệu này là <strong>dữ liệu minh họa</strong> — không phản ánh tình hình thực tế</span>
+  <span>Prepared by <strong>Citek'</strong> · KPI Advisor AI Platform · \${dt}</span>
+</div></div>\`);
 
   /* ════ CSS ════ */
-  const CSS=`
+  const CSS=\`
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:#000}
-body{font-family:'Montserrat',sans-serif}
-.slide{height:100vh;height:100dvh;overflow:hidden;display:none;flex-direction:column;font-family:'Montserrat',sans-serif;background:#F2F4F5;padding-bottom:47px}
+html,body{height:100%;overflow:hidden;background:#1a2b35;font-family:'Montserrat','Segoe UI',sans-serif}
+.slide{height:100vh;height:100dvh;overflow:hidden;display:none;flex-direction:column;background:#f0f4f8;padding-bottom:34px}
 .slide.active{display:flex}
-/* HEADER */
-.slide-header,.pb-header-x{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;flex-shrink:0;color:white}
-.sh-logo{font-size:18px;font-weight:700;color:white;flex-shrink:0;min-width:80px}
-.sh-logo span{color:#C5D500}
-.sh-title{font-size:13px;font-weight:700;color:white;text-align:center;flex:1;padding:0 16px}
-.sh-title small{display:block;font-size:10px;font-weight:400;opacity:.7;margin-top:2px}
-.sh-right{font-size:10px;color:rgba(255,255,255,.6);text-align:right;flex-shrink:0;min-width:80px}
+.status-bar{position:fixed;bottom:0;left:0;right:0;height:34px;background:#003E4F;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100}
+.sb-left{display:flex;gap:10px;align-items:center}
+.sb-btn{background:rgba(255,255,255,.12);border:none;color:white;padding:4px 14px;border-radius:5px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;transition:background .15s}
+.sb-btn:hover:not(:disabled){background:rgba(255,255,255,.22)}
+.sb-btn:disabled{opacity:.3;cursor:default}
+.sb-num{font-size:12px;font-weight:700;color:white}
+.sb-right{font-size:10px;color:rgba(255,255,255,.4)}
+.progress-track{position:fixed;bottom:34px;left:0;right:0;height:2px;background:rgba(255,255,255,.1)}
+.progress-fill{height:100%;background:#C5D500;transition:width .25s ease}
+.sl-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;flex-shrink:0;color:white}
+.hdr-logo{font-size:17px;font-weight:700;color:white;flex-shrink:0;min-width:72px}
+.hdr-logo span{color:#C5D500}
+.hdr-title{font-size:14px;font-weight:700;color:white;text-align:center;flex:1;padding:0 16px}
+.hdr-title small{display:block;font-size:10px;font-weight:400;opacity:.65;margin-top:2px}
+.hdr-right{font-size:10px;color:rgba(255,255,255,.6);text-align:right;flex-shrink:0;min-width:72px}
 .lv-pill{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600}
-/* COVER */
+.sl-foot{padding:4px 20px;font-size:9px;color:#94a3b8;flex-shrink:0;background:#edf0f4;border-top:1px solid #e0e7ef}
 .slide-cover{background:none;padding-bottom:0}
-.cover-bg{flex:1;background:linear-gradient(135deg,#003E4F 0%,#005870 55%,#007a9e 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 80px 90px;text-align:center;position:relative;overflow:hidden}
-.cover-bg::before{content:'';position:absolute;top:-15%;right:-8%;width:480px;height:480px;border-radius:50%;background:rgba(197,213,0,0.06);pointer-events:none}
-.cover-bg::after{content:'';position:absolute;bottom:-10%;left:-8%;width:380px;height:380px;border-radius:50%;background:rgba(0,212,255,0.06);pointer-events:none}
-.cover-eyebrow{font-size:12px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:22px}
-.cover-title{font-size:58px;font-weight:700;color:white;line-height:1.08;letter-spacing:-2px;margin-bottom:18px}
-.cover-sub{font-size:22px;font-weight:500;color:rgba(255,255,255,.88);margin-bottom:26px}
-.cover-meta{display:flex;gap:10px;align-items:center;background:rgba(0,0,0,.22);padding:10px 24px;border-radius:30px;font-size:12px;color:rgba(255,255,255,.7);margin-bottom:30px}
-.cover-sep{opacity:.35}
-.cover-badges{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:28px}
-.cover-badge{padding:8px 22px;border-radius:22px;border:2px solid;font-size:12px;font-weight:700;background:white}
-.cover-hint{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.5px}
-/* OVERVIEW */
-.ov-body{flex:1;display:flex;flex-direction:column;padding:18px 26px 14px;gap:14px;overflow:hidden;min-height:0}
-.ov-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;flex-shrink:0}
-.ov-card{background:white;border-radius:10px;padding:16px 18px;border-top:4px solid;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-.ov-val{font-size:36px;font-weight:700;line-height:1}
-.ov-lbl{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:5px}
-.ov-chart-section{flex:1;background:white;border-radius:10px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden;display:flex;flex-direction:column;min-height:0}
-.ov-chart-title{font-size:13px;font-weight:700;color:#005870;flex-shrink:0}
-.ov-chart-sub{font-size:11px;color:#888;margin-top:2px;margin-bottom:10px;flex-shrink:0}
-.ov-chart-wrap{flex:1;min-height:0}
-/* BADGES */
-.kbadge{display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
-.badge-up{background:#e8f5e9;color:#2e7d32}
-.badge-dn{background:#fde8e8;color:#c62828}
-.lg-dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:3px;vertical-align:middle}
-.lg-line{display:inline-block;width:18px;height:2px;background:#00D4FF;border-radius:1px;margin-right:3px;vertical-align:middle}
-.kpi-tag{display:inline-block;background:#eef2f4;color:#005870;font-size:9px;font-weight:600;padding:2px 8px;border-radius:8px;margin:2px}
-.mod-badge{display:inline-block;background:rgba(0,88,112,.1);color:#005870;font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;margin:3px}
-/* PATTERN A */
-.pa-body{flex:1;display:flex;flex-direction:column;padding:12px 20px 10px;gap:10px;overflow:hidden;min-height:0}
-.pa-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex-shrink:0}
-.pa-card{background:white;border-radius:8px;padding:13px 15px;border-top:3px solid;box-shadow:0 2px 5px rgba(0,0,0,.07)}
-.pa-card-label{font-size:9px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;line-height:1.35;margin-bottom:5px;height:2.7em;overflow:hidden}
-.pa-card-value{font-size:24px;font-weight:700;line-height:1;margin-bottom:1px}
-.pa-unit{font-size:11px;font-weight:400;color:#888}
-.pa-card-row{display:flex;align-items:center;justify-content:space-between;margin-top:7px;gap:5px}
-.pa-freq{font-size:9px;color:#ccc;margin-top:4px}
-.spark-cv{flex:1;max-width:80px;height:26px!important}
-.pa-bottom{display:grid;grid-template-columns:1fr 220px;gap:10px;flex:1;min-height:0}
-.pa-chart-card{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;min-height:0}
-.pcc-title{font-size:12px;font-weight:700;color:#005870;flex-shrink:0}
-.pcc-sub{font-size:10px;color:#888;margin-top:2px;flex-shrink:0}
-.pcc-legend{display:flex;align-items:center;font-size:10px;color:#666;margin:5px 0;flex-shrink:0}
-.pcc-wrap{flex:1;min-height:0}
-.pa-info-card{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:7px}
-.pic-desc{font-size:11px;color:#555;line-height:1.55}
-.pic-tags{display:flex;flex-wrap:wrap;gap:3px}
-.pic-mods{font-size:10px;color:#aaa;margin-top:auto}
-/* PATTERN B */
-.pb-body{flex:1;display:grid;grid-template-columns:40% 1fr;overflow:hidden;min-height:0}
-.pb-left{padding:18px 22px;display:flex;flex-direction:column;gap:7px;border-right:1px solid #e8e8e8;overflow:hidden}
-.pb-section-hd{font-size:10px;font-weight:700;color:#005870;text-transform:uppercase;letter-spacing:.6px;flex-shrink:0}
-.pb-list{display:flex;flex-direction:column;gap:9px;flex:1;overflow:hidden}
-.pb-row{display:flex;align-items:center;gap:8px}
-.pb-name{font-size:10px;color:#333;font-weight:500;width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pb-bar-wrap{flex:1;height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden}
-.pb-bar{height:100%;border-radius:3px;transition:width .3s}
-.pb-val{font-size:11px;font-weight:700;color:#333;flex-shrink:0;width:56px;text-align:right}
-.pb-unit{font-size:9px;font-weight:400;color:#999;margin-left:2px}
-.pb-desc{font-size:11px;color:#888;line-height:1.5;margin-top:auto;padding-top:10px;border-top:1px solid #f0f0f0;flex-shrink:0}
-.pb-right{padding:18px 22px;display:flex;flex-direction:column;gap:5px;min-height:0}
-.pb-chart-title{font-size:13px;font-weight:700;color:#333;flex-shrink:0}
-.pb-chart-sub{font-size:10px;color:#888;flex-shrink:0}
-.pb-legend{display:flex;align-items:center;font-size:10px;color:#666;margin-top:3px;flex-shrink:0}
-.pb-wrap{flex:1;min-height:0}
-.pb-foot-mods{font-size:10px;color:#bbb;flex-shrink:0}
-/* PATTERN C */
-.pc-body{flex:1;display:flex;flex-direction:column;padding:12px 20px 10px;gap:10px;overflow:hidden;min-height:0}
-.pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex-shrink:0}
-.pc-col{background:white;border-radius:8px;padding:14px 16px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:3px}
-.pc-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;line-height:1.35;height:2.7em;overflow:hidden}
-.pc-val{font-size:28px;font-weight:700;line-height:1;margin-top:3px}
-.pc-unit{font-size:10px;color:#888}
-.pc-spark{height:48px;margin:6px 0}
-.pc-badges{display:flex;flex-wrap:wrap;gap:3px}
-.pc-bottom{display:grid;grid-template-columns:1fr 1fr 150px;gap:10px;flex:1;min-height:0;overflow:hidden}
-.pc-insight{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:5px;overflow:hidden}
-.pc-ins-label{font-size:10px;font-weight:700;color:#005870;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
-.pc-ins-text{font-size:11px;color:#333;line-height:1.6}
-.pc-remaining{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);overflow:hidden}
-.pc-mods{background:white;border-radius:8px;padding:13px 15px;box-shadow:0 2px 5px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:4px}
-.pc-rem-hd{font-size:10px;font-weight:700;color:#005870;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.pc-rem-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f0f0}
-.pc-rem-name{font-size:10px;color:#555;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:6px}
-.pc-rem-val{font-size:11px;color:#333;flex-shrink:0}
-/* RECOMMENDATION */
+.cv-bg{flex:1;background:linear-gradient(135deg,#003E4F 0%,#005870 55%,#007a9e 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 80px 80px;text-align:center;position:relative;overflow:hidden}
+.cv-bg::before{content:'';position:absolute;top:-15%;right:-8%;width:480px;height:480px;border-radius:50%;background:rgba(197,213,0,.06);pointer-events:none}
+.cv-bg::after{content:'';position:absolute;bottom:-10%;left:-8%;width:380px;height:380px;border-radius:50%;background:rgba(0,212,255,.06);pointer-events:none}
+.cv-eyebrow{font-size:12px;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:22px}
+.cv-title{font-size:56px;font-weight:700;color:white;line-height:1.08;letter-spacing:-2px;margin-bottom:16px}
+.cv-company{font-size:22px;font-weight:500;color:rgba(255,255,255,.88);margin-bottom:24px}
+.cv-meta{display:flex;gap:10px;align-items:center;background:rgba(0,0,0,.22);padding:10px 24px;border-radius:30px;font-size:12px;color:rgba(255,255,255,.7);margin-bottom:28px}
+.cv-sep{opacity:.35}
+.cv-badges{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:24px}
+.cvbadge{padding:6px 20px;border-radius:20px;border:2px solid;font-size:12px;font-weight:700;background:white}
+.cv-note{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.3px}
+.slide-div{justify-content:center!important;align-items:center!important;padding-bottom:0!important}
+.div-inner{text-align:center}
+.div-icon{font-size:48px;margin-bottom:16px}
+.div-level{font-size:52px;font-weight:700;color:white;letter-spacing:-2px;line-height:1}
+.div-sub{font-size:18px;color:rgba(255,255,255,.7);margin-top:12px}
+.div-count{display:inline-block;background:rgba(255,255,255,.15);color:white;font-size:13px;font-weight:600;padding:6px 20px;border-radius:20px;margin-top:20px}
+.ov-body{flex:1;display:flex;flex-direction:column;padding:14px 22px 10px;gap:12px;overflow:hidden;min-height:0}
+.ov-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex-shrink:0}
+.ov-card{background:white;border-radius:10px;padding:14px 16px;border-top:4px solid;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.ov-num{font-size:36px;font-weight:700;line-height:1}
+.ov-lbl{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.ov-chart-wrap{flex:1;background:white;border-radius:10px;padding:14px 18px;box-shadow:0 2px 8px rgba(0,0,0,.08);overflow:hidden;min-height:0}
+.cc-body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;padding:10px 20px 6px;gap:8px}
+.cc-signal{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex-shrink:0}
+.cc-card{background:white;border-radius:10px;padding:13px 15px;box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;flex-direction:column;gap:5px}
+.cc-name{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;font-weight:600;line-height:1.35;height:2.7em;overflow:hidden}
+.cc-value{font-size:38px;font-weight:700;line-height:1}
+.cc-unit{font-size:12px;font-weight:400;color:#94a3b8}
+.cc-rag{display:inline-flex;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;width:fit-content}
+.cc-spark{height:28px;margin:2px 0}
+.cc-delta{font-size:10px;color:#94a3b8}
+.cc-analysis{display:grid;grid-template-columns:60% 40%;gap:10px;flex:1;min-height:0}
+.cc-chart-card{background:white;border-radius:10px;padding:12px 15px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;flex-direction:column;min-height:0}
+.cc-chart-legend{display:flex;gap:12px;font-size:10px;color:#666;margin-bottom:6px;flex-shrink:0}
+.cc-chart-wrap{flex:1;min-height:0}
+.cc-donut-card{background:white;border-radius:10px;padding:12px 15px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;flex-direction:column;min-height:0}
+.cc-donut-title{font-size:11px;font-weight:700;color:#005870;flex-shrink:0;margin-bottom:6px}
+.cc-donut-wrap{flex:1;min-height:0;max-height:130px}
+.cc-donut-legend{display:flex;flex-wrap:wrap;gap:2px;flex-shrink:0;margin-top:6px}
+.cc-detail{flex-shrink:0}
+.cc-table{width:100%;border-collapse:collapse;font-size:11px;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.07)}
+.da-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 22px;flex-shrink:0;background:white;border-bottom:3px solid #005870}
+.da-hdr-title{font-size:16px;font-weight:600;color:#005870;text-align:center;flex:1;padding:0 14px}
+.da-hdr-pills{display:flex;gap:6px;flex-shrink:0}
+.da-pill{background:#f0f7fa;color:#005870;border:1px solid #b0d4e0;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600}
+.da-body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;padding:10px 20px 6px;gap:8px}
+.da-signal{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex-shrink:0}
+.da-card{background:white;border-radius:8px;padding:12px 14px;border-top:3px solid;box-shadow:0 2px 6px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:4px}
+.da-cname{font-size:10px;text-transform:uppercase;color:#94a3b8;font-weight:600;letter-spacing:.5px;line-height:1.35;height:2.7em;overflow:hidden}
+.da-cval{font-size:28px;font-weight:700;line-height:1}
+.da-cunit{font-size:11px;font-weight:400;color:#94a3b8}
+.da-variance{display:flex;align-items:baseline;gap:4px}
+.da-vlbl{font-size:10px;color:#94a3b8}
+.da-variance2{font-size:10px;color:#94a3b8}
+.da-analysis{display:grid;grid-template-columns:55% 45%;gap:10px;flex:1;min-height:0}
+.da-chart-main{background:white;border-radius:8px;padding:12px 14px;box-shadow:0 2px 6px rgba(0,0,0,.08);display:flex;flex-direction:column;min-height:0}
+.da-chart-title{font-size:12px;font-weight:700;color:#334155;flex-shrink:0}
+.da-legend{display:flex;gap:10px;font-size:10px;color:#666;margin:4px 0;flex-shrink:0}
+.da-chart-wrap{flex:1;min-height:0}
+.da-right{display:flex;flex-direction:column;gap:8px;min-height:0}
+.da-hbar-wrap{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 2px 6px rgba(0,0,0,.08);flex:1;min-height:0}
+.da-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0}
+.da-mini{background:white;border-radius:8px;padding:8px 10px;box-shadow:0 2px 4px rgba(0,0,0,.06)}
+.da-mname{font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.da-mval{font-size:16px;font-weight:700;color:#334155;margin-top:2px}
+.da-detail{flex-shrink:0}
+.da-table{width:100%;border-collapse:collapse;font-size:11px;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.07)}
+.om-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 22px;flex-shrink:0;background:#f8fafb;border-bottom:2px solid #e0e7ef}
+.om-hdr-left{display:flex;align-items:center;gap:8px}
+.om-icon{font-size:20px}
+.om-hdr-name{font-size:16px;font-weight:700;color:#1e293b}
+.om-hdr-right{display:flex;align-items:center;gap:8px}
+.om-body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;padding:8px 18px 6px;gap:8px}
+.om-signal{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:8px;flex-shrink:0;height:38%}
+.om-card{background:white;border-radius:8px;padding:8px 12px;box-shadow:0 2px 5px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:3px}
+.om-card-top{display:flex;justify-content:space-between;align-items:flex-start}
+.om-cname{font-size:9px;text-transform:uppercase;color:#64748b;font-weight:600;letter-spacing:.4px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.om-freq{font-size:8px;color:#94a3b8;background:#f0f4f8;padding:1px 5px;border-radius:6px;flex-shrink:0}
+.om-cval{font-size:22px;font-weight:700;color:#1e293b;line-height:1}
+.om-cunit{font-size:10px;font-weight:400;color:#94a3b8}
+.om-spark{height:24px;flex-shrink:0}
+.om-prog-wrap{height:3px;background:#f0f0f0;border-radius:2px;overflow:hidden;flex-shrink:0}
+.om-prog{height:100%;border-radius:2px}
+.om-prog-lbl{font-size:8px;font-weight:600}
+.om-analysis{display:grid;grid-template-columns:60% 40%;gap:8px;flex:1;min-height:0}
+.om-daily-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 2px 5px rgba(0,0,0,.08);display:flex;flex-direction:column;min-height:0}
+.om-daily-title{font-size:11px;font-weight:700;color:#334155;flex-shrink:0;margin-bottom:6px}
+.om-daily-wrap{flex:1;min-height:0}
+.om-alert-card{background:white;border-radius:8px;padding:10px 12px;box-shadow:0 2px 5px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.om-alert-title{font-size:12px;font-weight:700;color:#ef4444;flex-shrink:0}
+.om-alert-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid #f0f0f0}
+.om-alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.om-alert-name{font-size:11px;color:#334155;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.om-alert-val{font-size:11px;font-weight:600;flex-shrink:0}
+.om-alert-ok{font-size:11px;color:#166534;padding:8px 0}
+.om-detail{flex-shrink:0}
+.om-table{width:100%;border-collapse:collapse;font-size:11px;border-radius:8px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,.07)}
+.tl-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 22px;flex-shrink:0;background:white;border-bottom:1px solid #e0e0e0}
+.tl-hdr-left{display:flex;align-items:center;gap:8px}
+.tl-icon{font-size:18px}
+.tl-hdr-name{font-size:15px;font-weight:700;color:#1e293b}
+.tl-hdr-right{display:flex;align-items:center;gap:8px}
+.tl-filter-btn{background:transparent;border:1px solid #94a3b8;color:#64748b;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Montserrat',sans-serif}
+.tl-body{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;padding:8px 18px 4px;gap:6px}
+.tl-signal{flex-shrink:0}
+.tl-badges{display:flex;gap:8px;flex-wrap:wrap}
+.tl-badge{background:#f0f7fa;border:1px solid #b0cfd8;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#005870}
+.tl-analysis{flex-shrink:0;height:120px;background:white;border-radius:8px;padding:8px 12px;box-shadow:0 2px 5px rgba(0,0,0,.07)}
+.tl-detail{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.tl-table-wrap{flex:1;overflow-y:auto;min-height:0;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.07)}
+.tl-table{width:100%;border-collapse:collapse;font-size:11px}
 .rec-body{flex:1;display:grid;grid-template-columns:1fr 1.15fr 1fr;overflow:hidden;min-height:0}
-.rec-col{padding:26px 28px;border-right:1px solid #eee;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.rec-col{padding:24px 26px;border-right:1px solid #eee;display:flex;flex-direction:column;gap:6px;overflow:hidden}
 .rec-col:last-child{border-right:none}
 .rec-main{background:#fafeff}
 .rec-hd{font-size:15px;font-weight:700;flex-shrink:0}
 .rec-sub{font-size:11px;color:#888;margin-bottom:6px;flex-shrink:0}
 .rec-list{list-style:none;display:flex;flex-direction:column;gap:8px;overflow:hidden}
-.rec-list li{font-size:11px;color:#333;line-height:1.5;padding:9px 12px;background:#f8f9fa;border-radius:6px;border-left:3px solid var(--accent,#005870)}
-.rec-footer{padding:10px 26px;background:#1a2b35;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.rec-footer span{font-size:10px;color:rgba(255,255,255,.55)}
+.rec-list li{font-size:11px;color:#333;line-height:1.5;padding:9px 12px;background:#f8f9fa;border-radius:6px;border-left:3px solid var(--ac,#005870)}
+.rec-footer{padding:10px 24px;background:#1a2b35;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.rec-footer span{font-size:10px;color:rgba(255,255,255,.5)}
 .rec-footer strong{color:#C5D500}
-/* NAV */
-.nav-prog-wrap{position:fixed;bottom:44px;left:0;right:0;height:3px;background:rgba(255,255,255,.1);z-index:999}
-.nav-prog{height:100%;background:linear-gradient(90deg,#C5D500,#00D4FF);transition:width .22s ease}
-.nav-bar{position:fixed;bottom:0;left:0;right:0;height:44px;background:rgba(0,40,55,.97);backdrop-filter:blur(6px);color:white;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:1000}
-.nav-btn{background:rgba(255,255,255,.12);border:none;color:white;padding:6px 18px;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;transition:background .15s;user-select:none}
-.nav-btn:hover:not(:disabled){background:rgba(255,255,255,.22)}
-.nav-btn:disabled{opacity:.3;cursor:default}
-.nav-center{display:flex;flex-direction:column;align-items:center;gap:2px}
-.nav-status{font-size:12px;font-weight:700;color:white;letter-spacing:.3px}
-.nav-title{font-size:10px;color:rgba(255,255,255,.5);max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
-`;
+\`;
 
-  /* ════ NAV JS ════ */
+  /* ════ NAV JS with lazy chart init ════ */
   const totalSlides=slides.length;
-  const navJS=`(function(){
-var cur=0,slides=document.querySelectorAll('.slide'),total=slides.length;
-var titles=Array.from(slides).map(function(s){
-  var el=s.querySelector('.cover-title,.sh-title,.pb-htitle');
-  return el?el.textContent.trim().replace(/\\s+/g,' ').slice(0,60):'';
-});
+  const navJS=\`(function(){
+var cur=0;
+var slides=document.querySelectorAll('.slide');
+var total=slides.length;
+var initialized=new Set();
+function initChartsForSlide(n){
+  if(initialized.has(n))return;
+  initialized.add(n);
+  slides[n].querySelectorAll('canvas[data-chart]').forEach(function(cv){
+    try{new Chart(cv,JSON.parse(cv.getAttribute('data-chart')));}catch(e){console.warn('Chart init err:',e);}
+  });
+}
 function goTo(n){
   slides[cur].classList.remove('active');
   cur=Math.max(0,Math.min(n,total-1));
   slides[cur].classList.add('active');
-  document.getElementById('nav-status').textContent='Slide '+(cur+1)+' / '+total;
-  document.getElementById('nav-title').textContent=titles[cur]||'';
-  document.getElementById('nav-prog').style.width=(total>1?(cur/(total-1)*100):100)+'%';
-  document.getElementById('nav-prev').disabled=(cur===0);
-  document.getElementById('nav-next').disabled=(cur===total-1);
+  document.getElementById('sb-num').textContent=(cur+1)+' / '+total;
+  document.getElementById('progress-fill').style.width=((cur+1)/total*100)+'%';
+  document.getElementById('sb-prev').disabled=(cur===0);
+  document.getElementById('sb-next').disabled=(cur===total-1);
+  initChartsForSlide(cur);
 }
-document.getElementById('nav-prev').addEventListener('click',function(){goTo(cur-1);});
-document.getElementById('nav-next').addEventListener('click',function(){goTo(cur+1);});
+document.getElementById('sb-prev').addEventListener('click',function(){goTo(cur-1);});
+document.getElementById('sb-next').addEventListener('click',function(){goTo(cur+1);});
 document.addEventListener('keydown',function(e){
   if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();goTo(cur+1);}
   else if(e.key==='ArrowLeft'){e.preventDefault();goTo(cur-1);}
@@ -2932,40 +3132,40 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='End'){goTo(total-1);}
 });
 var tx=0;
-document.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].clientX;},{passive:true});
 document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?goTo(cur+1):goTo(cur-1);}});
 Chart.defaults.font.family="'Montserrat',sans-serif";
-${chartInits.join('\n')}
 goTo(0);
-})();`;
+})();\`;
 
-  const navHTML=`<div class="nav-prog-wrap"><div class="nav-prog" id="nav-prog" style="width:0%"></div></div>
-<nav class="nav-bar">
-  <button class="nav-btn" id="nav-prev" disabled>← Trước</button>
-  <div class="nav-center">
-    <div class="nav-status" id="nav-status">Slide 1 / ${totalSlides}</div>
-    <div class="nav-title" id="nav-title">KPI Dashboard Specification</div>
+  const navHTML=\`<div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:\${totalSlides>0?Math.round(1/totalSlides*100):100}%"></div></div>
+<div class="status-bar">
+  <div class="sb-left">
+    <button class="sb-btn" id="sb-prev" disabled>← Trước</button>
+    <button class="sb-btn" id="sb-next">Tiếp →</button>
   </div>
-  <button class="nav-btn" id="nav-next">Tiếp →</button>
-</nav>`;
+  <span class="sb-num" id="sb-num">1 / \${totalSlides}</span>
+  <span class="sb-right">KPI Advisor · Citek' · \${dt}</span>
+</div>\`;
 
-  return `<!DOCTYPE html>
+  return \`<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard Specification \u2014 ${name}</title>
+<title>Dashboard Specification \\u2014 \${name}</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>
-<style>${CSS}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\\/script>
+<style>\${CSS}</style>
 </head>
 <body>
-${slides.join('\n')}
-${navHTML}
-<script>${navJS}<\/script>
+\${slides.join('\\n')}
+\${navHTML}
+<script>\${navJS}<\\/script>
 </body>
-</html>`;
+</html>\`;
 }
+
 
 /* ════════════════════════════════════
    EXPORT 4: Presentation (HTML Slides)
