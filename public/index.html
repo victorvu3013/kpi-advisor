@@ -2538,18 +2538,18 @@ function genDashboardSpec(name,kpis){
 
   /* ════ SLIDE 0: COVER ════ */
   const lvBadges=Object.entries(LV_META).map(([,m])=>
-    \`<span class="cvbadge" style="border-color:\${m.color};color:\${m.color}">\${m.label}</span>\`
+    `<span class="cvbadge" style="border-color:${m.color};color:${m.color}">${m.label}</span>`
   ).join('');
   const allDashCount=Object.values(DASH_TMPL).reduce((s,a)=>s+a.length,0);
-  slides.push(\`<div class="slide slide-cover">
+  slides.push(`<div class="slide slide-cover">
 <div class="cv-bg">
   <div class="cv-eyebrow">Citek<span style="color:#C5D500">'</span>&nbsp;·&nbsp;KPI Advisor</div>
   <h1 class="cv-title">KPI Dashboard<br>Specification</h1>
-  <div class="cv-company">\${name}</div>
-  <div class="cv-meta"><span>\${dt}</span><span class="cv-sep">·</span><span>\${kpis.length} KPI</span><span class="cv-sep">·</span><span>\${allDashCount} Dashboards</span><span class="cv-sep">·</span><span>\${allGroups.length} Nhóm</span></div>
-  <div class="cv-badges">\${lvBadges}</div>
+  <div class="cv-company">${name}</div>
+  <div class="cv-meta"><span>${dt}</span><span class="cv-sep">·</span><span>${kpis.length} KPI</span><span class="cv-sep">·</span><span>${allDashCount} Dashboards</span><span class="cv-sep">·</span><span>${allGroups.length} Nhóm</span></div>
+  <div class="cv-badges">${lvBadges}</div>
   <div class="cv-note">⚠ Số liệu minh họa · Không phản ánh dữ liệu thực tế</div>
-</div></div>\`);
+</div></div>`);
 
   /* ════ SLIDE 1: KPI OVERVIEW ════ */
   const sortedGroups=[...allGroups].sort((a,b)=>kpis.filter(k=>k.nhom===b).length-kpis.filter(k=>k.nhom===a).length);
@@ -2561,29 +2561,29 @@ function genDashboardSpec(name,kpis){
       scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{family:'Montserrat',size:10},color:'#666'}},
               y:{grid:{display:false},ticks:{font:{family:'Montserrat',size:10},color:'#333'}}}}});
   const ovMeta=[{v:kpis.length,l:'Tổng KPI',c:'#005870'},{v:hiCount,l:'Ưu tiên Cao',c:'#C5D500'},{v:aiCount,l:'AI bổ sung',c:'#00D4FF'},{v:allGroups.length,l:'Nhóm nghiệp vụ',c:'#005870'}];
-  slides.push(\`<div class="slide">
+  slides.push(`<div class="slide">
 <div class="sl-hdr" style="background:#005870">
   <div class="hdr-logo">Citek<span>'</span></div>
   <div class="hdr-title">Tổng quan bộ KPI đề xuất<small>Phân bổ theo nhóm nghiệp vụ &amp; mức ưu tiên</small></div>
-  <div class="hdr-right">\${name}&nbsp;·&nbsp;\${dt}</div>
+  <div class="hdr-right">${name}&nbsp;·&nbsp;${dt}</div>
 </div>
 <div class="ov-body">
-  <div class="ov-strip">\${ovMeta.map(c=>\`<div class="ov-card" style="border-top-color:\${c.c}"><div class="ov-num" style="color:\${c.c}">\${c.v}</div><div class="ov-lbl">\${c.l}</div></div>\`).join('')}</div>
-  <div class="ov-chart-wrap"><canvas data-chart='\${ovCfg}'></canvas></div>
+  <div class="ov-strip">${ovMeta.map(c=>`<div class="ov-card" style="border-top-color:${c.c}"><div class="ov-num" style="color:${c.c}">${c.v}</div><div class="ov-lbl">${c.l}</div></div>`).join('')}</div>
+  <div class="ov-chart-wrap"><canvas data-chart='${ovCfg}'></canvas></div>
 </div>
-<div class="sl-foot">Slide 2 · KPI Overview · \${dt} · Dữ liệu minh họa</div>
-</div>\`);
+<div class="sl-foot">Slide 2 · KPI Overview · ${dt} · Dữ liệu minh họa</div>
+</div>`);
 
   /* ════ LEVEL DIVIDER ════ */
   function renderDivider(lv){
     const m=LV_META[lv];const cnt=DASH_TMPL[lv].length;
-    return \`<div class="slide slide-div" style="background:linear-gradient(135deg,\${m.color} 0%,\${m.color}cc 100%)">
+    return `<div class="slide slide-div" style="background:linear-gradient(135deg,${m.color} 0%,${m.color}cc 100%)">
 <div class="div-inner">
-  <div class="div-icon">\${m.icon}</div>
-  <div class="div-level">\${m.label}</div>
-  <div class="div-sub">\${m.sub}</div>
-  <div class="div-count">\${cnt} Dashboard\${cnt>1?'s':''}</div>
-</div></div>\`;
+  <div class="div-icon">${m.icon}</div>
+  <div class="div-level">${m.label}</div>
+  <div class="div-sub">${m.sub}</div>
+  <div class="div-count">${cnt} Dashboard${cnt>1?'s':''}</div>
+</div></div>`;
   }
 
   /* ════ PATTERN A: COMMAND CENTER (C-Level) ════ */
@@ -2603,13 +2603,13 @@ function genDashboardSpec(name,kpis){
       const km=mock(k.chi);const rag=ragStatus(km);const sv=sparkVals(k.chi);
       const spCfg=JSON.stringify({type:'line',data:{labels:['','','','','','','',''],datasets:[{data:sv,borderColor:km.up?'#22c55e':'#ef4444',borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:km.up?'rgba(34,197,94,0.1)':'rgba(239,68,68,0.1)'}]},
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
-      return \`<div class="cc-card" style="border-top:3px solid \${BCOLS[i]||BCOLS[0]}">
-  <div class="cc-name">\${k.chi}</div>
-  <div class="cc-value" style="color:\${BCOLS[i]||BCOLS[0]}">\${km.val}<span class="cc-unit"> \${km.unit}</span></div>
-  <span class="cc-rag" style="background:\${rag.bg};color:\${rag.color}">\${rag.label}</span>
-  <div class="cc-spark"><canvas data-chart='\${spCfg}'></canvas></div>
-  <div class="cc-delta">\${km.up?'▲':'▼'} \${Math.abs(km.tp)}% vs kỳ trước</div>
-</div>\`;
+      return `<div class="cc-card" style="border-top:3px solid ${BCOLS[i]||BCOLS[0]}">
+  <div class="cc-name">${k.chi}</div>
+  <div class="cc-value" style="color:${BCOLS[i]||BCOLS[0]}">${km.val}<span class="cc-unit"> ${km.unit}</span></div>
+  <span class="cc-rag" style="background:${rag.bg};color:${rag.color}">${rag.label}</span>
+  <div class="cc-spark"><canvas data-chart='${spCfg}'></canvas></div>
+  <div class="cc-delta">${km.up?'▲':'▼'} ${Math.abs(km.tp)}% vs kỳ trước</div>
+</div>`;
     }).join('');
 
     const lineCfg=JSON.stringify({type:'bar',data:{labels:MONTHS12,datasets:[
@@ -2626,45 +2626,45 @@ function genDashboardSpec(name,kpis){
     const tableRows=(tier1.concat(tier2)).slice(0,5).map(k=>{
       const km=mock(k.chi);const pct=70+H(k.chi,22)%29;const ok=pct>=95;
       const trend=km.up?'<span style="color:#22c55e">▲</span>':'<span style="color:#ef4444">▼</span>';
-      return \`<tr style="\${ok?'':'background:#fef2f2'}">
-    <td style="padding:6px 10px;color:#334155;font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\${k.chi}</td>
-    <td style="padding:6px 10px;text-align:right;font-weight:700">\${km.val} \${km.unit}</td>
-    <td style="padding:6px 10px;text-align:right;color:\${ok?'#166534':'#c62828'};font-weight:600">\${ok?'✓':'✗'} \${pct}%</td>
-    <td style="padding:6px 10px;text-align:right;color:\${km.uy?'#166534':'#c62828'}">\${km.uy?'▲':'▼'} \${Math.abs(km.ty)}%</td>
-    <td style="padding:6px 10px;text-align:center">\${trend}</td>
-  </tr>\`;
+      return `<tr style="${ok?'':'background:#fef2f2'}">
+    <td style="padding:6px 10px;color:#334155;font-weight:500;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.chi}</td>
+    <td style="padding:6px 10px;text-align:right;font-weight:700">${km.val} ${km.unit}</td>
+    <td style="padding:6px 10px;text-align:right;color:${ok?'#166534':'#c62828'};font-weight:600">${ok?'✓':'✗'} ${pct}%</td>
+    <td style="padding:6px 10px;text-align:right;color:${km.uy?'#166534':'#c62828'}">${km.uy?'▲':'▼'} ${Math.abs(km.ty)}%</td>
+    <td style="padding:6px 10px;text-align:center">${trend}</td>
+  </tr>`;
     }).join('');
 
-    const doughLegend=doughLabels.map((l,i)=>\`<span style="display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#555;margin-right:8px"><span style="width:8px;height:8px;border-radius:2px;background:\${doughCols[i]};display:inline-block"></span>\${l}</span>\`).join('');
+    const doughLegend=doughLabels.map((l,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;font-size:9px;color:#555;margin-right:8px"><span style="width:8px;height:8px;border-radius:2px;background:${doughCols[i]};display:inline-block"></span>${l}</span>`).join('');
 
-    return \`<div class="slide">
-<div class="sl-hdr" style="background:\${meta.color}">
+    return `<div class="slide">
+<div class="sl-hdr" style="background:${meta.color}">
   <div class="hdr-logo">Citek<span>'</span></div>
-  <div class="hdr-title">\${title}<small>C-Level · Executive Dashboard · \${d.type}</small></div>
-  <div class="hdr-right"><span class="lv-pill" style="background:rgba(255,255,255,.2);color:white">\${meta.sub}</span></div>
+  <div class="hdr-title">${title}<small>C-Level · Executive Dashboard · ${d.type}</small></div>
+  <div class="hdr-right"><span class="lv-pill" style="background:rgba(255,255,255,.2);color:white">${meta.sub}</span></div>
 </div>
 <div class="cc-body">
-  <div class="cc-signal">\${cardHtml}</div>
+  <div class="cc-signal">${cardHtml}</div>
   <div class="cc-analysis">
     <div class="cc-chart-card">
       <div class="cc-chart-legend"><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;margin-right:12px"><span style="width:12px;height:3px;background:#005870;display:inline-block"></span>Thực tế</span><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px"><span style="width:12px;height:0;border-top:2px dashed #C5D500;display:inline-block"></span>Kế hoạch</span></div>
-      <div class="cc-chart-wrap"><canvas data-chart='\${lineCfg}'></canvas></div>
+      <div class="cc-chart-wrap"><canvas data-chart='${lineCfg}'></canvas></div>
     </div>
     <div class="cc-donut-card">
       <div class="cc-donut-title">Cơ cấu KPI theo nhóm</div>
-      <div class="cc-donut-wrap"><canvas data-chart='\${dnCfg}'></canvas></div>
-      <div class="cc-donut-legend">\${doughLegend}</div>
+      <div class="cc-donut-wrap"><canvas data-chart='${dnCfg}'></canvas></div>
+      <div class="cc-donut-legend">${doughLegend}</div>
     </div>
   </div>
   <div class="cc-detail">
     <table class="cc-table">
       <thead><tr style="background:#005870;color:white"><th style="padding:7px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase">Chỉ tiêu</th><th style="padding:7px 10px;text-align:right;font-size:10px;font-weight:600">Thực tế</th><th style="padding:7px 10px;text-align:right;font-size:10px;font-weight:600">vs KH</th><th style="padding:7px 10px;text-align:right;font-size:10px;font-weight:600">vs CK</th><th style="padding:7px 10px;text-align:center;font-size:10px;font-weight:600">XH</th></tr></thead>
-      <tbody>\${tableRows}</tbody>
+      <tbody>${tableRows}</tbody>
     </table>
   </div>
 </div>
-<div class="sl-foot">\${d.name} · C-Level · \${dt} · SAP: \${(main.mods||[]).join(', ')||mods.split(',').slice(0,2).join(', ')} · Dữ liệu minh họa</div>
-</div>\`;
+<div class="sl-foot">${d.name} · C-Level · ${dt} · SAP: ${(main.mods||[]).join(', ')||mods.split(',').slice(0,2).join(', ')} · Dữ liệu minh họa</div>
+</div>`;
   }
 
   /* ════ PATTERN B: DEEP ANALYSIS (D-Level) ════ */
@@ -2695,61 +2695,61 @@ function genDashboardSpec(name,kpis){
 
     const cardHtml=cards.map((k,i)=>{
       const km=mock(k.chi);const pct=70+H(k.chi,i+11)%25;const okPct=pct>=85;
-      return \`<div class="da-card" style="border-top:3px solid \${BCOLS[i]}">
-  <div class="da-cname">\${k.chi}</div>
-  <div class="da-cval" style="color:\${BCOLS[i]}">\${km.val}<span class="da-cunit"> \${km.unit}</span></div>
+      return `<div class="da-card" style="border-top:3px solid ${BCOLS[i]}">
+  <div class="da-cname">${k.chi}</div>
+  <div class="da-cval" style="color:${BCOLS[i]}">${km.val}<span class="da-cunit"> ${km.unit}</span></div>
   <div class="da-variance">
-    <span style="color:\${okPct?'#166534':'#c62828'};font-size:14px;font-weight:600">\${okPct?'+':'-'}\${Math.abs(pct-80)}%</span>
+    <span style="color:${okPct?'#166534':'#c62828'};font-size:14px;font-weight:600">${okPct?'+':'-'}${Math.abs(pct-80)}%</span>
     <span class="da-vlbl">vs KH</span>
   </div>
-  <div class="da-variance2"><span style="color:\${km.uy?'#166534':'#c62828'};font-size:11px">\${km.uy?'▲':'▼'} \${Math.abs(km.ty)}% vs CK</span></div>
-</div>\`;
+  <div class="da-variance2"><span style="color:${km.uy?'#166534':'#c62828'};font-size:11px">${km.uy?'▲':'▼'} ${Math.abs(km.ty)}% vs CK</span></div>
+</div>`;
     }).join('');
 
     const miniCards=(tier2.concat(tier3)).slice(0,4).map(k=>{
       const km=mock(k.chi);
-      return \`<div class="da-mini"><div class="da-mname">\${k.chi}</div><div class="da-mval">\${km.val} <span style="font-size:9px;color:#888">\${km.unit}</span></div></div>\`;
+      return `<div class="da-mini"><div class="da-mname">${k.chi}</div><div class="da-mval">${km.val} <span style="font-size:9px;color:#888">${km.unit}</span></div></div>`;
     }).join('');
 
     const tableRows=(tier1.concat(tier2)).slice(0,6).map(k=>{
       const km=mock(k.chi);const pct=70+H(k.chi,22)%29;const ok=pct>=95;
-      return \`<tr style="\${ok?'':'background:#fef9f0'}">
-    <td style="padding:5px 10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#334155">\${k.chi}</td>
-    <td style="padding:5px 10px;text-align:right;font-weight:700">\${km.val}</td>
-    <td style="padding:5px 10px;text-align:right;color:#888">\${Math.round((parseFloat(km.val)||50)*(100/pct)).toLocaleString('vi-VN')}</td>
-    <td style="padding:5px 10px;text-align:right;color:\${ok?'#166534':'#c62828'};font-weight:600">\${pct}%</td>
-    <td style="padding:5px 10px;text-align:right;color:\${km.uy?'#166534':'#c62828'}">\${km.uy?'▲':'▼'}\${Math.abs(km.ty)}%</td>
-    <td style="padding:5px 10px;color:#94a3b8;font-size:10px">\${k.nhom||'—'}</td>
-  </tr>\`;
+      return `<tr style="${ok?'':'background:#fef9f0'}">
+    <td style="padding:5px 10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#334155">${k.chi}</td>
+    <td style="padding:5px 10px;text-align:right;font-weight:700">${km.val}</td>
+    <td style="padding:5px 10px;text-align:right;color:#888">${Math.round((parseFloat(km.val)||50)*(100/pct)).toLocaleString('vi-VN')}</td>
+    <td style="padding:5px 10px;text-align:right;color:${ok?'#166534':'#c62828'};font-weight:600">${pct}%</td>
+    <td style="padding:5px 10px;text-align:right;color:${km.uy?'#166534':'#c62828'}">${km.uy?'▲':'▼'}${Math.abs(km.ty)}%</td>
+    <td style="padding:5px 10px;color:#94a3b8;font-size:10px">${k.nhom||'—'}</td>
+  </tr>`;
     }).join('');
 
-    return \`<div class="slide">
+    return `<div class="slide">
 <div class="da-hdr">
-  <div><span class="lv-pill" style="background:#e0f0f7;color:\${meta.color}">\${meta.label}</span></div>
-  <div class="da-hdr-title">\${title}</div>
+  <div><span class="lv-pill" style="background:#e0f0f7;color:${meta.color}">${meta.label}</span></div>
+  <div class="da-hdr-title">${title}</div>
   <div class="da-hdr-pills"><span class="da-pill">vs Kế hoạch</span><span class="da-pill">vs Cùng kỳ</span></div>
 </div>
 <div class="da-body">
-  <div class="da-signal">\${cardHtml}</div>
+  <div class="da-signal">${cardHtml}</div>
   <div class="da-analysis">
     <div class="da-chart-main">
-      <div class="da-chart-title">\${main.chi} — Thực tế vs Kế hoạch</div>
+      <div class="da-chart-title">${main.chi} — Thực tế vs Kế hoạch</div>
       <div class="da-legend"><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;margin-right:10px"><span style="width:10px;height:10px;background:rgba(0,88,112,0.8);display:inline-block;border-radius:2px"></span>Thực tế</span><span style="display:inline-flex;align-items:center;gap:4px;font-size:10px"><span style="width:10px;height:10px;border:2px solid #C5D500;display:inline-block;border-radius:2px"></span>Kế hoạch</span></div>
-      <div class="da-chart-wrap"><canvas data-chart='\${groupedCfg}'></canvas></div>
+      <div class="da-chart-wrap"><canvas data-chart='${groupedCfg}'></canvas></div>
     </div>
     <div class="da-right">
-      <div class="da-hbar-wrap"><canvas data-chart='\${hbarCfg}'></canvas></div>
-      <div class="da-mini-grid">\${miniCards}</div>
+      <div class="da-hbar-wrap"><canvas data-chart='${hbarCfg}'></canvas></div>
+      <div class="da-mini-grid">${miniCards}</div>
     </div>
   </div>
   <div class="da-detail">
     <table class="da-table">
       <thead><tr style="background:#f0f7fa;color:#005870"><th style="padding:6px 10px;text-align:left;font-size:10px;text-transform:uppercase;font-weight:700">Chỉ tiêu</th><th style="padding:6px 10px;text-align:right;font-size:10px;text-transform:uppercase;font-weight:700">Thực tế</th><th style="padding:6px 10px;text-align:right;font-size:10px;text-transform:uppercase;font-weight:700">Kế hoạch</th><th style="padding:6px 10px;text-align:right;font-size:10px;text-transform:uppercase;font-weight:700">% Đạt</th><th style="padding:6px 10px;text-align:right;font-size:10px;text-transform:uppercase;font-weight:700">vs CK</th><th style="padding:6px 10px;font-size:10px;text-transform:uppercase;font-weight:700">Nhóm</th></tr></thead>
-      <tbody>\${tableRows}</tbody>
+      <tbody>${tableRows}</tbody>
     </table>
-    <div style="font-size:10px;color:#94a3b8;margin-top:4px">T-Codes: \${tCodes(allKpiMods)} · \${dt} · Dữ liệu minh họa</div>
+    <div style="font-size:10px;color:#94a3b8;margin-top:4px">T-Codes: ${tCodes(allKpiMods)} · ${dt} · Dữ liệu minh họa</div>
   </div>
-</div></div>\`;
+</div></div>`;
   }
 
   /* ════ PATTERN C: OPERATIONAL MONITOR (M-Level) ════ */
@@ -2778,56 +2778,56 @@ function genDashboardSpec(name,kpis){
       const spBg=pct>=80?'rgba(34,197,94,0.1)':pct>=60?'rgba(245,158,11,0.1)':'rgba(239,68,68,0.1)';
       const spCfg=JSON.stringify({type:'line',data:{labels:['','','','','','','',''],datasets:[{data:sv,borderColor:spColor,borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:spBg}]},
         options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});
-      return \`<div class="om-card">
+      return `<div class="om-card">
   <div class="om-card-top">
-    <div class="om-cname">\${k.chi}</div>
-    <span class="om-freq">\${k.freq||'Ngày'}</span>
+    <div class="om-cname">${k.chi}</div>
+    <span class="om-freq">${k.freq||'Ngày'}</span>
   </div>
-  <div class="om-cval">\${km.val}<span class="om-cunit"> \${km.unit}</span></div>
-  <div class="om-spark"><canvas data-chart='\${spCfg}'></canvas></div>
-  <div class="om-prog-wrap"><div class="om-prog" style="width:\${pct}%;background:\${pc}"></div></div>
-  <div class="om-prog-lbl" style="color:\${pc}">\${pct}% vs target</div>
-</div>\`;
+  <div class="om-cval">${km.val}<span class="om-cunit"> ${km.unit}</span></div>
+  <div class="om-spark"><canvas data-chart='${spCfg}'></canvas></div>
+  <div class="om-prog-wrap"><div class="om-prog" style="width:${pct}%;background:${pc}"></div></div>
+  <div class="om-prog-lbl" style="color:${pc}">${pct}% vs target</div>
+</div>`;
     }).join('');
 
     const alerts=cards6.filter(k=>parseFloat(mock(k.chi).tp)<-2).slice(0,4);
     const alertHtml=alerts.length?alerts.map(k=>{
       const km=mock(k.chi);
-      return \`<div class="om-alert-row"><span class="om-alert-dot" style="background:#ef4444"></span><span class="om-alert-name">\${k.chi}</span><span class="om-alert-val" style="color:#ef4444">▼ \${Math.abs(km.tp)}%</span></div>\`;
-    }).join(''):\`<div class="om-alert-ok">✓ Tất cả KPI trong ngưỡng</div>\`;
+      return `<div class="om-alert-row"><span class="om-alert-dot" style="background:#ef4444"></span><span class="om-alert-name">${k.chi}</span><span class="om-alert-val" style="color:#ef4444">▼ ${Math.abs(km.tp)}%</span></div>`;
+    }).join(''):`<div class="om-alert-ok">✓ Tất cả KPI trong ngưỡng</div>`;
 
     const tableRows=cards6.slice(0,6).map((k,i)=>{
       const km=mock(k.chi);const bg=i%2===0?'#fafafa':'white';
-      const hd=Math.round(parseFloat(km.val.replace(/\D/g,''))||50);
-      return \`<tr style="background:\${bg}"><td style="padding:5px 10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\${k.chi}</td><td style="padding:5px 10px;text-align:right;font-weight:700">\${km.val} \${km.unit}</td><td style="padding:5px 10px;text-align:right">\${(hd*0.95).toFixed(1)}</td><td style="padding:5px 10px;text-align:right">\${(hd*3.1).toFixed(0)}</td><td style="padding:5px 10px;text-align:center"><span style="background:#eef2f4;padding:2px 7px;border-radius:8px;font-size:9px">\${k.freq||'Ngày'}</span></td></tr>\`;
+      const hd=Math.round(parseFloat(km.val.replace(/D/g,''))||50);
+      return `<tr style="background:${bg}"><td style="padding:5px 10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${k.chi}</td><td style="padding:5px 10px;text-align:right;font-weight:700">${km.val} ${km.unit}</td><td style="padding:5px 10px;text-align:right">${(hd*0.95).toFixed(1)}</td><td style="padding:5px 10px;text-align:right">${(hd*3.1).toFixed(0)}</td><td style="padding:5px 10px;text-align:center"><span style="background:#eef2f4;padding:2px 7px;border-radius:8px;font-size:9px">${k.freq||'Ngày'}</span></td></tr>`;
     }).join('');
 
-    return \`<div class="slide">
+    return `<div class="slide">
 <div class="om-hdr">
-  <div class="om-hdr-left"><span class="om-icon">\${meta.icon}</span><span class="om-hdr-name">\${d.name}</span></div>
-  <div class="om-hdr-right"><span style="font-size:10px;color:#64748b">Cập nhật: hôm nay</span>&nbsp;<span class="lv-pill" style="background:#e0f0f4;color:\${meta.color}">\${meta.label}</span></div>
+  <div class="om-hdr-left"><span class="om-icon">${meta.icon}</span><span class="om-hdr-name">${d.name}</span></div>
+  <div class="om-hdr-right"><span style="font-size:10px;color:#64748b">Cập nhật: hôm nay</span>&nbsp;<span class="lv-pill" style="background:#e0f0f4;color:${meta.color}">${meta.label}</span></div>
 </div>
 <div class="om-body">
-  <div class="om-signal">\${cardHtml}</div>
+  <div class="om-signal">${cardHtml}</div>
   <div class="om-analysis">
     <div class="om-daily-card">
-      <div class="om-daily-title">\${main.chi} — 30 ngày gần nhất <span style="font-size:9px;color:#94a3b8">🟩 ≥ target · 🟥 &lt; target</span></div>
-      <div class="om-daily-wrap"><canvas data-chart='\${dailyCfg}'></canvas></div>
+      <div class="om-daily-title">${main.chi} — 30 ngày gần nhất <span style="font-size:9px;color:#94a3b8">🟩 ≥ target · 🟥 &lt; target</span></div>
+      <div class="om-daily-wrap"><canvas data-chart='${dailyCfg}'></canvas></div>
     </div>
     <div class="om-alert-card">
       <div class="om-alert-title">⚠ Cần chú ý</div>
-      \${alertHtml}
+      ${alertHtml}
     </div>
   </div>
   <div class="om-detail">
     <table class="om-table">
       <thead><tr style="background:#f0f7fa;color:#005870"><th style="padding:6px 10px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase">Chỉ tiêu</th><th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase">Hôm nay</th><th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase">Tuần này</th><th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase">Tháng này</th><th style="padding:6px 10px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase">Tần suất</th></tr></thead>
-      <tbody>\${tableRows}</tbody>
+      <tbody>${tableRows}</tbody>
     </table>
   </div>
 </div>
-<div class="sl-foot">\${d.name} · M-Level · \${dt} · Dữ liệu minh họa</div>
-</div>\`;
+<div class="sl-foot">${d.name} · M-Level · ${dt} · Dữ liệu minh họa</div>
+</div>`;
   }
 
   /* ════ PATTERN D: TRANSACTION LOG (Dept) ════ */
@@ -2862,47 +2862,47 @@ function genDashboardSpec(name,kpis){
     }
 
     const statuses=['Đạt','Đạt','Cảnh báo','Thấp','Đạt','Quá hạn','Đạt','Cảnh báo','Đạt','Thấp'];
-    const statusColors={Đạt:{bg:'#f0fdf4',color:'#166534'},Cảnh báo:{bg:'#fffbeb',color:'#92400e'},Thấp:{bg:'#fef2f2',color:'#c62828'},Quá hạn:{bg:'#fef2f2',color:'#c62828'}};
+    const statusColors={'Đạt':{bg:'#f0fdf4',color:'#166534'},'Cảnh báo':{bg:'#fffbeb',color:'#92400e'},'Thấp':{bg:'#fef2f2',color:'#c62828'},'Quá hạn':{bg:'#fef2f2',color:'#c62828'}};
     const actions=['Xem chi tiết','Xử lý','Xem chi tiết','Escalate','Xem chi tiết','Xử lý','Xem chi tiết','Escalate','Xem chi tiết','Xử lý'];
 
     const tableRows=Array.from({length:10},(_,i)=>{
       const k=dashKPIs[i%Math.max(1,dashKPIs.length)]||{chi:d.kpis[0]||'KPI',unit:'—'};
       const km=mock(k.chi+(i+''));
       const st=statuses[i];const sc=statusColors[st]||statusColors['Đạt'];
-      return \`<tr style="background:\${sc.bg}">
-    <td style="padding:6px 10px;font-weight:600;color:#334155;font-size:11px;font-family:monospace">\${String(1000+i+H(k.chi,i)).slice(-4)}</td>
-    <td style="padding:6px 10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">\${k.chi}</td>
-    <td style="padding:6px 10px;text-align:right;font-family:monospace;font-size:11px">\${km.val} \${km.unit}</td>
-    <td style="padding:6px 10px;text-align:center"><span style="background:\${sc.bg};color:\${sc.color};border:1px solid \${sc.color}40;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">\${st}</span></td>
-    <td style="padding:6px 10px;text-align:center"><span style="border:1px solid #94a3b8;color:#334155;padding:2px 8px;border-radius:10px;font-size:9px;cursor:pointer">\${actions[i]}</span></td>
-  </tr>\`;
+      return `<tr style="background:${sc.bg}">
+    <td style="padding:6px 10px;font-weight:600;color:#334155;font-size:11px;font-family:monospace">${String(1000+i+H(k.chi,i)).slice(-4)}</td>
+    <td style="padding:6px 10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">${k.chi}</td>
+    <td style="padding:6px 10px;text-align:right;font-family:monospace;font-size:11px">${km.val} ${km.unit}</td>
+    <td style="padding:6px 10px;text-align:center"><span style="background:${sc.bg};color:${sc.color};border:1px solid ${sc.color}40;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">${st}</span></td>
+    <td style="padding:6px 10px;text-align:center"><span style="border:1px solid #94a3b8;color:#334155;padding:2px 8px;border-radius:10px;font-size:9px;cursor:pointer">${actions[i]}</span></td>
+  </tr>`;
     }).join('');
 
-    return \`<div class="slide">
+    return `<div class="slide">
 <div class="tl-hdr">
-  <div class="tl-hdr-left"><span class="tl-icon">\${meta.icon}</span><span class="tl-hdr-name">\${d.name}</span></div>
-  <div class="tl-hdr-right"><span class="lv-pill" style="border:1.5px solid \${meta.color};color:\${meta.color};background:transparent">\${meta.label}</span>&nbsp;<button class="tl-filter-btn">⊟ Lọc</button></div>
+  <div class="tl-hdr-left"><span class="tl-icon">${meta.icon}</span><span class="tl-hdr-name">${d.name}</span></div>
+  <div class="tl-hdr-right"><span class="lv-pill" style="border:1.5px solid ${meta.color};color:${meta.color};background:transparent">${meta.label}</span>&nbsp;<button class="tl-filter-btn">⊟ Lọc</button></div>
 </div>
 <div class="tl-body">
   <div class="tl-signal">
     <div class="tl-badges">
-      <span class="tl-badge">📊 Tổng: \${total.toLocaleString('vi-VN')} records</span>
-      <span class="tl-badge" style="border-color:#f97316;color:#c2410c">⚠ Quá hạn: \${overdue}</span>
-      <span class="tl-badge" style="border-color:#22c55e;color:#166534">✓ Hôm nay: \${today}</span>
-      <span class="tl-badge">📅 Tuần này: \${week}</span>
+      <span class="tl-badge">📊 Tổng: ${total.toLocaleString('vi-VN')} records</span>
+      <span class="tl-badge" style="border-color:#f97316;color:#c2410c">⚠ Quá hạn: ${overdue}</span>
+      <span class="tl-badge" style="border-color:#22c55e;color:#166534">✓ Hôm nay: ${today}</span>
+      <span class="tl-badge">📅 Tuần này: ${week}</span>
     </div>
   </div>
-  <div class="tl-analysis"><canvas data-chart='\${chartCfg}' style="height:104px!important"></canvas></div>
+  <div class="tl-analysis"><canvas data-chart='${chartCfg}' style="height:104px!important"></canvas></div>
   <div class="tl-detail">
     <div class="tl-table-wrap">
       <table class="tl-table">
         <thead style="position:sticky;top:0;z-index:10"><tr style="background:#005870;color:white"><th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase">Mã</th><th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase">Chỉ tiêu</th><th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase">Giá trị</th><th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase">Trạng thái</th><th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:600;text-transform:uppercase">Thao tác</th></tr></thead>
-        <tbody>\${tableRows}</tbody>
+        <tbody>${tableRows}</tbody>
       </table>
     </div>
     <div style="font-size:10px;color:#94a3b8;text-align:center;padding:4px">Hiển thị dữ liệu minh họa · Không phản ánh tình hình thực tế của doanh nghiệp</div>
   </div>
-</div></div>\`;
+</div></div>`;
   }
 
   /* ════ BUILD ALL SLIDES ════ */
@@ -2919,39 +2919,39 @@ function genDashboardSpec(name,kpis){
 
   /* ════ RECOMMENDATION SLIDE ════ */
   const hiKpis=kpis.filter(k=>k.pri==='Cao').slice(0,4);
-  const quickWins=hiKpis.map(k=>\`<li>\${k.chi}</li>\`).join('')||'<li>Cấu hình C-Level dashboard với KPI tài chính</li><li>Setup SAP module liên quan</li>';
-  const coreImpl=['Rollout từ C-Level → D-Level → M-Level → Department','Cấu hình nguồn dữ liệu SAP: '+mods.split(',').slice(0,2).join(', '),'Training người dùng theo từng cấp quản lý','Thiết lập quy trình review KPI định kỳ'].map(t=>\`<li>\${t}</li>\`).join('');
-  const advanced=['Tích hợp SAP Analytics Cloud (SAC) cho AI Forecasting','Cross-system KPI: CX/CRM + ERP + HR một điểm nhìn','Real-time streaming dashboard với BTP Event Mesh','Predictive maintenance với PM/EAM + Machine Learning'].map(t=>\`<li>\${t}</li>\`).join('');
-  slides.push(\`<div class="slide">
+  const quickWins=hiKpis.map(k=>`<li>${k.chi}</li>`).join('')||'<li>Cấu hình C-Level dashboard với KPI tài chính</li><li>Setup SAP module liên quan</li>';
+  const coreImpl=['Rollout từ C-Level → D-Level → M-Level → Department','Cấu hình nguồn dữ liệu SAP: '+mods.split(',').slice(0,2).join(', '),'Training người dùng theo từng cấp quản lý','Thiết lập quy trình review KPI định kỳ'].map(t=>`<li>${t}</li>`).join('');
+  const advanced=['Tích hợp SAP Analytics Cloud (SAC) cho AI Forecasting','Cross-system KPI: CX/CRM + ERP + HR một điểm nhìn','Real-time streaming dashboard với BTP Event Mesh','Predictive maintenance với PM/EAM + Machine Learning'].map(t=>`<li>${t}</li>`).join('');
+  slides.push(`<div class="slide">
 <div class="sl-hdr" style="background:#1a3a44">
   <div class="hdr-logo">Citek<span>'</span></div>
   <div class="hdr-title">Khuyến nghị triển khai<small>Lộ trình theo thứ tự ưu tiên</small></div>
-  <div class="hdr-right">\${name}&nbsp;·&nbsp;\${dt}</div>
+  <div class="hdr-right">${name}&nbsp;·&nbsp;${dt}</div>
 </div>
 <div class="rec-body">
   <div class="rec-col" style="border-top:4px solid #C5D500">
     <div class="rec-hd" style="color:#7a8500">⚡ Quick Wins</div>
     <div class="rec-sub">Tuần 1–4 · Ưu tiên cao nhất</div>
-    <ul class="rec-list" style="--ac:#C5D500">\${quickWins}</ul>
+    <ul class="rec-list" style="--ac:#C5D500">${quickWins}</ul>
   </div>
   <div class="rec-col rec-main" style="border-top:4px solid #005870">
     <div class="rec-hd" style="color:#005870">🏗 Core Implementation</div>
     <div class="rec-sub">Tháng 1–3 · Nền tảng vận hành</div>
-    <ul class="rec-list" style="--ac:#005870">\${coreImpl}</ul>
+    <ul class="rec-list" style="--ac:#005870">${coreImpl}</ul>
   </div>
   <div class="rec-col" style="border-top:4px solid #00D4FF">
     <div class="rec-hd" style="color:#0080a0">📊 Advanced Analytics</div>
     <div class="rec-sub">Tháng 4–6 · Tối ưu hóa &amp; AI</div>
-    <ul class="rec-list" style="--ac:#00D4FF">\${advanced}</ul>
+    <ul class="rec-list" style="--ac:#00D4FF">${advanced}</ul>
   </div>
 </div>
 <div class="rec-footer">
   <span>⚠ Số liệu trong tài liệu này là <strong>dữ liệu minh họa</strong> — không phản ánh tình hình thực tế</span>
-  <span>Prepared by <strong>Citek'</strong> · KPI Advisor AI Platform · \${dt}</span>
-</div></div>\`);
+  <span>Prepared by <strong>Citek'</strong> · KPI Advisor AI Platform · ${dt}</span>
+</div></div>`);
 
   /* ════ CSS ════ */
-  const CSS=\`
+  const CSS=`
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:#1a2b35;font-family:'Montserrat','Segoe UI',sans-serif}
 .slide{height:100vh;height:100dvh;overflow:hidden;display:none;flex-direction:column;background:#f0f4f8;padding-bottom:34px}
@@ -3097,11 +3097,11 @@ html,body{height:100%;overflow:hidden;background:#1a2b35;font-family:'Montserrat
 .rec-footer{padding:10px 24px;background:#1a2b35;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .rec-footer span{font-size:10px;color:rgba(255,255,255,.5)}
 .rec-footer strong{color:#C5D500}
-\`;
+`;
 
   /* ════ NAV JS with lazy chart init ════ */
   const totalSlides=slides.length;
-  const navJS=\`(function(){
+  const navJS=`(function(){
 var cur=0;
 var slides=document.querySelectorAll('.slide');
 var total=slides.length;
@@ -3136,34 +3136,34 @@ document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].client
 document.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?goTo(cur+1):goTo(cur-1);}});
 Chart.defaults.font.family="'Montserrat',sans-serif";
 goTo(0);
-})();\`;
+})();`;
 
-  const navHTML=\`<div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:\${totalSlides>0?Math.round(1/totalSlides*100):100}%"></div></div>
+  const navHTML=`<div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:${totalSlides>0?Math.round(1/totalSlides*100):100}%"></div></div>
 <div class="status-bar">
   <div class="sb-left">
     <button class="sb-btn" id="sb-prev" disabled>← Trước</button>
     <button class="sb-btn" id="sb-next">Tiếp →</button>
   </div>
-  <span class="sb-num" id="sb-num">1 / \${totalSlides}</span>
-  <span class="sb-right">KPI Advisor · Citek' · \${dt}</span>
-</div>\`;
+  <span class="sb-num" id="sb-num">1 / ${totalSlides}</span>
+  <span class="sb-right">KPI Advisor · Citek' · ${dt}</span>
+</div>`;
 
-  return \`<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard Specification \\u2014 \${name}</title>
+<title>Dashboard Specification \u2014 ${name}</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\\/script>
-<style>\${CSS}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>
+<style>${CSS}</style>
 </head>
 <body>
-\${slides.join('\\n')}
-\${navHTML}
-<script>\${navJS}<\\/script>
+${slides.join('\n')}
+${navHTML}
+<script>${navJS}<\/script>
 </body>
-</html>\`;
+</html>`;
 }
 
 
